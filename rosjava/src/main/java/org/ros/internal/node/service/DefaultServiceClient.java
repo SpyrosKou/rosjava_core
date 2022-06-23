@@ -17,8 +17,6 @@
 package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.Message;
@@ -37,7 +35,6 @@ import org.ros.node.service.ServiceResponseListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -125,7 +122,7 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
             executorService);
 
     serviceClientHandshakeHandler.addListener(handshakeLatch);
-    this.tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
+    this.tcpClientManager.add(serviceClientHandshakeHandler);
   }
 
   @Override

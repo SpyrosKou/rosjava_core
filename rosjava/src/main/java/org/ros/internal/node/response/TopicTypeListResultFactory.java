@@ -16,11 +16,10 @@
 
 package org.ros.internal.node.response;
 
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.ros.master.client.TopicType;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 /**
  * A {@link ResultFactory} to take an object and turn it into a list of

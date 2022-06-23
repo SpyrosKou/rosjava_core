@@ -17,9 +17,6 @@
 package org.ros.internal.transport.queue;
 
 import com.google.common.annotations.VisibleForTesting;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;

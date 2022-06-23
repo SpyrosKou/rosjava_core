@@ -16,7 +16,7 @@
 
 package org.ros.internal.transport.queue;
 
-import org.apache.commons.logging.LogFactory;
+
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.concurrent.EventDispatcher;

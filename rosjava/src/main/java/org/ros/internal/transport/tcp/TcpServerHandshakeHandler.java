@@ -32,7 +32,6 @@ import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ChannelBufferServiceServer;
-import org.ros.node.service.ServiceServer;
 
 /**
  * A {@link ChannelHandler} which will process the TCP server handshake.

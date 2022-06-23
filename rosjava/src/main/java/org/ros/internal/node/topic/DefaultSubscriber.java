@@ -18,9 +18,6 @@ package org.ros.internal.node.topic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.message.Message;
@@ -90,7 +87,7 @@ public class DefaultSubscriber<T extends Message> extends DefaultTopicParticipan
     SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
         new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
             incomingMessageQueue, executorService);
-    tcpClientManager.addNamedChannelHandler(subscriberHandshakeHandler);
+    tcpClientManager.add(subscriberHandshakeHandler);
     subscriberListeners = new ListenerGroup<SubscriberListener<T>>(executorService);
     subscriberListeners.add(new DefaultSubscriberListener<T>() {
       @Override

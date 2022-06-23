@@ -16,8 +16,6 @@
 
 package org.ros.time;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.Topics;
 import org.ros.internal.node.DefaultNode;
 import org.ros.message.MessageListener;

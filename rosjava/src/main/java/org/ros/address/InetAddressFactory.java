@@ -18,14 +18,12 @@ package org.ros.address;
 
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
-
 import org.ros.exception.RosRuntimeException;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

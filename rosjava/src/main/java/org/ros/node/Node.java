@@ -23,7 +23,6 @@ import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NodeNameResolver;
-import org.slf4j.Logger;
 
 import java.net.URI;
 import java.util.concurrent.ScheduledExecutorService;

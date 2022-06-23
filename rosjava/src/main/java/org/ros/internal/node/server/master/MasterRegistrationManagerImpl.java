@@ -16,21 +16,18 @@
 
 package org.ros.internal.node.server.master;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.google.common.collect.Maps;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceServer;
-
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Manages all registration logic for the {@link MasterServer}.

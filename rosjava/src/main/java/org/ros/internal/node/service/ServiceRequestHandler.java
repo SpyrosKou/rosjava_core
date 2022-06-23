@@ -30,7 +30,6 @@ import org.ros.message.MessageSerializer;
 import org.ros.node.service.ServiceResponseBuilder;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 

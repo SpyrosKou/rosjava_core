@@ -1,7 +1,5 @@
 package org.ros.node;
 
-import org.slf4j.Marker;
-
 /**
  * A subset of {@link org.slf4j.Logger} that allows logging in a {@link org.slf4j.Logger} and published in {@link org.ros.Topics#ROSOUT}
  * Created at 2022-06-15 on 12:43

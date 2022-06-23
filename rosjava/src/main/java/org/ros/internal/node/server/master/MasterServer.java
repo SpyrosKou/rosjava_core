@@ -18,9 +18,6 @@ package org.ros.internal.node.server.master;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;

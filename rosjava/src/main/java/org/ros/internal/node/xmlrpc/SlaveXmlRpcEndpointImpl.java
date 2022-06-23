@@ -18,9 +18,6 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
@@ -34,12 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

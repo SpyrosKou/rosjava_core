@@ -17,9 +17,6 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.ros.concurrent.ListenerGroup;
