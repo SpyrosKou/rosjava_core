@@ -16,11 +16,11 @@
 
 package org.ros.internal.node.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.MessageEvent;
+import org.ros.internal.message.Message;
 import org.ros.internal.transport.BaseClientHandshakeHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -30,7 +30,6 @@ import org.ros.node.service.ServiceServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
@@ -46,17 +45,18 @@ import java.util.concurrent.ExecutorService;
  * @param <S>
  *          the connected {@link ServiceServer} returns responses of this type
  */
-final class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
+final class ServiceClientHandshakeHandler<T extends Message, S extends Message> extends BaseClientHandshakeHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ServiceClientHandshakeHandler.class);
-  
+  private static final String NAME = "ServiceClientHandshakeHandler";
+
   private final ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners;
   private final MessageDeserializer<S> deserializer;
   private final ExecutorService executorService;
 
-  public ServiceClientHandshakeHandler(ConnectionHeader outgoingConnectionHeader,
-      ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners,
-      MessageDeserializer<S> deserializer, ExecutorService executorService) {
+  public ServiceClientHandshakeHandler(final ConnectionHeader outgoingConnectionHeader,
+                                       final ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners,
+                                       final MessageDeserializer<S> deserializer, ExecutorService executorService) {
     super(new ServiceClientHandshake(outgoingConnectionHeader), executorService);
     this.responseListeners = responseListeners;
     this.deserializer = deserializer;
@@ -64,24 +64,26 @@ final class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandl
   }
 
   @Override
-  protected void onSuccess(ConnectionHeader incommingConnectionHeader, ChannelHandlerContext ctx,
-      MessageEvent e) {
-    ChannelPipeline pipeline = e.getChannel().getPipeline();
+  protected final void onSuccess(final ConnectionHeader incomingConnectionHeader, final ChannelHandlerContext ctx,
+      final MessageEvent messageEvent) {
+    final ChannelPipeline pipeline = messageEvent.getChannel().getPipeline();
     pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
     pipeline.remove(ServiceClientHandshakeHandler.this);
-    pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<S>());
-    pipeline.addLast("ResponseHandler", new ServiceResponseHandler<S>(responseListeners,
+    pipeline.addLast(XmlRpcConstants.RESPONSE_DECODER, new ServiceResponseDecoder<>());
+    pipeline.addLast(XmlRpcConstants.RESPONSE_HANDLER, new ServiceResponseHandler<>(responseListeners,
         deserializer, executorService));
   }
 
   @Override
-  protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
-    LOGGER.error("Service client handshake failed: " + errorMessage);
-    e.getChannel().close();
+  protected final void onFailure(final String errorMessage,final ChannelHandlerContext ctx,final MessageEvent messageEvent) {
+    if(LOGGER.isErrorEnabled()) {
+      LOGGER.error("Service client handshake failed: " + errorMessage);
+    }
+    messageEvent.getChannel().close();
   }
 
   @Override
-  public String getName() {
-    return "ServiceClientHandshakeHandler";
+  public final String getName() {
+    return NAME;
   }
 }

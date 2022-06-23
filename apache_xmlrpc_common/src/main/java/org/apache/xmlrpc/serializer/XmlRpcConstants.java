@@ -40,6 +40,8 @@ public abstract class XmlRpcConstants {
      */
     public static final String ARRAY = "array";
     static final String EX_SERIALIZABLE = EX + ":" + SERIALIZABLE;
+    public static final String RESPONSE_DECODER = "ResponseDecoder";
+    public static final String RESPONSE_HANDLER = "ResponseHandler";
 
     private XmlRpcConstants() {
         throw new UnsupportedOperationException("Not for implementation");

@@ -29,9 +29,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.ros.helpers.TestParameters.STARTUP_TIMEOUT;
 
 
 /**
@@ -58,7 +57,7 @@ public class ParameterLoaderNodeTest extends RosTest {
                 latch.countDown();
             }
         }, nodeConfiguration);
-        assertTrue(latch.await(1, TimeUnit.SECONDS));
+        assertTrue(latch.await(STARTUP_TIMEOUT, TimeUnit.SECONDS));
     }
 
     @Test
@@ -71,7 +70,7 @@ public class ParameterLoaderNodeTest extends RosTest {
         ParameterLoaderNode parameterLoaderNode = new ParameterLoaderNode(resourceList);
 
         final CountDownLatch parameterNodeLatch = new CountDownLatch(1);
-        nodeMainExecutor.execute(parameterLoaderNode, nodeConfiguration, new ArrayList<NodeListener>() {{
+        nodeMainExecutor.execute(parameterLoaderNode, nodeConfiguration, new ArrayList<>() {{
             add(new DefaultNodeListener() {
                 @Override
                 public void onShutdown(Node node) {
@@ -80,7 +79,7 @@ public class ParameterLoaderNodeTest extends RosTest {
             });
         }});
 
-        assertTrue(parameterNodeLatch.await(1, TimeUnit.SECONDS));
+        assertTrue(parameterNodeLatch.await(STARTUP_TIMEOUT, TimeUnit.SECONDS));
 
         try {
             // Without namespace.
@@ -128,6 +127,6 @@ public class ParameterLoaderNodeTest extends RosTest {
         }});
 
         // No exceptions shall be thrown on node execution, and it should shut down properly.
-        assertTrue(parameterNodeLatch.await(1, TimeUnit.SECONDS));
+        assertTrue(parameterNodeLatch.await(STARTUP_TIMEOUT, TimeUnit.SECONDS));
     }
 }
