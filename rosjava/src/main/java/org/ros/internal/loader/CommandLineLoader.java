@@ -29,6 +29,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -240,10 +241,13 @@ public class CommandLineLoader {
      * @throws ClassNotFoundException
      * @throws InstantiationException
      * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
      */
-    public NodeMain loadClass(String name) throws ClassNotFoundException, InstantiationException,
-            IllegalAccessException {
-        Class<?> clazz = getClass().getClassLoader().loadClass(name);
-        return NodeMain.class.cast(clazz.newInstance());
+    public final NodeMain loadClass(final String name) throws ClassNotFoundException, InstantiationException,
+            IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        Preconditions.checkNotNull(name, "Class name cannot be null");
+        final Class<?> clazz = getClass().getClassLoader().loadClass(name);
+        return NodeMain.class.cast( clazz.getDeclaredConstructor().newInstance());
     }
 }
