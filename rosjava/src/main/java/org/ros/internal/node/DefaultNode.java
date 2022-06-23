@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SharedScheduledExecutorService;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
@@ -113,8 +114,8 @@ public class DefaultNode implements ConnectedNode {
      * @param nodeListeners     a {@link Collection} of {@link NodeListener}s that will be added
      *                          to this {@link Node} before it starts
      */
-    public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners,
-                       ScheduledExecutorService scheduledExecutorService) {
+    public DefaultNode(final NodeConfiguration nodeConfiguration,final Collection<NodeListener> nodeListeners,
+                       final SharedScheduledExecutorService scheduledExecutorService) {
         this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
         this.nodeListeners = new ListenerGroup<NodeListener>(scheduledExecutorService);
         this.nodeListeners.addAll(nodeListeners);
@@ -168,18 +169,17 @@ public class DefaultNode implements ConnectedNode {
         final CountDownLatch rosoutLatch = new CountDownLatch(1);
 
 
-        final DefaultPublisherListener<Log> defaultPublisherListener = new DefaultPublisherListener<>() {
+        final PublisherListener<Log> publisherListener = new DefaultPublisherListener<>() {
             @Override
-            public void onMasterRegistrationSuccess(Publisher<Log> registrant) {
+            public final void onMasterRegistrationSuccess(final Publisher<Log> registrant) {
                 rosoutLatch.countDown();
+                registrant.removeListener(this);
             }
         };
-        final Consumer<Publisher<Log>> consumer = publisher -> publisher.addListener(defaultPublisherListener);
+        final Consumer<Publisher<Log>> consumer = publisher -> publisher.addListener(publisherListener);
         this.rosoutLogger = new RosoutLogger(this, consumer);
         try {
             rosoutLatch.await();
-
-//          TODO: SpyrosKoukas  this.rosoutLogger.getPublisher().removeListener()
         } catch (InterruptedException e) {
             this.signalOnError(e);
             this.shutdown();

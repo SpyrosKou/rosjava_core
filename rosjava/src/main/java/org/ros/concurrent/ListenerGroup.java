@@ -109,12 +109,12 @@ public class ListenerGroup<T> {
    * @param listener the listener to remove
    * @return flag indicating successful removal
      */
-  public boolean remove(T listener) {
+  public final boolean remove(final T listener) {
     Preconditions.checkNotNull(listener);
-    for (EventDispatcher<T> eventDispatcher : eventDispatchers) {
+    for (final EventDispatcher<T> eventDispatcher : this.eventDispatchers) {
       if (listener.equals(eventDispatcher.getListener())) {
         eventDispatcher.cancel();
-        eventDispatchers.remove(eventDispatcher);
+        this.eventDispatchers.remove(eventDispatcher);
         return true;
       }
     }

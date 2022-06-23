@@ -117,4 +117,9 @@ public interface Publisher<T extends Message> extends TopicParticipant {
    *          the {@link PublisherListener} to add
    */
   void addListener(PublisherListener<T> listener);
+
+  /**
+   * Remove an existing lifecycle listener from the {@link Publisher}
+   */
+  boolean removeListener(PublisherListener<T> listener);
 }

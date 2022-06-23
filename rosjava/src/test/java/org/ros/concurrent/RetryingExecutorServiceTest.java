@@ -16,49 +16,60 @@
 
 package org.ros.concurrent;
 
-import static org.mockito.Mockito.*;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.junit.Before;
-import org.junit.Test;
+
+import static org.mockito.Mockito.*;
 
 /**
  * @author rodrigoq@google.com (Rodrigo Queiro)
  */
 public class RetryingExecutorServiceTest {
 
-  private ScheduledExecutorService executorService;
+    private ScheduledExecutorService executorService;
 
-  @Before
-  public void before() {
-    executorService = Executors.newScheduledThreadPool(4);
-  }
+    @Before
+    public void before() {
+        this.executorService = Executors.newScheduledThreadPool(4);
+    }
 
-  @Test
-  public void testNoRetry_calledOnce() throws Exception {
-    RetryingExecutorService service = new RetryingExecutorService(executorService);
-    Callable<Boolean> callable = mock(Callable.class);
-    when(callable.call()).thenReturn(false);
-    service.submit(callable);
-    service.shutdown(10, TimeUnit.SECONDS);
-    verify(callable, times(1)).call();
-  }
+    @Test
+    public void testNoRetry_calledOnce() throws Exception {
+        final RetryingExecutorService service = new RetryingExecutorService(this.executorService);
+        final Callable<Boolean> callable = mock(Callable.class);
+        when(callable.call()).thenReturn(false);
+        service.submit(callable);
+        service.shutdown(10, TimeUnit.SECONDS);
+        verify(callable, times(1)).call();
+    }
 
-  @Test
-  public void testOneRetry_calledTwice() throws Exception {
-    RetryingExecutorService service = new RetryingExecutorService(executorService);
-    service.setRetryDelay(0, TimeUnit.SECONDS);
-    Callable<Boolean> callable = mock(Callable.class);
-    when(callable.call()).thenReturn(true).thenReturn(false);
-    service.submit(callable);
+    @Test
+    public void testOneRetry_calledTwice() throws Exception {
+        final RetryingExecutorService service = new RetryingExecutorService(this.executorService);
+        service.setRetryDelay(0, TimeUnit.SECONDS);
+        final Callable<Boolean> callable = mock(Callable.class);
+        when(callable.call()).thenReturn(true).thenReturn(false);
+        service.submit(callable);
 
-    // Call verify() with a timeout before calling shutdown, as shutdown() will prevent further
-    // retries.
-    verify(callable, timeout(10000).times(2)).call();
-    service.shutdown(10, TimeUnit.SECONDS);
-  }
+        // Call verify() with a timeout before calling shutdown, as shutdown() will prevent further
+        // retries.
+        verify(callable, timeout(10000).times(2)).call();
+        service.shutdown(10, TimeUnit.SECONDS);
+    }
+
+    @After
+    public void after() {
+        this.executorService.shutdown();
+        try {
+            this.executorService.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (final Exception exception) {
+            this.executorService.shutdownNow();
+        }
+    }
 }

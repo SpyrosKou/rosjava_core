@@ -29,21 +29,21 @@ import java.util.concurrent.ScheduledExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNodeFactory implements NodeFactory {
+public final class DefaultNodeFactory implements NodeFactory {
 
-  private final ScheduledExecutorService scheduledExecutorService;
+  private final SharedScheduledExecutorService scheduledExecutorService;
 
-  public DefaultNodeFactory(ScheduledExecutorService scheduledExecutorService) {
+  public DefaultNodeFactory(final ScheduledExecutorService scheduledExecutorService) {
     this.scheduledExecutorService = new SharedScheduledExecutorService(scheduledExecutorService);
   }
 
   @Override
-  public Node newNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> listeners) {
-    return new DefaultNode(nodeConfiguration, listeners, scheduledExecutorService);
+  public final Node newNode(final NodeConfiguration nodeConfiguration, final Collection<NodeListener> listeners) {
+    return new DefaultNode(nodeConfiguration, listeners, this.scheduledExecutorService);
   }
 
   @Override
-  public Node newNode(NodeConfiguration nodeConfiguration) {
-    return newNode(nodeConfiguration, new LinkedList<NodeListener>());
+  public final Node newNode(final NodeConfiguration nodeConfiguration) {
+    return newNode(nodeConfiguration, new LinkedList<>());
   }
 }

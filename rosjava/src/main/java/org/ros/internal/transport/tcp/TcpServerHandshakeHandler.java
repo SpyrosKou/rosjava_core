@@ -44,17 +44,17 @@ final class TcpServerHandshakeHandler extends SimpleChannelHandler {
     private final TopicParticipantManager topicParticipantManager;
     private final ServiceManager serviceManager;
 
-    TcpServerHandshakeHandler(TopicParticipantManager topicParticipantManager,
-                                     ServiceManager serviceManager) {
+    TcpServerHandshakeHandler(final TopicParticipantManager topicParticipantManager,
+                                     final ServiceManager serviceManager) {
         this.topicParticipantManager = topicParticipantManager;
         this.serviceManager = serviceManager;
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-        ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-        ChannelPipeline pipeline = e.getChannel().getPipeline();
-        ConnectionHeader incomingHeader = ConnectionHeader.decode(incomingBuffer);
+    public final void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+        final ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
+        final ChannelPipeline pipeline = e.getChannel().getPipeline();
+        final ConnectionHeader incomingHeader = ConnectionHeader.decode(incomingBuffer);
         if (incomingHeader.hasField(ConnectionHeaderFields.SERVICE)) {
             handleServiceHandshake(e, pipeline, incomingHeader);
         } else {
@@ -77,27 +77,27 @@ final class TcpServerHandshakeHandler extends SimpleChannelHandler {
         }
     }
 
-    private void handleSubscriberHandshake(ChannelHandlerContext ctx, MessageEvent e,
-                                           ChannelPipeline pipeline, ConnectionHeader incomingConnectionHeader)
+    private final void handleSubscriberHandshake(final ChannelHandlerContext ctx,final MessageEvent e,
+                                           final ChannelPipeline pipeline, final ConnectionHeader incomingConnectionHeader)
             throws InterruptedException {
         Preconditions.checkState(incomingConnectionHeader.hasField(ConnectionHeaderFields.TOPIC),
                 "Handshake header missing field: " + ConnectionHeaderFields.TOPIC);
-        GraphName topicName =
+        final GraphName topicName =
                 GraphName.of(incomingConnectionHeader.getField(ConnectionHeaderFields.TOPIC));
         Preconditions.checkState(topicParticipantManager.hasPublisher(topicName),
                 "No publisher for topic: " + topicName);
-        DefaultPublisher<?> publisher = topicParticipantManager.getPublisher(topicName);
-        ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingConnectionHeader);
-        Channel channel = ctx.getChannel();
+        final DefaultPublisher<?> publisher = topicParticipantManager.getPublisher(topicName);
+        final ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingConnectionHeader);
+        final Channel channel = ctx.getChannel();
         if (incomingConnectionHeader.hasField(ConnectionHeaderFields.TCP_NODELAY)) {
-            boolean tcpNoDelay = "1".equals(incomingConnectionHeader.getField(ConnectionHeaderFields.TCP_NODELAY));
+            final boolean tcpNoDelay = "1".equals(incomingConnectionHeader.getField(ConnectionHeaderFields.TCP_NODELAY));
             channel.getConfig().setOption("tcpNoDelay", tcpNoDelay);
         }
-        ChannelFuture future = channel.write(outgoingBuffer).await();
+        final ChannelFuture future = channel.write(outgoingBuffer).await();
         if (!future.isSuccess()) {
             throw new RosRuntimeException(future.getCause());
         }
-        String nodeName = incomingConnectionHeader.getField(ConnectionHeaderFields.CALLER_ID);
+        final String nodeName = incomingConnectionHeader.getField(ConnectionHeaderFields.CALLER_ID);
         publisher.addSubscriber(new SubscriberIdentifier(NodeIdentifier.forName(nodeName),
                 new TopicIdentifier(topicName)), channel);
 
