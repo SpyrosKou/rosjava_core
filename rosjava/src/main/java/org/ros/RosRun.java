@@ -25,6 +25,8 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * This is a main class entry point for executing {@link NodeMain}s.
  *
@@ -53,10 +55,8 @@ public final class RosRun {
             nodeMain = loader.loadClass(nodeClassName);
         } catch (ClassNotFoundException e) {
             throw new RosRuntimeException("Unable to locate node: " + nodeClassName, e);
-        } catch (InstantiationException e) {
-            throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, e);
-        } catch (IllegalAccessException e) {
-            throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, e);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException reflexionException) {
+            throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, reflexionException);
         }
 
         Preconditions.checkState(nodeMain != null);
