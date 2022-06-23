@@ -32,8 +32,9 @@ import org.slf4j.LoggerFactory;
  */
 public class MessageReceiver<T> extends AbstractNamedChannelHandler {
 
+    public static final String CLASS_NAME = "IncomingMessageQueueChannelHandler";
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiver.class);
-
+    private static final boolean DEBUG_ENABLED= LOGGER.isDebugEnabled();
     private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
     private final MessageDeserializer<T> deserializer;
 
@@ -45,18 +46,18 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
 
     @Override
     public String getName() {
-        return "IncomingMessageQueueChannelHandler";
+        return CLASS_NAME;
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-        ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-        if (LOGGER.isDebugEnabled()) {
+    public void messageReceived(final ChannelHandlerContext ctx,final MessageEvent messageEvent) throws Exception {
+        final ChannelBuffer buffer = (ChannelBuffer) messageEvent.getMessage();
+        if (DEBUG_ENABLED) {
             LOGGER.debug(String.format("Received %d byte message.", buffer.readableBytes()));
         }
         // We have to make a defensive copy of the buffer here because Netty does
         // not guarantee that the returned ChannelBuffer will not be reused.
-        lazyMessages.addLast(new LazyMessage<T>(buffer.copy(), deserializer));
-        super.messageReceived(ctx, e);
+        this.lazyMessages.addLast(new LazyMessage<>(buffer.copy(), this.deserializer));
+        super.messageReceived(ctx, messageEvent);
     }
 }
