@@ -18,7 +18,7 @@ plugins {
     id 'application'
 }
 dependencies {
-    api 'org.ros.rosjava_bootstrap:message_generation:noetic-0.1'
+    api 'org.ros.rosjava_bootstrap:message_generation:0.3.8 '
     api 'org.ros.rosjava_messages:std_msgs:[0.5.9,0.5.11)', {
         exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
     }

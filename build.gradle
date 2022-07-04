@@ -17,7 +17,7 @@
 
 allprojects {
   group 'org.ros.rosjava_core'
-  version = 'noetic-0.1'
+  version = '0.3.8'
 }
 
 subprojects {
