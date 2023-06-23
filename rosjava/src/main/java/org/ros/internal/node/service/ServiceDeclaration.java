@@ -28,7 +28,7 @@ import java.net.URI;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceDeclaration {
+public final class ServiceDeclaration {
 
   private final ServiceIdentifier identifier;
   private final ServiceDescription description;

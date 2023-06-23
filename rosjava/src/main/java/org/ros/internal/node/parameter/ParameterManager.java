@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterManager {
+public final class ParameterManager {
 
   private final ExecutorService executorService;
   private final Map<GraphName, ListenerGroup<ParameterListener>> listeners;

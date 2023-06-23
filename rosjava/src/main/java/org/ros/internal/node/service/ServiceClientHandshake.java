@@ -31,7 +31,7 @@ import java.lang.invoke.MethodHandles;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceClientHandshake extends BaseClientHandshake {
+public final class ServiceClientHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

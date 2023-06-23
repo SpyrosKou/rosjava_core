@@ -26,7 +26,7 @@ import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ServiceResponseDecoder<ResponseType> extends
+final class ServiceResponseDecoder<ResponseType> extends
     ReplayingDecoder<ServiceResponseDecoderState> {
 
   private ServiceServerResponse response;

@@ -24,7 +24,7 @@ import org.ros.exception.RosRuntimeException;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class UriResultFactory implements ResultFactory<URI> {
+public final class UriResultFactory implements ResultFactory<URI> {
 
   @Override
   public URI newFromValue(Object value) {

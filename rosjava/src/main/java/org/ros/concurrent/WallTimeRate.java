@@ -37,7 +37,7 @@ public final class WallTimeRate implements Rate {
         while (delta < this.delay) {
             try {
                 Thread.sleep(this.delay - delta);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 break;
             }
             delta = System.currentTimeMillis() - this.time;

@@ -32,7 +32,7 @@ import org.ros.message.MessageDeserializer;
  * @param <T>
  *          the message type
  */
-public class LazyMessage<T> {
+public final class LazyMessage<T> {
 
   private final ChannelBuffer buffer;
   private final MessageDeserializer<T> deserializer;

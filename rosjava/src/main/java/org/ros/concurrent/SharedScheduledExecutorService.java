@@ -1,5 +1,7 @@
 package org.ros.concurrent;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -18,15 +20,16 @@ import java.util.concurrent.TimeoutException;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class SharedScheduledExecutorService implements ScheduledExecutorService {
+public final class SharedScheduledExecutorService implements ScheduledExecutorService {
 
   /**
    * The scheduledExecutorService {@link ScheduledExecutorService}.
    */
-  private ScheduledExecutorService scheduledExecutorService;
+  private final ScheduledExecutorService scheduledExecutorService;
 
-  public SharedScheduledExecutorService(ScheduledExecutorService wrapped) {
-    this.scheduledExecutorService = wrapped;
+  public SharedScheduledExecutorService(final ScheduledExecutorService scheduledExecutorService) {
+    Preconditions.checkNotNull(scheduledExecutorService);
+    this.scheduledExecutorService = scheduledExecutorService;
   }
 
   /**

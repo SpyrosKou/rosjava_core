@@ -19,7 +19,7 @@ package org.ros.internal.node.response;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class IntegerResultFactory implements ResultFactory<Integer> {
+public final class IntegerResultFactory implements ResultFactory<Integer> {
   
   @Override
   public Integer newFromValue(Object value) {

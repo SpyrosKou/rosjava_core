@@ -33,15 +33,15 @@ import java.util.List;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TopicListResultFactory implements ResultFactory<List<TopicDeclaration>> {
+public final class TopicListResultFactory implements ResultFactory<List<TopicDeclaration>> {
 
   @Override
   public List<TopicDeclaration> newFromValue(Object value) {
-    List<TopicDeclaration> descriptions = Lists.newArrayList();
-    List<Object> topics = Arrays.asList((Object[]) value);
-    for (Object topic : topics) {
-      String name = (String) ((Object[]) topic)[0];
-      String type = (String) ((Object[]) topic)[1];
+    final List<TopicDeclaration> descriptions = Lists.newArrayList();
+    final List<Object> topics = Arrays.asList((Object[]) value);
+    for (final Object topic : topics) {
+      final String name = (String) ((Object[]) topic)[0];
+      final String type = (String) ((Object[]) topic)[1];
       descriptions.add(TopicDeclaration.newFromTopicName(GraphName.of(name), new TopicDescription(type, null,
           null), null));
     }

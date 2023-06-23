@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Holder<T> {
+public final class Holder<T> {
 
   private final CountDownLatch latch;
 

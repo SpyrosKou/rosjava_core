@@ -19,7 +19,7 @@ package org.ros.internal.node.response;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class VoidResultFactory implements ResultFactory<Void> {
+public final class VoidResultFactory implements ResultFactory<Void> {
   
   @Override
   public Void newFromValue(Object value) {

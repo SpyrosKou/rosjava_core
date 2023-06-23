@@ -34,10 +34,11 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class InetAddressFactory {
+public final class InetAddressFactory {
 
   private InetAddressFactory() {
     // Utility class
+    throw new AssertionError("Utility Class");
   }
 
   private static boolean isIpv4(InetAddress address) {

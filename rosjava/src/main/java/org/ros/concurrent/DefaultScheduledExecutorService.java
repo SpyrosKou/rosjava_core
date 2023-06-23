@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -39,10 +39,10 @@ import java.util.concurrent.TimeoutException;
  * the {@link ScheduledExecutorService} uses an unbounded queue which makes it
  * impossible to create an unlimited number of threads on demand (as explained
  * in the {@link ThreadPoolExecutor} class javadoc.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultScheduledExecutorService implements ScheduledExecutorService {
+public final class DefaultScheduledExecutorService implements ScheduledExecutorService {
 
   private static final int CORE_POOL_SIZE = 11;
 
@@ -55,7 +55,7 @@ public class DefaultScheduledExecutorService implements ScheduledExecutorService
 
   /**
    * This instance will take over the lifecycle of the services.
-   * 
+   *
    * @param executorService
    */
   public DefaultScheduledExecutorService(ExecutorService executorService) {
@@ -64,7 +64,7 @@ public class DefaultScheduledExecutorService implements ScheduledExecutorService
 
   /**
    * This instance will take over the lifecycle of the services.
-   * 
+   *
    * @param executorService
    * @param scheduledExecutorService
    */
@@ -102,14 +102,14 @@ public class DefaultScheduledExecutorService implements ScheduledExecutorService
    * First calls {@link #awaitTermination(long, TimeUnit)} on the wrapped
    * {@link ExecutorService} and then {@link #awaitTermination(long, TimeUnit)}
    * on the wrapped {@link ScheduledExecutorService}.
-   * 
+   *
    * @return {@code true} if both {@link Executor}s terminated, {@code false}
    *         otherwise
    */
   @Override
   public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-    boolean executorServiceResult = executorService.awaitTermination(timeout, unit);
-    boolean scheduledExecutorServiceResult =
+    final boolean executorServiceResult = executorService.awaitTermination(timeout, unit);
+    final boolean scheduledExecutorServiceResult =
         scheduledExecutorService.awaitTermination(timeout, unit);
     return executorServiceResult && scheduledExecutorServiceResult;
   }

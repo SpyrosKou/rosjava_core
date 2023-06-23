@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class IncomingMessageQueue<T> {
+public final class IncomingMessageQueue<T> {
 
   /**
    * The maximum number of incoming messages that will be queued.
@@ -43,8 +43,7 @@ public class IncomingMessageQueue<T> {
   private final MessageDispatcher<T> messageDispatcher;
 
   public IncomingMessageQueue(MessageDeserializer<T> deserializer, ExecutorService executorService) {
-    CircularBlockingDeque<LazyMessage<T>> lazyMessages =
-        new CircularBlockingDeque<LazyMessage<T>>(DEQUE_CAPACITY);
+    final CircularBlockingDeque<LazyMessage<T>> lazyMessages = new CircularBlockingDeque<LazyMessage<T>>(DEQUE_CAPACITY);
     messageReceiver = new MessageReceiver<T>(lazyMessages, deserializer);
     messageDispatcher = new MessageDispatcher<T>(lazyMessages, executorService);
     executorService.execute(messageDispatcher);

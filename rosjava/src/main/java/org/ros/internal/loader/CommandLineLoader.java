@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class CommandLineLoader {
+public final class CommandLineLoader {
 
     private final List<String> argv;
     private final List<String> nodeArguments;

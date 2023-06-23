@@ -19,7 +19,7 @@ package org.ros.internal.node.response;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class StringResultFactory implements ResultFactory<String> {
+public final class StringResultFactory implements ResultFactory<String> {
   
   @Override
   public String newFromValue(Object value) {

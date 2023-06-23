@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ListenerGroup<T> {
+public final class ListenerGroup<T> {
 
   private final static int DEFAULT_QUEUE_CAPACITY = 128;
 

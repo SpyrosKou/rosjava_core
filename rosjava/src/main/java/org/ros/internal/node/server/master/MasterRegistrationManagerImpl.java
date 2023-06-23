@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class MasterRegistrationManagerImpl {
+public final class MasterRegistrationManagerImpl {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

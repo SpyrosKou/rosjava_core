@@ -30,12 +30,12 @@ import com.google.common.collect.Lists;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class UriListResultFactory implements ResultFactory<List<URI>> {
+public final class UriListResultFactory implements ResultFactory<List<URI>> {
 
 	@Override
 	public List<URI> newFromValue(Object value) {
-		List<Object> values = Arrays.asList((Object[]) value);
-		List<URI> uris = Lists.newArrayList();
+		final List<Object> values = Arrays.asList((Object[]) value);
+		final List<URI> uris = Lists.newArrayList();
 		for (Object uri : values) {
 			try {
 				uris.add(new URI((String) uri));

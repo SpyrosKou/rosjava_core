@@ -33,7 +33,7 @@ import java.net.URISyntaxException;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NodeIdentifier {
+public final class NodeIdentifier {
 
   private final GraphName name;
   private final URI uri;

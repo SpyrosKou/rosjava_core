@@ -29,7 +29,7 @@ import java.util.Set;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class NodeRegistrationInfo {
+public final class NodeRegistrationInfo {
 
   /**
    * The name of the node.

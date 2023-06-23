@@ -31,7 +31,7 @@ import java.util.Set;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class TopicRegistrationInfo {
+public final class TopicRegistrationInfo {
 
   /**
    * The name of the topic.

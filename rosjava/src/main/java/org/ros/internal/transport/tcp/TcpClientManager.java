@@ -30,7 +30,7 @@ import java.util.concurrent.Executor;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpClientManager {
+public final class TcpClientManager {
 
   private final ChannelGroup channelGroup;
   private final Collection<TcpClient> tcpClients;

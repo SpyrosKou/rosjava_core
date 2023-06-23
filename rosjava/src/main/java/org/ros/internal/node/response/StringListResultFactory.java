@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class StringListResultFactory implements ResultFactory<List<String>> {
+public final class StringListResultFactory implements ResultFactory<List<String>> {
 
   @Override
   public List<String> newFromValue(Object value) {

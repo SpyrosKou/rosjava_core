@@ -19,7 +19,7 @@ package org.ros.internal.node.response;
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class ObjectResultFactory implements ResultFactory<Object> {
+public final class ObjectResultFactory implements ResultFactory<Object> {
 
   @Override
   public Object newFromValue(Object value) {

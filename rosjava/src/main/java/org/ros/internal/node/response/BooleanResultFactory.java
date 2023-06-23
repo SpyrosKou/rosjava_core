@@ -19,7 +19,7 @@ package org.ros.internal.node.response;
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class BooleanResultFactory implements ResultFactory<Boolean> {
+public final class BooleanResultFactory implements ResultFactory<Boolean> {
   
   @Override
   public Boolean newFromValue(Object value) {

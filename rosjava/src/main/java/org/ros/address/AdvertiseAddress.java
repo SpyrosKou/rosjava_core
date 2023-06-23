@@ -36,7 +36,7 @@ import java.util.concurrent.Callable;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class AdvertiseAddress {
+public final class AdvertiseAddress {
 
   private final String host;
 

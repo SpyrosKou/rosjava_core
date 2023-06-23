@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ServiceRequestHandler<T extends Message, S extends Message> extends SimpleChannelHandler {
+final class ServiceRequestHandler<T extends Message, S extends Message> extends SimpleChannelHandler {
 
     private final ServiceDeclaration serviceDeclaration;
     private final ServiceResponseBuilder<T, S> responseBuilder;

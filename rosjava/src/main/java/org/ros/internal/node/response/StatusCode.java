@@ -42,7 +42,7 @@ public enum StatusCode {
   }
   
   @Override
-  public String toString() {
+  public final String toString() {
     switch (this) {
       case ERROR:
         return "Error";

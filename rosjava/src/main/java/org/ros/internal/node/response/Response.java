@@ -30,7 +30,7 @@ import java.util.List;
  * 
  * @param <T>
  */
-public class Response<T> {
+public final class Response<T> {
 
   private final StatusCode statusCode;
   private final String statusMessage;

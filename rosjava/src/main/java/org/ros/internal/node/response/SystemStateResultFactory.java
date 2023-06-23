@@ -34,7 +34,7 @@ import java.util.Set;
  * 
  * @author Keith M. Hughes
  */
-public class SystemStateResultFactory implements ResultFactory<SystemState> {
+public final class SystemStateResultFactory implements ResultFactory<SystemState> {
 
 	@Override
 	public SystemState newFromValue(Object value) {

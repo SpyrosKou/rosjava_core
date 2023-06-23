@@ -28,14 +28,14 @@ import com.google.common.collect.Lists;
  * 
  * @author Keith M. Hughes
  */
-public class TopicTypeListResultFactory implements
+public final class TopicTypeListResultFactory implements
 		ResultFactory<List<TopicType>> {
 
 	@Override
 	public List<TopicType> newFromValue(Object value) {
-		List<TopicType> topics = Lists.newArrayList();
+		final List<TopicType> topics = Lists.newArrayList();
 
-		for (Object pair : (Object[]) value) {
+		for (final Object pair : (Object[]) value) {
 			topics.add(new TopicType((String) ((Object[]) pair)[0],
 					(String) ((Object[]) pair)[1]));
 		}

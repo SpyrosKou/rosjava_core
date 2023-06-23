@@ -19,7 +19,7 @@ package org.ros.address;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PrivateAdvertiseAddressFactory implements AdvertiseAddressFactory {
+public final class PrivateAdvertiseAddressFactory implements AdvertiseAddressFactory {
 
   @Override
   public AdvertiseAddress newDefault() {

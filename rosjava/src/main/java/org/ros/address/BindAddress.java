@@ -25,7 +25,7 @@ import java.net.InetSocketAddress;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class BindAddress {
+public final class BindAddress {
 
   private final InetSocketAddress address;
 

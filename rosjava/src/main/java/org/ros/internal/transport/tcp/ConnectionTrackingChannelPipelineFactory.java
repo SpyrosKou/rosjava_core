@@ -38,7 +38,7 @@ public class ConnectionTrackingChannelPipelineFactory implements ChannelPipeline
 
   @Override
   public ChannelPipeline getPipeline() {
-    ChannelPipeline pipeline = pipeline();
+    final ChannelPipeline pipeline = pipeline();
     pipeline.addLast(CONNECTION_TRACKING_HANDLER, connectionTrackingHandler);
     return pipeline;
   }

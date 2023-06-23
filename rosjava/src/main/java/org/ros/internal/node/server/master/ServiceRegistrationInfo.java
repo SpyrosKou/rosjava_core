@@ -25,7 +25,7 @@ import java.net.URI;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class ServiceRegistrationInfo {
+public final class ServiceRegistrationInfo {
 
   /**
    * Name of the service.

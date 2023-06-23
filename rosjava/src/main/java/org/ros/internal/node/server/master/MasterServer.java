@@ -56,7 +56,7 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class MasterServer extends XmlRpcServer implements MasterRegistrationListener {
+public final class MasterServer extends XmlRpcServer implements MasterRegistrationListener {
 
   private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

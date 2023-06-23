@@ -32,7 +32,7 @@ import java.lang.invoke.MethodHandles;
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageReceiver<T> extends AbstractNamedChannelHandler {
+public final class MessageReceiver<T> extends AbstractNamedChannelHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -46,19 +46,19 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return "IncomingMessageQueueChannelHandler";
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-        ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
+    public final void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent) throws Exception {
+        final ChannelBuffer buffer = (ChannelBuffer) messageEvent.getMessage();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("Received %d byte message.", buffer.readableBytes()));
         }
         // We have to make a defensive copy of the buffer here because Netty does
         // not guarantee that the returned ChannelBuffer will not be reused.
         lazyMessages.addLast(new LazyMessage<T>(buffer.copy(), deserializer));
-        super.messageReceived(ctx, e);
+        super.messageReceived(ctx, messageEvent);
     }
 }

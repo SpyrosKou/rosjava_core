@@ -37,7 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceFactory {
+public final class ServiceFactory {
 
   private final GraphName nodeName;
   private final SlaveServer slaveServer;
