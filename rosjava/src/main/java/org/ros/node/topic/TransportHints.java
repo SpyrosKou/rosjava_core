@@ -10,9 +10,9 @@ import org.ros.node.ConnectedNode;
  *
  * @author stefan.glaser@hs-offenburg.de (Stefan Glaser)
  */
-public class TransportHints {
+public final class TransportHints {
 
-  private boolean tcpNoDelay;
+  private final boolean tcpNoDelay;
 
   public TransportHints() {
     this(false);
@@ -22,12 +22,8 @@ public class TransportHints {
     this.tcpNoDelay = tcpNoDelay;
   }
 
-  public TransportHints tcpNoDelay(boolean tcpNoDelay) {
-    this.tcpNoDelay = tcpNoDelay;
-    return this;
-  }
 
-  public boolean getTcpNoDelay() {
-    return tcpNoDelay;
+  public final boolean getTcpNoDelay() {
+    return this.tcpNoDelay;
   }
 }
