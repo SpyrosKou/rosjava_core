@@ -487,4 +487,10 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
     SlaveClient client = new SlaveClient(MASTER_NODE_NAME, nodeInfo.getNodeSlaveUri());
     client.shutdown("Replaced by new slave");
   }
+
+  @Override
+  public final void shutdown() {
+    super.shutdown();
+    super.shutdownFinalization();
+  }
 }

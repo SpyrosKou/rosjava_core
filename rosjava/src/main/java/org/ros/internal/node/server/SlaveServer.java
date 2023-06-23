@@ -69,14 +69,14 @@ public final class SlaveServer extends XmlRpcServer {
      * {@link TcpRosServer} is initialized first so that the slave server returns
      * correct information when topics are requested.
      */
-    public void start() {
+    public final void start() {
         super.start(new SlaveXmlRpcEndpointImpl(this));
-        tcpRosServer.start();
+        this.tcpRosServer.start();
     }
 
 
     @Override
-    public void shutdown() {
+    public final void shutdown() {
         // prevent recursive call of this method
         if (this.shutdownStarted.compareAndSet(false, true)) {
             this.shutdownStarted.set(true);
@@ -85,6 +85,7 @@ public final class SlaveServer extends XmlRpcServer {
             if (this.node != null) {
                 this.node.shutdown();
             }
+            super.shutdownFinalization();
         }
     }
 
@@ -147,7 +148,6 @@ public final class SlaveServer extends XmlRpcServer {
     /**
      * @param parameterName
      * @param parameterValue
-     *
      * @return the number of parameter subscribers that received the update
      */
     public final int paramUpdate(GraphName parameterName, Object parameterValue) {
@@ -155,7 +155,7 @@ public final class SlaveServer extends XmlRpcServer {
     }
 
     public final void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
-        final  GraphName graphName = GraphName.of(topicName);
+        final GraphName graphName = GraphName.of(topicName);
         if (topicParticipantManager.hasSubscriber(graphName)) {
             final DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(graphName);
             final TopicDeclaration topicDeclaration = subscriber.getTopicDeclaration();

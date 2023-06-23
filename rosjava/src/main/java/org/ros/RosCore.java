@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosCore {
+public final class RosCore {
 
   private final MasterServer masterServer;
 
@@ -65,7 +65,7 @@ public class RosCore {
   }
 
   public void start() {
-    masterServer.start();
+    this.masterServer.start();
   }
 
   public URI getUri() {
