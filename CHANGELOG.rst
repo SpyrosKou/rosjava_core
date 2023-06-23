@@ -6,6 +6,7 @@ Changelog
 latest
 -----------------
 * Gradle update to 7.5
+* Import 'org.apache.xmlrpc:xmlrpc-client:3.1.3', 'org.apache.xmlrpc:xmlrpc-common:3.1.3', 'org.apache.xmlrpc:xmlrpc-server:3.1.3' instead of compiling.
 
 
 
