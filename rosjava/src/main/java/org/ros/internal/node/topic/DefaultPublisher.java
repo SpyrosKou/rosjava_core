@@ -18,8 +18,6 @@ package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.ros.concurrent.ListenerGroup;
@@ -65,7 +63,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * Queue of all messages being published by this {@link Publisher}.
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
-  private final ListenerGroup<PublisherListener<T>> listeners;
+  private final ListenerGroup<PublisherListener<T>> listenerGroup;
   private final NodeIdentifier nodeIdentifier;
   private final MessageFactory messageFactory;
   private CountDownLatch shutdownLatch;
@@ -77,8 +75,8 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
     this.nodeIdentifier = nodeIdentifier;
     this.messageFactory = messageFactory;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
-    listeners = new ListenerGroup<PublisherListener<T>>(executorService);
-    listeners.add(new DefaultPublisherListener<T>() {
+    listenerGroup = new ListenerGroup<>(executorService);
+    listenerGroup.add(new DefaultPublisherListener<T>() {
       @Override
       public void onMasterRegistrationSuccess(Publisher<T> registrant) {
         LOGGER.info("Publisher registered: " + DefaultPublisher.this);
@@ -118,7 +116,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    */
   @Override
   public void shutdown(long timeout, TimeUnit unit) {
-    shutdownLatch = new CountDownLatch(listeners.size());
+    shutdownLatch = new CountDownLatch(listenerGroup.size());
     signalOnShutdown(timeout, unit);
     try {
       shutdownLatch.await(timeout, unit);
@@ -126,7 +124,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
       LOGGER.error(e.getMessage(), e);
     }
     outgoingMessageQueue.shutdown();
-    listeners.shutdown();
+    listenerGroup.shutdown();
   }
 
   @Override
@@ -219,7 +217,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
 
   @Override
   public void addListener(PublisherListener<T> listener) {
-    listeners.add(listener);
+    listenerGroup.add(listener);
   }
 
   /**
@@ -231,7 +229,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
   @Override
   public void signalOnMasterRegistrationSuccess() {
     final Publisher<T> publisher = this;
-    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterRegistrationSuccess(publisher);
@@ -248,7 +246,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
   @Override
   public void signalOnMasterRegistrationFailure() {
     final Publisher<T> publisher = this;
-    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterRegistrationFailure(publisher);
@@ -265,7 +263,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
   @Override
   public void signalOnMasterUnregistrationSuccess() {
     final Publisher<T> publisher = this;
-    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationSuccess(publisher);
@@ -283,7 +281,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
   @Override
   public void signalOnMasterUnregistrationFailure() {
     final Publisher<T> publisher = this;
-    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationFailure(publisher);
@@ -303,7 +301,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    */
   private void signalOnNewSubscriber(final SubscriberIdentifier subscriberIdentifier) {
     final Publisher<T> publisher = this;
-    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onNewSubscriber(publisher, subscriberIdentifier);
@@ -323,7 +321,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
   private void signalOnShutdown(long timeout, TimeUnit unit) {
     final Publisher<T> publisher = this;
     try {
-      listeners.signal(new SignalRunnable<PublisherListener<T>>() {
+      listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
         @Override
         public void run(PublisherListener<T> listener) {
           listener.onShutdown(publisher);
