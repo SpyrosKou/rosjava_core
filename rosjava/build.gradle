@@ -30,11 +30,15 @@ dependencies {
 //    implementation 'commons-pool:commons-pool:1.6'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
-    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
 
     implementation 'org.apache.xmlrpc:xmlrpc-client:3.1.3'
     implementation 'org.apache.xmlrpc:xmlrpc-common:3.1.3'
     implementation 'org.apache.xmlrpc:xmlrpc-server:3.1.3'
+    implementation 'commons-httpclient:commons-httpclient:3.1'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.apache.ws.commons:ws-commons-util:1.0.1'
+
 
     implementation 'org.ros.rosjava_messages:rosgraph_msgs:[1.11,1.12)', {
         exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
