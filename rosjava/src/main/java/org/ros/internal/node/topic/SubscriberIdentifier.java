@@ -27,7 +27,7 @@ import java.net.URI;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SubscriberIdentifier {
+public final class SubscriberIdentifier {
 
   private final NodeIdentifier nodeIdentifier;
   private final TopicIdentifier topicIdentifier;

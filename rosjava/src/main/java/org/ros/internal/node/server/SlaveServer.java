@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveServer extends XmlRpcServer {
+public final class SlaveServer extends XmlRpcServer {
 
     private final GraphName nodeName;
     private final MasterClient masterClient;
@@ -114,18 +114,18 @@ public class SlaveServer extends XmlRpcServer {
             }
         }
         for (final DefaultSubscriber<?> subscriber : getSubscriptions()) {
-            for (final PublisherIdentifier publisherIdentifer : topicParticipantManager.getSubscriberConnections(subscriber)) {
+            for (final PublisherIdentifier publisherIdentifier : topicParticipantManager.getSubscriberConnections(subscriber)) {
                 final List<String> subscriberBusInfo = Lists.newArrayList();
                 subscriberBusInfo.add(Integer.toString(id));
                 // Subscriber connection PublisherIdentifiers are populated with node
                 // URIs instead of names. As a result, the only identifier information
                 // available is the URI.
-                subscriberBusInfo.add(publisherIdentifer.getNodeIdentifier().getUri().toString());
+                subscriberBusInfo.add(publisherIdentifier.getNodeIdentifier().getUri().toString());
                 // TODO(damonkohler): Pull out BusInfo constants.
                 subscriberBusInfo.add("i");
                 // TODO(damonkohler): Add getter for protocol to topic participants.
                 subscriberBusInfo.add(ProtocolNames.TCPROS);
-                subscriberBusInfo.add(publisherIdentifer.getTopicName().toString());
+                subscriberBusInfo.add(publisherIdentifier.getTopicName().toString());
                 busInfo.add(subscriberBusInfo);
                 id++;
             }
@@ -138,11 +138,11 @@ public class SlaveServer extends XmlRpcServer {
     }
 
 
-    public List<DefaultSubscriber<?>> getSubscriptions() {
+    public final List<DefaultSubscriber<?>> getSubscriptions() {
         return topicParticipantManager.getSubscribers();
     }
 
-    public List<DefaultPublisher<?>> getPublications() {
+    public final List<DefaultPublisher<?>> getPublications() {
         return topicParticipantManager.getPublishers();
     }
 
@@ -152,16 +152,16 @@ public class SlaveServer extends XmlRpcServer {
      *
      * @return the number of parameter subscribers that received the update
      */
-    public int paramUpdate(GraphName parameterName, Object parameterValue) {
+    public final int paramUpdate(GraphName parameterName, Object parameterValue) {
         return parameterManager.updateParameter(parameterName, parameterValue);
     }
 
-    public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
-        GraphName graphName = GraphName.of(topicName);
+    public final void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
+        final  GraphName graphName = GraphName.of(topicName);
         if (topicParticipantManager.hasSubscriber(graphName)) {
-            DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(graphName);
-            TopicDeclaration topicDeclaration = subscriber.getTopicDeclaration();
-            Collection<PublisherIdentifier> identifiers = PublisherIdentifier.newCollectionFromUris(publisherUris, topicDeclaration);
+            final DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(graphName);
+            final TopicDeclaration topicDeclaration = subscriber.getTopicDeclaration();
+            final Collection<PublisherIdentifier> identifiers = PublisherIdentifier.newCollectionFromUris(publisherUris, topicDeclaration);
             subscriber.updatePublishers(identifiers);
         }
     }

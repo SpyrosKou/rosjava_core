@@ -19,7 +19,7 @@ package org.ros.exception;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceException extends Exception {
+public final class ServiceException extends Exception {
 
   public ServiceException(final Throwable throwable) {
     super(throwable);

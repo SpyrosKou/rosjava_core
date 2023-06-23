@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-class UpdatePublisherRunnable<T extends Message> implements Runnable {
+final class UpdatePublisherRunnable<T extends Message> implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdatePublisherRunnable.class);
 

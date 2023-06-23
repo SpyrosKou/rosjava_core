@@ -75,7 +75,7 @@ import java.util.function.Consumer;
  * @author damonkohler@google.com (Damon Kohler)
  * @author Spyros Koukas
  */
-public class DefaultNode implements ConnectedNode {
+public final class DefaultNode implements ConnectedNode {
 
     /**
      * The maximum delay before shutdown will begin even if all
@@ -113,14 +113,16 @@ public class DefaultNode implements ConnectedNode {
      * @param nodeListeners     a {@link Collection} of {@link NodeListener}s that will be added
      *                          to this {@link Node} before it starts
      */
-    public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners,
-                       ScheduledExecutorService scheduledExecutorService) {
+    public DefaultNode(
+            final NodeConfiguration nodeConfiguration
+            ,final Collection<NodeListener> nodeListeners
+            ,final ScheduledExecutorService scheduledExecutorService) {
         this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
-        this.nodeListeners = new ListenerGroup<NodeListener>(scheduledExecutorService);
+        this.nodeListeners = new ListenerGroup<>(scheduledExecutorService);
         this.nodeListeners.addAll(nodeListeners);
         this.scheduledExecutorService = scheduledExecutorService;
         this.masterUri = nodeConfiguration.getMasterUri();
-        this.masterClient = new MasterClient(masterUri);
+        this.masterClient = new MasterClient(this.masterUri);
         this.topicParticipantManager = new TopicParticipantManager();
         this.serviceManager = new ServiceManager();
         this.parameterManager = new ParameterManager(scheduledExecutorService);
@@ -161,7 +163,7 @@ public class DefaultNode implements ConnectedNode {
     private final void start() {
         // The Registrar must be started first so that master registration is
         // possible during startup.
-        this.registrar.start(slaveServer.toNodeIdentifier());
+        this.registrar.start(this.slaveServer.toNodeIdentifier());
 
         // Wait for the logger to register with the master. This ensures the master is running before
         // requesting the use_sim_time parameter.

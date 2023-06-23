@@ -33,7 +33,7 @@ import java.util.Map;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TopicDeclaration {
+public final class TopicDeclaration {
 
   private final TopicIdentifier topicIdentifier;
   private final TopicDescription topicDescription;
