@@ -233,7 +233,7 @@ public class DefaultNodeTest extends RosTest {
         slaveClient.requestTopic(GraphName.of("test_addresses_pub"),
             Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
-    InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();
+    InetSocketAddress tcpRosAddress = result.getAdvertiseAddress().toInetSocketAddress();
     checkHostName(tcpRosAddress.getHostName());
   }
 }
