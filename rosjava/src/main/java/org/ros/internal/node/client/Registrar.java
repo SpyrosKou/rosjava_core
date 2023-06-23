@@ -38,6 +38,7 @@ import org.ros.node.service.ServiceServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -53,7 +54,7 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class Registrar implements TopicParticipantManagerListener, ServiceManagerListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Registrar.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final boolean DEBUG = LOGGER.isDebugEnabled();
 
 

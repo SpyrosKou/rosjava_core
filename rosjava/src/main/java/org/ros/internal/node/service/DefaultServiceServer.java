@@ -35,6 +35,7 @@ import org.ros.node.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -45,7 +46,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 final class DefaultServiceServer<T extends Message, S extends Message> implements ChannelBufferServiceServer<T, S> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private static final String ROSRPC = "rosrpc";
 
     private final ServiceDeclaration serviceDeclaration;

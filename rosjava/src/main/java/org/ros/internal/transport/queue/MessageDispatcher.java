@@ -26,6 +26,7 @@ import org.ros.message.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -37,7 +38,7 @@ import java.util.concurrent.ExecutorService;
 public final class MessageDispatcher<T> extends CancellableLoop {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(MessageDispatcher.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
   private final ListenerGroup<MessageListener<T>> messageListeners;

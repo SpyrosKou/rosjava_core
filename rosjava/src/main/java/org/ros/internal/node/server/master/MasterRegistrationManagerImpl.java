@@ -16,6 +16,7 @@
 
 package org.ros.internal.node.server.master;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MasterRegistrationManagerImpl {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MasterRegistrationManagerImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
    * A map from node names to the information about the mode.

@@ -31,6 +31,7 @@ import org.ros.node.topic.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -44,7 +45,7 @@ import java.util.concurrent.ExecutorService;
  */
 class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberHandshakeHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final IncomingMessageQueue<T> incomingMessageQueue;
 

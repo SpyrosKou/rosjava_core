@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.Callable;
@@ -43,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class XmlRpcServer {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(XmlRpcServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final WebServer server;
     private final AdvertiseAddress advertiseAddress;
     private final CountDownLatch startLatch;

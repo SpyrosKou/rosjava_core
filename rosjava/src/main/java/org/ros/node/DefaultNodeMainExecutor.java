@@ -23,6 +23,7 @@ import org.ros.namespace.GraphName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,7 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNodeMainExecutor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final NodeFactory nodeFactory;
     private final ScheduledExecutorService scheduledExecutorService;

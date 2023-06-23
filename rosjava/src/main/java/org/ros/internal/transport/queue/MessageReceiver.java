@@ -25,6 +25,8 @@ import org.ros.message.MessageDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
+
 /**
  * @param <T> the message type
  *
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MessageReceiver<T> extends AbstractNamedChannelHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
     private final MessageDeserializer<T> deserializer;

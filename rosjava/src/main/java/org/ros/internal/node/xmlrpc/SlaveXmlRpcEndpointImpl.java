@@ -32,6 +32,7 @@ import org.ros.namespace.GraphName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ import java.util.Vector;
 public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(SlaveXmlRpcEndpointImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final SlaveServer slave;
 

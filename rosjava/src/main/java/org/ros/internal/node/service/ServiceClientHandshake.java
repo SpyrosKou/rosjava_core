@@ -24,6 +24,8 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
+
 /**
  * Handshake logic from the client side of a service connection.
  * 
@@ -32,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class ServiceClientHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(ServiceClientHandshake.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public ServiceClientHandshake(ConnectionHeader outgoingConnectionHeader) {
     super(outgoingConnectionHeader);

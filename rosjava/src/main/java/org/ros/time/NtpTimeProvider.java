@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -44,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 public final class NtpTimeProvider implements TimeProvider {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(NtpTimeProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private int sampleSize = 11;
   

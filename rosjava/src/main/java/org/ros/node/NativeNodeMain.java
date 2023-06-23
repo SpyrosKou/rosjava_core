@@ -19,6 +19,8 @@ package org.ros.node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
+
 /**
  * A java wrapper to load and run a native-code ROS node.
  * 
@@ -30,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public abstract class NativeNodeMain extends AbstractNodeMain {
 
   public static final int SUCCESS = 0;
-  private Logger logger = LoggerFactory.getLogger(NativeNodeMain.class);
+  private final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private String libName;
   private String masterUri = null;
   private String hostName = null;

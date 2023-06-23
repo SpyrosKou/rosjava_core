@@ -31,6 +31,8 @@ import org.ros.node.topic.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
+
 /**
  * A {@link Runnable} which is used whenever new publishers are being added to a
  * {@link DefaultSubscriber}. It takes care of registration between the {@link Subscriber}
@@ -40,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 final class UpdatePublisherRunnable<T extends Message> implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpdatePublisherRunnable.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final DefaultSubscriber<T> subscriber;
     private final PublisherIdentifier publisherIdentifier;

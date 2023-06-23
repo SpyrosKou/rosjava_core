@@ -35,6 +35,7 @@ import org.ros.message.MessageSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -43,7 +44,7 @@ import java.util.concurrent.ExecutorService;
 public class OutgoingMessageQueue<T extends Message> {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(OutgoingMessageQueue.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int DEQUE_CAPACITY = 16;
 

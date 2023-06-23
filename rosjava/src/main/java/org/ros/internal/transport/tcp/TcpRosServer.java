@@ -34,6 +34,7 @@ import org.ros.internal.node.topic.TopicParticipantManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.Callable;
@@ -52,7 +53,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class TcpRosServer {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(TcpRosServer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final BindAddress bindAddress;
   private final AdvertiseAddress advertiseAddress;

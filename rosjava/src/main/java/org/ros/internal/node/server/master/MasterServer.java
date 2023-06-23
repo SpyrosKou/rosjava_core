@@ -38,6 +38,7 @@ import org.ros.node.topic.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -58,7 +59,7 @@ import java.util.List;
 public class MasterServer extends XmlRpcServer implements MasterRegistrationListener {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(MasterServer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
    * Position in the {@link #getSystemState()} for publisher information.

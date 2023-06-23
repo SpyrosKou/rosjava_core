@@ -54,6 +54,7 @@ import org.ros.message.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.CountDownLatch;
@@ -67,7 +68,7 @@ import java.util.concurrent.TimeUnit;
 public class MessageQueueIntegrationTest {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(MessageQueueIntegrationTest.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int QUEUE_CAPACITY = 128;
 

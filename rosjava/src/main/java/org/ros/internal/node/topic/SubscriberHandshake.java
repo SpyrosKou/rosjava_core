@@ -26,6 +26,8 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
+
 /**
  * Handshake logic from the subscriber side of a topic connection.
  * 
@@ -34,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class SubscriberHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberHandshake.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public SubscriberHandshake(ConnectionHeader outgoingConnectionHeader) {
     super(outgoingConnectionHeader);

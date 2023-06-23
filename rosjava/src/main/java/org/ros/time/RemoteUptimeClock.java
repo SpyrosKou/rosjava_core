@@ -27,6 +27,7 @@ import org.ros.exception.RosRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
@@ -38,7 +39,7 @@ import java.util.concurrent.Callable;
 public class RemoteUptimeClock {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(RemoteUptimeClock.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final LocalUptimeProvider localUptimeProvider;
   private final Callable<Double> callable;

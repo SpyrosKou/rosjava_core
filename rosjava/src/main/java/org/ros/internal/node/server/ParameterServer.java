@@ -24,6 +24,7 @@ import org.ros.namespace.GraphName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.*;
 
 /**
@@ -34,7 +35,7 @@ import java.util.*;
  */
 public final class ParameterServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParameterServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Map<String, Object> tree = Maps.newConcurrentMap();
     private final Multimap<GraphName, NodeIdentifier> subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, NodeIdentifier>create());

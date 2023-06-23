@@ -24,6 +24,7 @@ import org.ros.internal.message.MessageBuffers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -36,7 +37,7 @@ import java.util.Map.Entry;
 public class ConnectionHeader {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHeader.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final Map<String, String> fields;
 

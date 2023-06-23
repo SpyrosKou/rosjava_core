@@ -37,6 +37,7 @@ import org.ros.node.topic.SubscriberListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Set;
@@ -50,7 +51,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultSubscriber<T extends Message> extends DefaultTopicParticipant implements Subscriber<T> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSubscriber.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
    * The maximum delay before shutdown will begin even if all

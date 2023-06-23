@@ -30,6 +30,7 @@ import org.ros.node.service.ServiceServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -48,7 +49,7 @@ import java.util.concurrent.ExecutorService;
  */
 final class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ServiceClientHandshakeHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
   private final ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners;
   private final MessageDeserializer<S> deserializer;

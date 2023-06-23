@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.nio.channels.Channels;
 
 /**
@@ -38,7 +39,7 @@ import java.nio.channels.Channels;
 public class ConnectionTrackingHandler extends SimpleChannelHandler {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionTrackingHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
    * The channel group the connection is to be part of.

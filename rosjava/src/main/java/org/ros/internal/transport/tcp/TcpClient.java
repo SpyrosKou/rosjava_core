@@ -35,6 +35,7 @@ import org.ros.exception.RosRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.util.List;
@@ -47,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 public class TcpClient {
 
   private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(TcpClient.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int DEFAULT_CONNECTION_TIMEOUT_DURATION = 5;
   private static final TimeUnit DEFAULT_CONNECTION_TIMEOUT_UNIT = TimeUnit.SECONDS;
