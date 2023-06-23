@@ -84,6 +84,10 @@ public final class RosCore {
     masterServer.shutdown();
   }
 
+  public boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {
+    return masterServer.awaitShutdown(timeout, unit);
+  }
+
   @VisibleForTesting
   public MasterServer getMasterServer() {
     return masterServer;
