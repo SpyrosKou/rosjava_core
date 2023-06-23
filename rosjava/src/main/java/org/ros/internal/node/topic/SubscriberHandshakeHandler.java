@@ -43,7 +43,7 @@ import java.util.concurrent.ExecutorService;
  * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
+final class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

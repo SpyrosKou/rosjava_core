@@ -33,7 +33,7 @@ import java.lang.invoke.MethodHandles;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SubscriberHandshake extends BaseClientHandshake {
+public final class SubscriberHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

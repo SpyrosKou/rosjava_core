@@ -30,7 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SubscriberFactory {
+public final class SubscriberFactory {
 
   private final NodeIdentifier nodeIdentifier;
   private final TopicParticipantManager topicParticipantManager;

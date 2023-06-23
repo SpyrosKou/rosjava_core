@@ -31,7 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublisherFactory {
+public final class PublisherFactory {
 
   private final TopicParticipantManager topicParticipantManager;
   private final MessageFactory messageFactory;

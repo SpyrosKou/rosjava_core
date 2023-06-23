@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant implements Publisher<T> {
+public final class DefaultPublisher<T extends Message> extends DefaultTopicParticipant implements Publisher<T> {
 
   private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

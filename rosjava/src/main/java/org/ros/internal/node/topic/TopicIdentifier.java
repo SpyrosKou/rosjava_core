@@ -27,7 +27,7 @@ import org.ros.namespace.GraphName;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TopicIdentifier {
+public final class TopicIdentifier {
   
   private final GraphName name;
   

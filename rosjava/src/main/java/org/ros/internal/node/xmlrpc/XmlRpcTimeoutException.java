@@ -20,7 +20,7 @@ package org.ros.internal.node.xmlrpc;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class XmlRpcTimeoutException extends RuntimeException {
+public final class XmlRpcTimeoutException extends RuntimeException {
   
   public XmlRpcTimeoutException() {
   }

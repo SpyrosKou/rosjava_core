@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultSubscriber<T extends Message> extends DefaultTopicParticipant implements Subscriber<T> {
+public final class DefaultSubscriber<T extends Message> extends DefaultTopicParticipant implements Subscriber<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

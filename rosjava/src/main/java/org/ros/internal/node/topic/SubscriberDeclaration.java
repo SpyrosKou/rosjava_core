@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SubscriberDeclaration {
+public final class SubscriberDeclaration {
 
   private final SubscriberIdentifier subscriberIdentifier;
   private final TopicDeclaration topicDeclaration;

@@ -45,7 +45,7 @@ import java.util.Vector;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
+public final class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

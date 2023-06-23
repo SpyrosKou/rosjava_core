@@ -27,7 +27,7 @@ import java.net.URI;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublisherDeclaration {
+public final class PublisherDeclaration {
 
   private final PublisherIdentifier publisherIdentifier;
   private final TopicDeclaration topicDeclaration;

@@ -23,35 +23,36 @@ import java.lang.management.ManagementFactory;
  *
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class Process {
+public final class Process {
   
   private Process() {
     // Utility class.
+    throw new AssertionError("Utility class");
   }
   
   /**
    * @return PID of node process if available, throws
    *         {@link UnsupportedOperationException} otherwise.
    */
-  public static int getPid() {
+  public static final int getPid() {
     // NOTE(kwc): Java has no standard way of getting PID. MF.getName()
     // returns '1234@localhost'.
     try {
-      String mxName = ManagementFactory.getRuntimeMXBean().getName();
-      int idx = mxName.indexOf('@');
+      final String mxName = ManagementFactory.getRuntimeMXBean().getName();
+      final int idx = mxName.indexOf('@');
       if (idx > 0) {
         try {
           return Integer.parseInt(mxName.substring(0, idx));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException numberFormatException) {
           return 0;
         }
       }
-    } catch (NoClassDefFoundError unused) {
+    } catch (final NoClassDefFoundError unused) {
       // Android does not support ManagementFactory. Try to get the PID on
       // Android.
       try {
         return (Integer) Class.forName("android.os.Process").getMethod("myPid").invoke(null);
-      } catch (Exception unused1) {
+      } catch (final Exception unused1) {
         // Ignore this exception and fall through to the
         // UnsupportedOperationException.
       }
