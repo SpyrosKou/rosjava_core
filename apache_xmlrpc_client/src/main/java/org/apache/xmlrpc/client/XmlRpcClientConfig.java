@@ -29,5 +29,5 @@ import org.apache.xmlrpc.XmlRpcRequestConfig;
  * local transport requires an instance of
  * {@link org.apache.xmlrpc.client.XmlRpcLocalClientConfig}.
  */
-interface XmlRpcClientConfig extends XmlRpcRequestConfig {
+public interface XmlRpcClientConfig extends XmlRpcRequestConfig {
 }

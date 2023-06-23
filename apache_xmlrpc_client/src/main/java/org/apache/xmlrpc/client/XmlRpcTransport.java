@@ -27,7 +27,7 @@ import org.apache.xmlrpc.XmlRpcRequest;
  * 2.0, which has actually been a stream based transport.
  * @since 3.0
  */
-interface XmlRpcTransport {
+public interface XmlRpcTransport {
 	/**  Send an XML-RPC message. This method is called to send a message to the
 	 * other party.
 	 * @param pRequest The request being performed.

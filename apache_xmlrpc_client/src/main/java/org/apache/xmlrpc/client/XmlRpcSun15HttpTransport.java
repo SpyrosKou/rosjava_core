@@ -34,7 +34,7 @@ import org.apache.xmlrpc.XmlRpcRequest;
  * {@link java.net.HttpURLConnection} class. Adds support for the
  * {@link Proxy} class.
  */
-final class XmlRpcSun15HttpTransport extends XmlRpcSun14HttpTransport {
+public class XmlRpcSun15HttpTransport extends XmlRpcSun14HttpTransport {
     /**
      * Creates a new instance.
      * @param pClient The client controlling this instance.

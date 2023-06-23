@@ -27,7 +27,7 @@ import org.apache.xmlrpc.XmlRpcException;
  * from Apache XML-RPC 2.0</p>
  * @since 3.0
  */
-public final class XmlRpcClientException extends XmlRpcException {
+public class XmlRpcClientException extends XmlRpcException {
 	private static final long serialVersionUID = 3545798797134608691L;
 
 	/**

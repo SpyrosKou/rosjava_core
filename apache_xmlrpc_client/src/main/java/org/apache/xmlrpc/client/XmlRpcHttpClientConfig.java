@@ -27,7 +27,7 @@ import org.apache.xmlrpc.common.XmlRpcHttpRequestConfig;
  * for HTTP based transport. Provides details like server URL,
  * user credentials, and so on.
  */
-interface XmlRpcHttpClientConfig extends XmlRpcHttpRequestConfig {
+public interface XmlRpcHttpClientConfig extends XmlRpcHttpRequestConfig {
 	/** Returns the HTTP servers URL.
 	 * @return XML-RPC servers URL; for example, this may be the URL of a
 	 * servlet

@@ -50,7 +50,7 @@ import org.xml.sax.SAXException;
 /** An HTTP transport factory, which is based on the Jakarta Commons
  * HTTP Client.
  */
-final class XmlRpcCommonsTransport extends XmlRpcHttpTransport {
+public class XmlRpcCommonsTransport extends XmlRpcHttpTransport {
     /**
      * Maximum number of allowed redirects.
      */
