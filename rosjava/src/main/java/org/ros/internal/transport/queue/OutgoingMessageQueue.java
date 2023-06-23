@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -41,31 +41,30 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class OutgoingMessageQueue<T extends Message> {
+public final class OutgoingMessageQueue<T extends Message> {
 
-  private static final boolean DEBUG = false;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int DEQUE_CAPACITY = 16;
-
   private final MessageSerializer<T> serializer;
-  private final CircularBlockingDeque<T> deque;
-  private final ChannelGroup channelGroup;
-  private final Writer writer;
-  private final MessageBufferPool messageBufferPool;
-  private final ChannelBuffer latchedBuffer;
-  private final Object mutex;
-
-  private boolean latchMode;
+  private final CircularBlockingDeque<T> deque= new CircularBlockingDeque<T>(DEQUE_CAPACITY);
+  private final ChannelGroup channelGroup = new DefaultChannelGroup();
+  private final Writer writer = new Writer();
+  private final MessageBufferPool messageBufferPool = new MessageBufferPool();
+  private final ChannelBuffer latchedBuffer = MessageBuffers.dynamicBuffer();
+  private final Object mutex = new Object();
+  //Can be changed
+  private boolean latchMode=false;
   private T latchedMessage;
 
   private final class Writer extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
-      T message = deque.takeFirst();
+      final T message = deque.takeFirst();
       final ChannelBuffer buffer = messageBufferPool.acquire();
       serializer.serialize(message, buffer);
-      if (DEBUG) {
+      if (LOGGER.isInfoEnabled()) {
         LOGGER.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
             channelGroup.size()));
       }
@@ -73,24 +72,12 @@ public class OutgoingMessageQueue<T extends Message> {
       // race conditions. However, the duplicated buffer and the original buffer
       // share the same backing array. So, we have to wait until the write
       // operation is complete before returning the buffer to the pool.
-      channelGroup.write(buffer).addListener(new ChannelGroupFutureListener() {
-        @Override
-        public void operationComplete(ChannelGroupFuture future) throws Exception {
-          messageBufferPool.release(buffer);
-        }
-      });
+      channelGroup.write(buffer).addListener(future -> messageBufferPool.release(buffer));
     }
-  }
+  }//end inner class
 
   public OutgoingMessageQueue(MessageSerializer<T> serializer, ExecutorService executorService) {
     this.serializer = serializer;
-    deque = new CircularBlockingDeque<T>(DEQUE_CAPACITY);
-    channelGroup = new DefaultChannelGroup();
-    writer = new Writer();
-    messageBufferPool = new MessageBufferPool();
-    latchedBuffer = MessageBuffers.dynamicBuffer();
-    mutex = new Object();
-    latchMode = false;
     executorService.execute(writer);
   }
 
