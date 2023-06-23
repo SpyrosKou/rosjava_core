@@ -36,7 +36,7 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class FrameTransformTree {
+public final class FrameTransformTree {
 
   private static final int TRANSFORM_QUEUE_CAPACITY = 16;
 
