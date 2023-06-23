@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TransformBenchmark extends AbstractNodeMain {
+public final class TransformBenchmark extends AbstractNodeMain {
 
   private final AtomicInteger counter;
 
@@ -76,7 +76,7 @@ public class TransformBenchmark extends AbstractNodeMain {
     final std_msgs.String status = statusPublisher.newMessage();
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
-      protected void loop() throws InterruptedException {
+      protected final void loop() throws InterruptedException {
         Time now = connectedNode.getCurrentTime();
         Duration delta = now.subtract(time);
         if (delta.totalNsecs() > TimeUnit.NANOSECONDS.convert(5, TimeUnit.SECONDS)) {

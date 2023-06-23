@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessagesBenchmark extends AbstractNodeMain {
+public final class MessagesBenchmark extends AbstractNodeMain {
 
   private final AtomicInteger counter;
 

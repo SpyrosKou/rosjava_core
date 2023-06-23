@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NtpTimeProvider implements TimeProvider {
+public final class NtpTimeProvider implements TimeProvider {
 
   private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(NtpTimeProvider.class);
@@ -75,7 +75,7 @@ public class NtpTimeProvider implements TimeProvider {
    * 
    * @throws IOException : if ntpClient.getTime() fails too often.
    */
-  public void updateTime() throws IOException {
+  public final void updateTime() throws IOException {
     List<Long> offsets = Lists.newArrayList();
     int failures = 0;
     for (int i = 0; i < sampleSize; i++) {

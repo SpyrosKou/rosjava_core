@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PubsubBenchmark extends AbstractNodeMain {
+public final class PubsubBenchmark extends AbstractNodeMain {
 
   private final AtomicInteger counter;
 

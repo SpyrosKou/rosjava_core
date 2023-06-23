@@ -26,15 +26,16 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class CollectionMath {
+public final class CollectionMath {
   
   private CollectionMath() {
     // Utility class.
+    throw new AssertionError("Utility class");
   }
  
-  public static <T extends Comparable<? super T>> T median(Collection<T> collection) {
-    Preconditions.checkArgument(collection.size() > 0);
-    List<T> list = Lists.newArrayList(collection);
+  public static final <T extends Comparable<? super T>> T median(final Collection<T> collection) {
+    Preconditions.checkArgument(!collection.isEmpty());
+    final List<T> list = Lists.newArrayList(collection);
     Collections.sort(list);
     return list.get(list.size() / 2);
   }

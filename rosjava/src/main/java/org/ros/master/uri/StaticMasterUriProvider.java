@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Keith M. Hughes
  */
-public class StaticMasterUriProvider implements MasterUriProvider {
+public final class StaticMasterUriProvider implements MasterUriProvider {
   
   /**
    * The URI which will always be returned.
@@ -36,12 +36,12 @@ public class StaticMasterUriProvider implements MasterUriProvider {
   }
 
   @Override
-  public URI getMasterUri() {
+  public final URI getMasterUri() {
     return uri;
   }
 
   @Override
-  public URI getMasterUri(long timeout, TimeUnit unit) {
+  public final URI getMasterUri(long timeout, TimeUnit unit) {
     return uri;
   }
 }

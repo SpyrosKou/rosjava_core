@@ -25,7 +25,7 @@ import org.ros.namespace.GraphName;
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class Transform {
+public final class Transform {
 
   private Vector3 translation;
   private Quaternion rotationAndScale;

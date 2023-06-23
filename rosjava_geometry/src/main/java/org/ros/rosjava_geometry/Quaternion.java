@@ -27,7 +27,7 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class Quaternion {
+public final class Quaternion {
 
   private final double x;
   private final double y;

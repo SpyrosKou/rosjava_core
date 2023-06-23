@@ -26,7 +26,7 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
-public class Vector3 {
+public final class Vector3 {
 
   private static final Vector3 ZERO = new Vector3(0, 0, 0);
   private static final Vector3 X_AXIS = new Vector3(1, 0, 0);

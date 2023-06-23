@@ -27,7 +27,7 @@ import com.google.common.base.Preconditions;
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class FrameTransform {
+public final class FrameTransform {
 
   private final Transform transform;
   private final GraphName source;

@@ -21,10 +21,11 @@ package org.ros.math;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Unsigned {
+public final class Unsigned {
 
   private Unsigned() {
     // Utility class.
+    throw new AssertionError("Utility class");
   }
 
   /**

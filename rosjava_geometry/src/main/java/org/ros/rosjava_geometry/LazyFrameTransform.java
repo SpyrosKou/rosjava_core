@@ -26,7 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class LazyFrameTransform {
+public final class LazyFrameTransform {
 
   private final geometry_msgs.TransformStamped message;
 
