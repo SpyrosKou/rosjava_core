@@ -21,8 +21,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
 import org.ros.exception.RosRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

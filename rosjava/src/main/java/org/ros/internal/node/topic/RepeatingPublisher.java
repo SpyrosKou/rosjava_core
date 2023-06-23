@@ -18,8 +18,8 @@ package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.message.Message;
 import org.ros.node.topic.Publisher;

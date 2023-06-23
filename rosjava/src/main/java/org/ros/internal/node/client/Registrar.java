@@ -19,8 +19,8 @@ package org.ros.internal.node.client;
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
 import org.ros.concurrent.Holder;
 import org.ros.concurrent.RetryingExecutorService;
 import org.ros.exception.RosRuntimeException;

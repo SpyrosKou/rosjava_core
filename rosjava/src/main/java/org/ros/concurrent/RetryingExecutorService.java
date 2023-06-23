@@ -18,8 +18,8 @@ package org.ros.concurrent;
 
 import com.google.common.collect.Maps;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
 import org.ros.exception.RosRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

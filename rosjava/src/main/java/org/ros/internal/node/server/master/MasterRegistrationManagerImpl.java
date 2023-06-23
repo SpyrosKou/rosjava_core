@@ -22,8 +22,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;

@@ -19,8 +19,8 @@ package org.ros.internal.node.topic;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.message.Message;

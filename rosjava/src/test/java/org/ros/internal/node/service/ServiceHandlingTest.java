@@ -1,6 +1,6 @@
 package org.ros.internal.node.service;
 
-import org.apache.commons.logging.Log;
+
 import org.ros.exception.RemoteException;
 import org.ros.node.*;
 import rosjava_test_msgs.AddTwoInts;

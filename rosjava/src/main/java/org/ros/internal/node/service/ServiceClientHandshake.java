@@ -16,8 +16,8 @@
 
 package org.ros.internal.node.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+
 import org.ros.internal.node.BaseClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
