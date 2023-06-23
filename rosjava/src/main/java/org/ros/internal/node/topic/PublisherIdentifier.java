@@ -34,16 +34,15 @@ import java.util.Set;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublisherIdentifier {
+public final class PublisherIdentifier {
 
   private final NodeIdentifier nodeIdentifier;
   private final TopicIdentifier topicIdentifier;
 
-  public static Collection<PublisherIdentifier> newCollectionFromUris(
-      Collection<URI> publisherUris, TopicDeclaration topicDeclaration) {
-    Set<PublisherIdentifier> publishers = Sets.newHashSet();
-    for (URI uri : publisherUris) {
-      NodeIdentifier nodeIdentifier = new NodeIdentifier(null, uri);
+  public static Set<PublisherIdentifier> newCollectionFromUris(final Collection<URI> publisherUris,final TopicDeclaration topicDeclaration) {
+    final Set<PublisherIdentifier> publishers = Sets.newHashSet();
+    for (final URI uri : publisherUris) {
+      final NodeIdentifier nodeIdentifier = new NodeIdentifier(null, uri);
       publishers.add(new PublisherIdentifier(nodeIdentifier, topicDeclaration.getIdentifier()));
     }
     return publishers;
@@ -61,8 +60,8 @@ public class PublisherIdentifier {
     this.topicIdentifier = topicIdentifier;
   }
 
-  public ConnectionHeader toConnectionHeader() {
-    ConnectionHeader connectionHeader = new ConnectionHeader();
+  public final ConnectionHeader toConnectionHeader() {
+    final ConnectionHeader connectionHeader = new ConnectionHeader();
     connectionHeader.merge(nodeIdentifier.toConnectionHeader());
     connectionHeader.merge(topicIdentifier.toConnectionHeader());
     return connectionHeader;
