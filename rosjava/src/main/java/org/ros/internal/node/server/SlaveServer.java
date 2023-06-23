@@ -24,10 +24,8 @@ import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.*;
 import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl;
-import org.ros.internal.system.Process;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -176,7 +174,7 @@ public final class SlaveServer extends XmlRpcServer {
         for (final String protocol : protocols) {
             if (protocol.equals(ProtocolNames.TCPROS)) {
                 try {
-                    return new TcpRosProtocolDescription(tcpRosServer.getAdvertiseAddress());
+                    return ProtocolDescription.createTcpRosProtocolDescription(tcpRosServer.getAdvertiseAddress());
                 } catch (Exception e) {
                     throw new ServerException(e);
                 }

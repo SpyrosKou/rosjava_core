@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -26,66 +26,71 @@ import com.google.common.collect.Lists;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ProtocolDescription {
+public final class ProtocolDescription {
 
-  private final String name;
-  private final AdvertiseAddress address;
+    private final String name;
+    private final AdvertiseAddress address;
 
-  public ProtocolDescription(String name, AdvertiseAddress address) {
-    this.name = name;
-    this.address = address;
-  }
+    public ProtocolDescription(String name, AdvertiseAddress address) {
+        this.name = name;
+        this.address = address;
+    }
 
-  public String getName() {
-    return name;
-  }
 
-  public AdvertiseAddress getAdverstiseAddress() {
-    return address;
-  }
-  
-  public InetSocketAddress getAddress() {
-    return address.toInetSocketAddress();
-  }
+    public static final ProtocolDescription createTcpRosProtocolDescription(final AdvertiseAddress address) {
+        return new ProtocolDescription(ProtocolNames.TCPROS, address);
+    }
 
-  public List<Object> toList() {
-    return Lists.newArrayList((Object) name, address.getHost(), address.getPort());
-  }
+    public String getName() {
+        return name;
+    }
 
-  @Override
-  public String toString() {
-    return "Protocol<" + name + ", " + getAdverstiseAddress() + ">";
-  }
+    public AdvertiseAddress getAdvertiseAddress() {
+        return address;
+    }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((address == null) ? 0 : address.hashCode());
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    return result;
-  }
+    public InetSocketAddress getAddress() {
+        return address.toInetSocketAddress();
+    }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    ProtocolDescription other = (ProtocolDescription) obj;
-    if (address == null) {
-      if (other.address != null)
-        return false;
-    } else if (!address.equals(other.address))
-      return false;
-    if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
-      return false;
-    return true;
-  }
+    public List<Object> toList() {
+        return Lists.newArrayList((Object) name, address.getHost(), address.getPort());
+    }
+
+    @Override
+    public String toString() {
+        return "Protocol<" + name + ", " + getAdvertiseAddress() + ">";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((address == null) ? 0 : address.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProtocolDescription other = (ProtocolDescription) obj;
+        if (address == null) {
+            if (other.address != null)
+                return false;
+        } else if (!address.equals(other.address))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
 
 }
