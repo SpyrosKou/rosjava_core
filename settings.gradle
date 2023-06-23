@@ -15,7 +15,6 @@
  */
 
 include(
-    'apache_xmlrpc_client',
     'apache_xmlrpc_common',
     'apache_xmlrpc_server',
     'rosjava',
