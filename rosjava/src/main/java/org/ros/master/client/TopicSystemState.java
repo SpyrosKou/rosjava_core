@@ -23,7 +23,7 @@ import java.util.Set;
  * 
  * @author Keith M. Hughes
  */
-public class TopicSystemState {
+public final class TopicSystemState {
 
 	/**
 	 * Name of the topic.

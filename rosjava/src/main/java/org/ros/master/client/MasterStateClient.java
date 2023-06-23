@@ -31,7 +31,7 @@ import java.util.List;
  * 
  * @author Keith M. Hughes
  */
-public class MasterStateClient {
+public final class MasterStateClient {
 
   /**
    * The node doing the calling.
@@ -43,7 +43,7 @@ public class MasterStateClient {
    */
   private final MasterClient masterClient;
 
-  public MasterStateClient(Node caller, URI masterUri) {
+  public MasterStateClient(final Node caller,final URI masterUri) {
     this.caller = caller;
     masterClient = new MasterClient(masterUri);
   }
@@ -53,8 +53,8 @@ public class MasterStateClient {
    *          the name of the {@link Node} to lookup
    * @return the {@link URI} of the {@link Node} with the given name
    */
-  public URI lookupNode(String nodeName) {
-    Response<URI> response = masterClient.lookupNode(caller.getName(), nodeName);
+  public final URI lookupNode(final String nodeName) {
+    final Response<URI> response = masterClient.lookupNode(caller.getName(), nodeName);
     return response.getResult();
   }
 
@@ -62,7 +62,7 @@ public class MasterStateClient {
    * @return the {@link URI} of the {@link MasterServer}
    */
   public URI getUri() {
-    Response<URI> response = masterClient.getUri(caller.getName());
+    final Response<URI> response = masterClient.getUri(caller.getName());
     return response.getResult();
   }
 
@@ -72,16 +72,18 @@ public class MasterStateClient {
    * @return the {@link URI} of the {@link ServiceServer} with the given name
    */
   public URI lookupService(String serviceName) {
-    Response<URI> result = masterClient.lookupService(caller.getName(), serviceName);
+    final Response<URI> result = masterClient.lookupService(caller.getName(), serviceName);
     return result.getResult();
   }
 
   /**
+   * @deprecated throws {@link UnsupportedOperationException}
    * @param subgraph
    *          the subgraph of the topics
    * @return a {@link List} of {@link TopicDeclaration}s for published topics
    */
-  public List<TopicDeclaration> getPublishedTopics(String subgraph) {
+  @Deprecated
+  List<TopicDeclaration> getPublishedTopics(String subgraph) {
     // TODO(keith): Figure out what to turn the topic definition into.
     throw new UnsupportedOperationException();
   }
@@ -89,8 +91,8 @@ public class MasterStateClient {
   /**
    * @return a {@link List} of {@link TopicType}s known by the master
    */
-  public List<TopicType> getTopicTypes() {
-    Response<List<TopicType>> result = masterClient.getTopicTypes(caller.getName());
+  public final List<TopicType> getTopicTypes() {
+    final Response<List<TopicType>> result = masterClient.getTopicTypes(caller.getName());
     return result.getResult();
   }
 
@@ -98,7 +100,7 @@ public class MasterStateClient {
    * @return the current {@link SystemState}
    */
   public SystemState getSystemState() {
-    Response<SystemState> result = masterClient.getSystemState(caller.getName());
+    final Response<SystemState> result = masterClient.getSystemState(caller.getName());
     return result.getResult();
   }
 }

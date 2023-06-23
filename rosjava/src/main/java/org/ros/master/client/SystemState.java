@@ -23,7 +23,7 @@ import java.util.Collection;
  * 
  * @author Keith M. Hughes
  */
-public class SystemState {
+public final class SystemState {
 
 	/**
 	 * All topics known.

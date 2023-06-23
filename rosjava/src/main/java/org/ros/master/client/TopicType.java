@@ -21,7 +21,7 @@ package org.ros.master.client;
  *
  * @author Keith M. Hughes
  */
-public class TopicType {
+public final class TopicType {
 	
 	/**
 	 * Name of the topic.
