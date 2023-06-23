@@ -55,7 +55,6 @@ import java.util.concurrent.TimeUnit;
  */
 public final class Registrar implements TopicParticipantManagerListener, ServiceManagerListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final boolean DEBUG = LOGGER.isDebugEnabled();
 
 
   private static final int SHUTDOWN_TIMEOUT = 5;
@@ -81,7 +80,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     retryingExecutorService = new RetryingExecutorService(executorService);
     nodeIdentifier = null;
     running = false;
-    if (DEBUG) {
+    if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
     }
   }
@@ -109,13 +108,13 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     return false;
   }
 
-  private <T> boolean callMaster(Callable<Response<T>> callable) {
+  private <T> boolean callMaster(final Callable<Response<T>> callable) {
     Preconditions.checkNotNull(nodeIdentifier, "Registrar not started.");
     boolean success;
     try {
       final Response<T> response = callable.call();
-      if (DEBUG) {
-        LOGGER.debug("Response:"+response);
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Response:"+response);
       }
       success = response.isSuccess();
     } catch (Exception e) {
@@ -129,25 +128,17 @@ public final class Registrar implements TopicParticipantManagerListener, Service
 
   @Override
   public void onPublisherAdded(final DefaultPublisher<?> publisher) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Registering publisher: " + publisher);
     }
-    boolean submitted = submit(new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        boolean success = callMaster(new Callable<Response<List<URI>>>() {
-          @Override
-          public Response<List<URI>> call() throws Exception {
-            return masterClient.registerPublisher(publisher.toDeclaration());
-          }
-        });
-        if (success) {
-          publisher.signalOnMasterRegistrationSuccess();
-        } else {
-          publisher.signalOnMasterRegistrationFailure();
-        }
-        return !success;
+    boolean submitted = submit(() -> {
+      boolean success = callMaster(() -> masterClient.registerPublisher(publisher.toDeclaration()));
+      if (success) {
+        publisher.signalOnMasterRegistrationSuccess();
+      } else {
+        publisher.signalOnMasterRegistrationFailure();
       }
+      return !success;
     });
     if (!submitted) {
       executorService.execute(new Runnable() {
@@ -161,7 +152,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
 
   @Override
   public void onPublisherRemoved(final DefaultPublisher<?> publisher) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Unregistering publisher: " + publisher);
     }
     boolean submitted = submit(new Callable<Boolean>() {
@@ -193,7 +184,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
 
   @Override
   public void onSubscriberAdded(final DefaultSubscriber<?> subscriber) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Registering subscriber: " + subscriber);
     }
     boolean submitted = submit(new Callable<Boolean>() {
@@ -230,7 +221,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
 
   @Override
   public void onSubscriberRemoved(final DefaultSubscriber<?> subscriber) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Unregistering subscriber: " + subscriber);
     }
     boolean submitted = submit(new Callable<Boolean>() {
@@ -264,7 +255,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
 
   @Override
   public void onServiceServerAdded(final ServiceServer<?, ?> serviceServer) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Registering service: " + serviceServer);
     }
     boolean submitted = submit(() -> {
@@ -283,7 +274,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
 
   @Override
   public void onServiceServerRemoved(final ServiceServer<?, ?> serviceServer) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Unregistering service: " + serviceServer);
     }
     boolean submitted = submit(new Callable<Boolean>() {
