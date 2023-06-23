@@ -17,13 +17,17 @@
 
 package org.ros.internal.node.xmlrpc;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.TimingOutCallback;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
 import org.apache.xmlrpc.common.TypeConverterFactoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 
@@ -37,6 +41,7 @@ import java.lang.reflect.UndeclaredThrowableException;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> {
+    public static final Logger LOGGER= LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final XmlRpcClient client;
     private final TypeConverterFactory typeConverterFactory;
@@ -109,7 +114,7 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
      *                     method "bar" in the handler, then the full method name would be
      *                     "Foo.bar".
      */
-    public Object newInstance(ClassLoader pClassLoader, final Class<T> pClass,
+    public final Object newInstance(final ClassLoader pClassLoader, final Class<T> pClass,
                               final String pRemoteName, final int timeout) {
         return Proxy.newProxyInstance(pClassLoader, new Class[]{pClass}, (pProxy, pMethod, pArgs) -> {
             if (isObjectMethodLocal() && pMethod.getDeclaringClass().equals(Object.class)) {
@@ -127,12 +132,16 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
                 client.executeAsync(methodName, pArgs, callback);
                 result = callback.waitForResponse();
             } catch (TimingOutCallback.TimeoutException e) {
+                LOGGER.error("pRemoteName:"+pRemoteName+" "+ ExceptionUtils.getStackTrace(e));
                 throw new XmlRpcTimeoutException(e);
             } catch (InterruptedException e) {
+                LOGGER.error("pRemoteName:"+pRemoteName+" "+ ExceptionUtils.getStackTrace(e));
                 throw new XmlRpcTimeoutException(e);
             } catch (UndeclaredThrowableException e) {
+                LOGGER.error("pRemoteName:"+pRemoteName+" "+ ExceptionUtils.getStackTrace(e));
                 throw new RuntimeException(e);
             } catch (XmlRpcException e) {
+                LOGGER.error("pRemoteName:"+pRemoteName+" "+ ExceptionUtils.getStackTrace(e));
                 final Throwable linkedException = e.linkedException;
                 if (linkedException == null) {
                     throw new RuntimeException(e);
