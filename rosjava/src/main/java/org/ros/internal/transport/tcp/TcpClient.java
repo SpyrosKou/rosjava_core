@@ -45,9 +45,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpClient {
+public final class TcpClient {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int DEFAULT_CONNECTION_TIMEOUT_DURATION = 5;
@@ -104,7 +103,7 @@ public class TcpClient {
     final ChannelFuture future = bootstrap.connect(socketAddress).awaitUninterruptibly();
     if (future.isSuccess()) {
       channel = future.getChannel();
-      if (DEBUG) {
+      if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Connected to: " + socketAddress);
       }
     } else {

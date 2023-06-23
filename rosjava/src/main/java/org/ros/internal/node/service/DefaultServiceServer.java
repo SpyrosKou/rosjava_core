@@ -99,16 +99,16 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
     }
 
     public final ChannelBuffer finishHandshake(final ConnectionHeader incomingConnectionHeader) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Client handshake header: " + incomingConnectionHeader);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Client handshake header: " + incomingConnectionHeader);
         }
         final ConnectionHeader connectionHeader = toDeclaration().toConnectionHeader();
         final String expectedChecksum = connectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
         final String incomingChecksum = incomingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
         // TODO(damonkohler): Pull out header field comparison logic.
         Preconditions.checkState(incomingChecksum.equals(expectedChecksum) || "*".equals(incomingChecksum));
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Server handshake header: " + connectionHeader);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Server handshake header: " + connectionHeader);
         }
         return connectionHeader.encode();
     }

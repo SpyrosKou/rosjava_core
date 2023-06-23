@@ -50,9 +50,8 @@ import java.util.concurrent.ScheduledExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpRosServer {
+public final class TcpRosServer {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final BindAddress bindAddress;
@@ -94,9 +93,8 @@ public class TcpRosServer {
         return ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort();
       }
     });
-    if (DEBUG) {
-      LOGGER.info("Bound to: " + bindAddress);
-      LOGGER.info("Advertising: " + advertiseAddress);
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Bound to: " + bindAddress+" Advertising: " + advertiseAddress);
     }
   }
 
@@ -107,7 +105,7 @@ public class TcpRosServer {
    * Calling this method more than once has no effect.
    */
   public void shutdown() {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Shutting down: " + getAddress());
     }
     if (outgoingChannel != null) {

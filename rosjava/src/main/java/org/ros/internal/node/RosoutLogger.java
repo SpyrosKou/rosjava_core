@@ -134,12 +134,12 @@ final class RosoutLogger implements org.ros.node.RosLog {
     public final void trace(final String message) {
 
         if (this.marker == null) {
-            this.logger.trace(message);
+            this.logger.info(message);
         } else {
-            this.logger.trace(this.marker, message);
+            this.logger.info(this.marker, message);
         }
 
-        if (this.logger.isTraceEnabled() && this.publisher != null) {
+        if (this.logger.isDebugEnabled() && this.publisher != null) {
             this.publish(Log.DEBUG, message);
         }
     }
