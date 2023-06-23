@@ -42,24 +42,19 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class XmlRpcServer {
-
-
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final WebServer server;
     private final AdvertiseAddress advertiseAddress;
-    private final CountDownLatch startLatch;
+    private final CountDownLatch startLatch = new CountDownLatch(1);
 
     public XmlRpcServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
         final InetSocketAddress address = bindAddress.toInetSocketAddress();
         this.server = new WebServer(address.getPort(), address.getAddress());
         this.advertiseAddress = advertiseAddress;
-        this.advertiseAddress.setPortCallable(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return server.getPort();
-            }
-        });
-        startLatch = new CountDownLatch(1);
+        this.advertiseAddress.setPortCallable(() -> server.getPort());
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("New WebServer Address:" + address.getAddress() + " port:" + address.getPort());
+        }
     }
 
     /**
