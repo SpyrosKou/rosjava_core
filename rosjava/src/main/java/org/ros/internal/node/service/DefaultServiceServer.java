@@ -17,7 +17,6 @@
 package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
-import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
@@ -47,6 +46,7 @@ import java.util.concurrent.ScheduledExecutorService;
 final class DefaultServiceServer<T extends Message, S extends Message> implements ChannelBufferServiceServer<T, S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPublisher.class);
+    private static final String ROSRPC = "rosrpc";
 
     private final ServiceDeclaration serviceDeclaration;
     private final ServiceResponseBuilder<T, S> serviceResponseBuilder;
@@ -114,7 +114,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
 
     @Override
     public final URI getUri() {
-        return advertiseAddress.toUri(XmlRpcConstants.ROSRPC);
+        return advertiseAddress.toUri(ROSRPC);
     }
 
     @Override
