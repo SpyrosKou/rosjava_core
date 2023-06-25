@@ -19,6 +19,7 @@ package org.ros.internal.node.client;
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
@@ -26,7 +27,10 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.XmlRpcServer;
 import org.ros.internal.node.xmlrpc.XmlRpcClientFactory;
 import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -34,10 +38,10 @@ import java.net.URI;
  * Base class for XML-RPC clients (e.g. MasterClient and SlaveClient).
  *
  * @param <T> the XML-RPC interface this {@link Client} connects to
- *
  * @author damonkohler@google.com (Damon Kohler)
  */
 abstract class Client<T extends XmlRpcEndpoint> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     // TODO(damonkohler): This should be pulled out into a user configurable
     // strategy.
@@ -53,27 +57,33 @@ abstract class Client<T extends XmlRpcEndpoint> {
      * @param uri            the {@link URI} to connect to
      * @param interfaceClass the class literal for the XML-RPC interface
      */
-    public Client(URI uri, Class<T> interfaceClass) {
+    public Client(final URI uri, final Class<T> interfaceClass) {
         Preconditions.checkNotNull(uri);
+        Preconditions.checkArgument(StringUtils.isNotBlank(uri.toString()));
         Preconditions.checkNotNull(interfaceClass);
         this.uri = uri;
-        final XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+        final XmlRpcClientConfigImpl xmlRpcClientConfig = new XmlRpcClientConfigImpl();
         try {
-            config.setServerURL(uri.toURL());
-        } catch (MalformedURLException e) {
+            xmlRpcClientConfig.setServerURL(uri.toURL());
+        } catch (final MalformedURLException e) {
             throw new RosRuntimeException(e);
         }
-        config.setConnectionTimeout(CONNECTION_TIMEOUT);
-        config.setReplyTimeout(REPLY_TIMEOUT);
+        try {
+            xmlRpcClientConfig.setConnectionTimeout(CONNECTION_TIMEOUT);
+            xmlRpcClientConfig.setReplyTimeout(REPLY_TIMEOUT);
 
-        final XmlRpcClient client = new XmlRpcClient();
-        client.setTransportFactory(new XmlRpcCommonsTransportFactory(client));
-        client.setConfig(config);
+            final XmlRpcClient client = new XmlRpcClient();
+            client.setTransportFactory(new XmlRpcCommonsTransportFactory(client));
+            client.setConfig(xmlRpcClientConfig);
 
-        final XmlRpcClientFactory<T> factory = new XmlRpcClientFactory<T>(client);
-        this.xmlRpcEndpoint =
-                interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, StringUtils.EMPTY,
-                        XMLRPC_TIMEOUT));
+            final XmlRpcClientFactory<T> factory = new XmlRpcClientFactory<T>(client);
+            final Object proxyObject = factory.newInstance(getClass().getClassLoader(), interfaceClass, StringUtils.EMPTY, XMLRPC_TIMEOUT);
+            final T xmlRpcEndpointProxy = interfaceClass.cast(proxyObject);
+            this.xmlRpcEndpoint = xmlRpcEndpointProxy;
+        } catch (final Exception exception) {
+            LOGGER.error(ExceptionUtils.getStackTrace(exception));
+            throw new RuntimeException(exception);
+        }
     }
 
     /**
