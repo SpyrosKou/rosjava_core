@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -25,9 +25,9 @@ import java.util.List;
 
 /**
  * The response from an XML-RPC call.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
- * 
+ *
  * @param <T>
  */
 public final class Response<T> {
@@ -52,7 +52,7 @@ public final class Response<T> {
    * Creates a {@link Response} from the {@link List} of {@link Object}s
    * returned from an XML-RPC call. Throws {@link RemoteException} if the
    * {@link StatusCode} is StatusCode.FAILURE.
-   * 
+   *
    * @param <T>
    * @param response
    *          the {@link List} of {@link Object}s returned from the XML-RPC call
@@ -91,7 +91,7 @@ public final class Response<T> {
    * Creates a {@link Response} from the {@link List} of {@link Object}s
    * returned from an XML-RPC call. Throws {@link RemoteException} if the
    * {@link StatusCode} is not a success.
-   * 
+   *
    * @param <T>
    * @param response
    *          the {@link List} of {@link Object}s returned from the XML-RPC call
@@ -104,9 +104,10 @@ public final class Response<T> {
    *           if the {@link Response}'s {@link StatusCode} does not indicate
    *           success
    */
-  public static <T> Response<T> fromListChecked(List<Object> response,
-      ResultFactory<T> resultFactory) throws RemoteException {
-    StatusCode statusCode;
+  public static <T> Response<T> fromListChecked(
+          final List<Object> response
+          ,final ResultFactory<T> resultFactory) throws RemoteException {
+    StatusCode statusCode=StatusCode.ERROR;
     String message;
     try {
       statusCode = StatusCode.fromInt((Integer) response.get(0));
