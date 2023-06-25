@@ -32,57 +32,56 @@ public final class PublisherDeclaration {
   private final PublisherIdentifier publisherIdentifier;
   private final TopicDeclaration topicDeclaration;
 
-  public static PublisherDeclaration newFromNodeIdentifier(NodeIdentifier nodeIdentifier,
-      TopicDeclaration topicDeclaration) {
+  public static PublisherDeclaration newFromNodeIdentifier(final NodeIdentifier nodeIdentifier,
+      final TopicDeclaration topicDeclaration) {
     Preconditions.checkNotNull(nodeIdentifier);
     Preconditions.checkNotNull(topicDeclaration);
     return new PublisherDeclaration(new PublisherIdentifier(nodeIdentifier,
         topicDeclaration.getIdentifier()), topicDeclaration);
   }
 
-  public PublisherDeclaration(PublisherIdentifier publisherIdentifier,
-      TopicDeclaration topicDeclaration) {
+  public PublisherDeclaration(final PublisherIdentifier publisherIdentifier,
+      final TopicDeclaration topicDeclaration) {
     Preconditions.checkNotNull(publisherIdentifier);
     Preconditions.checkNotNull(topicDeclaration);
-    Preconditions.checkArgument(publisherIdentifier.getTopicIdentifier().equals(
-        topicDeclaration.getIdentifier()));
+    Preconditions.checkArgument(publisherIdentifier.getTopicIdentifier().equals(topicDeclaration.getIdentifier()));
     this.publisherIdentifier = publisherIdentifier;
     this.topicDeclaration = topicDeclaration;
   }
   
-  public ConnectionHeader toConnectionHeader() {
+  public final ConnectionHeader toConnectionHeader() {
     ConnectionHeader connectionHeader = publisherIdentifier.toConnectionHeader();
     connectionHeader.merge(topicDeclaration.toConnectionHeader());
     return connectionHeader;
   }
 
-  public NodeIdentifier getSlaveIdentifier() {
+  public final NodeIdentifier getSlaveIdentifier() {
     return publisherIdentifier.getNodeIdentifier();
   }
 
-  public GraphName getSlaveName() {
+  public final GraphName getSlaveName() {
     return publisherIdentifier.getNodeIdentifier().getName();
   }
 
-  public URI getSlaveUri() {
+  public final URI getSlaveUri() {
     return publisherIdentifier.getNodeUri();
   }
 
-  public GraphName getTopicName() {
+  public final GraphName getTopicName() {
     return topicDeclaration.getName();
   }
 
-  public String getTopicMessageType() {
+  public final String getTopicMessageType() {
     return topicDeclaration.getMessageType();
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "PublisherDefinition<" + publisherIdentifier + ", " + topicDeclaration + ">";
   }
 
   @Override
-  public int hashCode() {
+  public final int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((publisherIdentifier == null) ? 0 : publisherIdentifier.hashCode());
@@ -91,7 +90,7 @@ public final class PublisherDeclaration {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public final boolean equals(Object obj) {
     if (this == obj)
       return true;
     if (obj == null)
