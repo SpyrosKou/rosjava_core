@@ -41,7 +41,7 @@ public final class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
 
   private final GraphName nodeName;
 
-  public SlaveClient(GraphName nodeName, URI uri) {
+  public SlaveClient(final GraphName nodeName,final URI uri) {
     super(uri, SlaveXmlRpcEndpoint.class);
     this.nodeName = nodeName;
   }
