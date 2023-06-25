@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -51,7 +51,7 @@ import static org.ros.Assert.assertGraphNameEquals;
 
 /**
  * Tests for the {@link DefaultNode}.
- * 
+ *
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -64,8 +64,8 @@ public class DefaultNodeTest extends RosTest {
 
   private void checkNodeAddress(final String host) throws InterruptedException {
     final Holder<InetSocketAddress> holder = Holder.newEmpty();
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, rosCore.getUri());
-    nodeMainExecutor.execute(new AbstractNodeMain() {
+    final NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, rosCore.getUri());
+    this.nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
         return GraphName.of("node");
@@ -84,8 +84,9 @@ public class DefaultNodeTest extends RosTest {
 
   @Test
   public void testCreatePublic() throws Exception {
-    String host = InetAddress.getLocalHost().getCanonicalHostName();
-    Assume.assumeTrue(!InetAddresses.isInetAddress(host));
+    final String host = InetAddress.getLocalHost().getCanonicalHostName();
+    final boolean isInetAddress=InetAddresses.isInetAddress(host);
+    Assume.assumeTrue(!isInetAddress);
     checkNodeAddress(host);
   }
 
