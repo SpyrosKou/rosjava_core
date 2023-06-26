@@ -81,7 +81,9 @@ abstract class Client<T extends XmlRpcEndpoint> {
             final T xmlRpcEndpointProxy = interfaceClass.cast(proxyObject);
             this.xmlRpcEndpoint = xmlRpcEndpointProxy;
         } catch (final Exception exception) {
-            LOGGER.error(ExceptionUtils.getStackTrace(exception));
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(exception));
+            }
             throw new RuntimeException(exception);
         }
     }
