@@ -42,6 +42,7 @@ import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The {@link MasterServer} provides naming and registration services to the
@@ -57,9 +58,7 @@ import java.util.List;
  * @author khughes@google.com (Keith M. Hughes)
  */
 public final class MasterServer extends XmlRpcServer implements MasterRegistrationListener {
-
-  private static final boolean DEBUG = false;
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
    * Position in the {@link #getSystemState()} for publisher information.
@@ -89,14 +88,14 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
 
   public MasterServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
     super(bindAddress, advertiseAddress);
-    masterRegistrationManager = new MasterRegistrationManagerImpl(this);
+    this.masterRegistrationManager = new MasterRegistrationManagerImpl(this);
   }
 
   /**
    * Start the {@link MasterServer}.
    */
-  public void start() {
-    if (DEBUG) {
+  public final void start() {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Starting master server.");
     }
     super.start(new MasterXmlRpcEndpointImpl(this));
@@ -156,7 +155,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    */
   public List<URI> registerSubscriber(GraphName nodeName, URI nodeSlaveUri, GraphName topicName,
       String topicMessageType) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info(String.format(
           "Registering subscriber %s with message type %s on node %s with URI %s", topicName,
           topicMessageType, nodeName, nodeSlaveUri));
@@ -184,7 +183,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    * @return {@code true} if the {@link Subscriber} was registered
    */
   public boolean unregisterSubscriber(GraphName nodeName, GraphName topicName) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info(String.format("Unregistering subscriber for %s on node %s.", topicName, nodeName));
     }
     synchronized (masterRegistrationManager) {
@@ -209,7 +208,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    */
   public List<URI> registerPublisher(GraphName nodeName, URI nodeSlaveUri, GraphName topicName,
       String topicMessageType) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info(String.format(
           "Registering publisher %s with message type %s on node %s with URI %s.", topicName,
           topicMessageType, nodeName, nodeSlaveUri));
@@ -241,7 +240,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    *          IRIs for all subscribers
    */
   private void publisherUpdate(TopicRegistrationInfo topicInfo, List<URI> subscriberSlaveUris) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Publisher update: " + topicInfo.getTopicName());
     }
     List<URI> publisherUris = Lists.newArrayList();
@@ -282,7 +281,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    * @return {@code true} if the {@link Publisher} was unregistered
    */
   public boolean unregisterPublisher(GraphName nodeName, GraphName topicName) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info(String.format("Unregistering publisher for %s on %s.", topicName, nodeName));
     }
     synchronized (masterRegistrationManager) {
@@ -339,11 +338,11 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    * 
    * @return TODO(keith): Fill in.
    */
-  public List<Object> getSystemState() {
+  public final List<Object> getSystemState() {
     synchronized (masterRegistrationManager) {
-      List<Object> result = Lists.newArrayList();
+      final List<Object> result = Lists.newArrayList();
 
-      Collection<TopicRegistrationInfo> topics = masterRegistrationManager.getAllTopics();
+      final Set<TopicRegistrationInfo> topics = masterRegistrationManager.getAllTopics();
       result.add(getSystemStatePublishers(topics));
       result.add(getSystemStateSubscribers(topics));
       result.add(getSystemStateServices());
@@ -361,15 +360,15 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    *         [topic1Publisher1...topic1PublisherN]] ... ] where the
    *         topicPublisherI instances are {@link Node} names
    */
-  private List<Object> getSystemStatePublishers(Collection<TopicRegistrationInfo> topics) {
-    List<Object> result = Lists.newArrayList();
-    for (TopicRegistrationInfo topic : topics) {
+  private final List<Object> getSystemStatePublishers(Collection<TopicRegistrationInfo> topics) {
+    final List<Object> result = Lists.newArrayList();
+    for (final TopicRegistrationInfo topic : topics) {
       if (topic.hasPublishers()) {
-        List<Object> topicInfo = Lists.newArrayList();
+        final List<Object> topicInfo = Lists.newArrayList();
         topicInfo.add(topic.getTopicName().toString());
 
-        List<String> publist = Lists.newArrayList();
-        for (NodeRegistrationInfo node : topic.getPublishers()) {
+        final List<String> publist = Lists.newArrayList();
+        for (final NodeRegistrationInfo node : topic.getPublishers()) {
           publist.add(node.getNodeName().toString());
         }
         topicInfo.add(publist);
@@ -390,15 +389,15 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    *         [topic1Subscriber1...topic1SubscriberN]] ... ] where the
    *         topicSubscriberI instances are {@link Node} names
    */
-  private List<Object> getSystemStateSubscribers(Collection<TopicRegistrationInfo> topics) {
-    List<Object> result = Lists.newArrayList();
-    for (TopicRegistrationInfo topic : topics) {
+  private final List<Object> getSystemStateSubscribers(Collection<TopicRegistrationInfo> topics) {
+    final List<Object> result = Lists.newArrayList();
+    for (final TopicRegistrationInfo topic : topics) {
       if (topic.hasSubscribers()) {
-        List<Object> topicInfo = Lists.newArrayList();
+        final List<Object> topicInfo = Lists.newArrayList();
         topicInfo.add(topic.getTopicName().toString());
 
-        List<Object> sublist = Lists.newArrayList();
-        for (NodeRegistrationInfo node : topic.getSubscribers()) {
+        final List<Object> sublist = Lists.newArrayList();
+        for (final NodeRegistrationInfo node : topic.getSubscribers()) {
           sublist.add(node.getNodeName().toString());
         }
         topicInfo.add(sublist);
@@ -417,10 +416,10 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    *         serviceProviderI instances are {@link Node} names
    */
   private List<Object> getSystemStateServices() {
-    List<Object> result = Lists.newArrayList();
+    final List<Object> result = Lists.newArrayList();
 
     for (ServiceRegistrationInfo service : masterRegistrationManager.getAllServices()) {
-      List<Object> topicInfo = Lists.newArrayList();
+      final List<Object> topicInfo = Lists.newArrayList();
       topicInfo.add(service.getServiceName().toString());
       topicInfo.add(Lists.newArrayList(service.getServiceName().toString()));
 
@@ -440,8 +439,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    */
   public URI lookupService(GraphName serviceName) {
     synchronized (masterRegistrationManager) {
-      ServiceRegistrationInfo service =
-          masterRegistrationManager.getServiceRegistrationInfo(serviceName);
+      final ServiceRegistrationInfo service =this.masterRegistrationManager.getServiceRegistrationInfo(serviceName);
       if (service != null) {
         return service.getServiceUri();
       } else {
@@ -462,11 +460,11 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
    *         contain, in order, the {@link TopicSystemState} name and
    *         {@link TopicSystemState} message type
    */
-  public List<Object> getPublishedTopics(GraphName caller, GraphName subgraph) {
+  public final List<Object> getPublishedTopics(final GraphName caller,final GraphName subgraph) {
     synchronized (masterRegistrationManager) {
       // TODO(keith): Filter topics according to subgraph.
-      List<Object> result = Lists.newArrayList();
-      for (TopicRegistrationInfo topic : masterRegistrationManager.getAllTopics()) {
+      final List<Object> result = Lists.newArrayList();
+      for (final TopicRegistrationInfo topic : masterRegistrationManager.getAllTopics()) {
         if (topic.hasPublishers()) {
           result.add(Lists.newArrayList(topic.getTopicName().toString(), topic.getMessageType()));
         }
@@ -484,7 +482,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
           nodeInfo.getNodeName(), nodeInfo.getNodeSlaveUri()));
     }
 
-    SlaveClient client = new SlaveClient(MASTER_NODE_NAME, nodeInfo.getNodeSlaveUri());
+    final SlaveClient client = new SlaveClient(MASTER_NODE_NAME, nodeInfo.getNodeSlaveUri());
     client.shutdown("Replaced by new slave");
   }
 
