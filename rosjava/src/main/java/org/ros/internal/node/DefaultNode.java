@@ -19,6 +19,7 @@ package org.ros.internal.node;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
@@ -57,8 +58,11 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.*;
 import org.ros.time.ClockTopicTimeProvider;
 import org.ros.time.TimeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rosgraph_msgs.Log;
 
+import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collection;
@@ -76,7 +80,7 @@ import java.util.function.Consumer;
  * @author Spyros Koukas
  */
 public final class DefaultNode implements ConnectedNode {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     /**
      * The maximum delay before shutdown will begin even if all
      * {@link NodeListener}s have not yet returned from their
@@ -115,8 +119,8 @@ public final class DefaultNode implements ConnectedNode {
      */
     public DefaultNode(
             final NodeConfiguration nodeConfiguration
-            ,final Collection<NodeListener> nodeListeners
-            ,final ScheduledExecutorService scheduledExecutorService) {
+            , final Collection<NodeListener> nodeListeners
+            , final ScheduledExecutorService scheduledExecutorService) {
         this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
         this.nodeListeners = new ListenerGroup<>(scheduledExecutorService);
         this.nodeListeners.addAll(nodeListeners);
@@ -227,7 +231,7 @@ public final class DefaultNode implements ConnectedNode {
     }
 
     @VisibleForTesting
-    Registrar getRegistrar() {
+    final Registrar getRegistrar() {
         return this.registrar;
     }
 
@@ -235,30 +239,25 @@ public final class DefaultNode implements ConnectedNode {
         return this.nodeConfiguration.getMessageSerializationFactory().newMessageSerializer(messageType);
     }
 
-    @SuppressWarnings("unchecked")
     private <T extends Message> MessageDeserializer<T> newMessageDeserializer(String messageType) {
         return this.nodeConfiguration.getMessageSerializationFactory().newMessageDeserializer(messageType);
     }
 
-    @SuppressWarnings("unchecked")
     private <T extends Message> MessageSerializer<T> newServiceResponseSerializer(String serviceType) {
         return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceResponseSerializer(serviceType);
     }
 
-    @SuppressWarnings("unchecked")
     private <T extends Message> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType) {
         return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceResponseDeserializer(serviceType);
     }
 
-    @SuppressWarnings("unchecked")
     private <T extends Message> MessageSerializer<T> newServiceRequestSerializer(String serviceType) {
         return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceRequestSerializer(serviceType);
     }
 
-    @SuppressWarnings("unchecked")
     private <T extends Message> MessageDeserializer<T> newServiceRequestDeserializer(String serviceType) {
         return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceRequestDeserializer(serviceType);
@@ -426,13 +425,19 @@ public final class DefaultNode implements ConnectedNode {
             try {
                 final Response<Integer> response =
                         this.masterClient.unregisterService(this.slaveServer.toNodeIdentifier(), serviceServer);
-                if (this.rosoutLogger.isDebugEnabled()) {
+                if (this.rosoutLogger.isDebugEnabled() || LOGGER.isDebugEnabled()) {
                     if (response.getResult() == 0) {
                         final String msg = "Failed to unregister service: " + serviceServer.getName();
-                        this.rosoutLogger.error(msg);
+
+                        this.rosoutLogger.debug(msg);
+
+                        LOGGER.debug(msg);
                     }
                 }
             } catch (final XmlRpcTimeoutException e) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(ExceptionUtils.getStackTrace(e));
+                }
                 this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
             } catch (final RemoteException e) {
                 this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
