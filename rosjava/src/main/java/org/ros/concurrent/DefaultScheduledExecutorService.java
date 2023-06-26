@@ -18,6 +18,7 @@ package org.ros.concurrent;
 
 import com.google.common.collect.Lists;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -81,8 +82,9 @@ public final class DefaultScheduledExecutorService implements ScheduledExecutorS
   }
 
   @Override
+  @Nonnull
   public List<Runnable> shutdownNow() {
-    List<Runnable> combined = Lists.newArrayList();
+    final List<Runnable> combined = Lists.newArrayList();
     combined.addAll(executorService.shutdownNow());
     combined.addAll(scheduledExecutorService.shutdownNow());
     return combined;
@@ -107,7 +109,7 @@ public final class DefaultScheduledExecutorService implements ScheduledExecutorS
    *         otherwise
    */
   @Override
-  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+  public boolean awaitTermination(long timeout,@Nonnull TimeUnit unit) throws InterruptedException {
     final boolean executorServiceResult = executorService.awaitTermination(timeout, unit);
     final boolean scheduledExecutorServiceResult =
         scheduledExecutorService.awaitTermination(timeout, unit);
@@ -115,68 +117,81 @@ public final class DefaultScheduledExecutorService implements ScheduledExecutorS
   }
 
   @Override
-  public <T> Future<T> submit(Callable<T> task) {
+  @Nonnull
+  public <T> Future<T> submit(@Nonnull final Callable<T> task) {
     return executorService.submit(task);
   }
 
   @Override
-  public <T> Future<T> submit(Runnable task, T result) {
+  @Nonnull
+  public <T> Future<T> submit(final @Nonnull Runnable task,final @Nonnull T result) {
     return executorService.submit(task, result);
   }
 
   @Override
-  public Future<?> submit(Runnable task) {
+  @Nonnull
+  public Future<?> submit(final @Nonnull Runnable task) {
     return executorService.submit(task);
   }
 
   @Override
-  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+  @Nonnull
+  public <T> List<Future<T>> invokeAll(@Nonnull final Collection<? extends Callable<T>> tasks)
       throws InterruptedException {
     return executorService.invokeAll(tasks);
   }
 
   @Override
-  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout,
-      TimeUnit unit) throws InterruptedException {
+  @Nonnull
+  public <T> List<Future<T>> invokeAll(@Nonnull final Collection<? extends Callable<T>> tasks
+          ,@Nonnull final  long timeout
+          ,@Nonnull final  TimeUnit unit) throws InterruptedException {
     return executorService.invokeAll(tasks, timeout, unit);
   }
 
   @Override
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException,
+  @Nonnull
+  public <T> T invokeAny(@Nonnull final Collection<? extends Callable<T>> tasks) throws InterruptedException,
       ExecutionException {
     return executorService.invokeAny(tasks);
   }
 
   @Override
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+  @Nonnull
+  public <T> T invokeAny(@Nonnull final Collection<? extends Callable<T>> tasks
+          , long timeout,@Nonnull final TimeUnit unit)
       throws InterruptedException, ExecutionException, TimeoutException {
     return executorService.invokeAny(tasks, timeout, unit);
   }
 
   @Override
-  public void execute(Runnable command) {
+  public void execute(@Nonnull final Runnable command) {
     executorService.execute(command);
   }
 
   @Override
-  public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+  @Nonnull
+  public ScheduledFuture<?> schedule(@Nonnull final Runnable command, long delay,@Nonnull final TimeUnit unit) {
     return scheduledExecutorService.schedule(command, delay, unit);
   }
 
   @Override
-  public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+  @Nonnull
+  public <V> ScheduledFuture<V> schedule(@Nonnull final Callable<V> callable, long delay,@Nonnull final TimeUnit unit) {
     return scheduledExecutorService.schedule(callable, delay, unit);
   }
 
   @Override
-  public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period,
-      TimeUnit unit) {
+  @Nonnull
+  public ScheduledFuture<?> scheduleAtFixedRate(@Nonnull final Runnable command, long initialDelay, long period,
+                                                @Nonnull final TimeUnit unit) {
     return scheduledExecutorService.scheduleAtFixedRate(command, initialDelay, period, unit);
   }
 
   @Override
-  public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay,
-      TimeUnit unit) {
+  @Nonnull
+  public ScheduledFuture<?> scheduleWithFixedDelay(@Nonnull final Runnable command, long initialDelay, long delay,
+                                                   @Nonnull final TimeUnit unit) {
     return scheduledExecutorService.scheduleWithFixedDelay(command, initialDelay, delay, unit);
   }
 }
