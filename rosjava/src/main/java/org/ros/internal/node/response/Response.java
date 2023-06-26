@@ -18,146 +18,158 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xbill.DNS.dnssec.R;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 
 /**
  * The response from an XML-RPC call.
  *
- * @author damonkohler@google.com (Damon Kohler)
- *
  * @param <T>
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public final class Response<T> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private final StatusCode statusCode;
+    private final String statusMessage;
+    private final T result;
 
-  private final StatusCode statusCode;
-  private final String statusMessage;
-  private final T result;
-
-  public static <T> Response<T> newError(String message, T value) {
-    return new Response<T>(StatusCode.ERROR, message, value);
-  }
-
-  public static <T> Response<T> newFailure(String message, T value) {
-    return new Response<T>(StatusCode.FAILURE, message, value);
-  }
-
-  public static <T> Response<T> newSuccess(String message, T value) {
-    return new Response<T>(StatusCode.SUCCESS, message, value);
-  }
-
-  /**
-   * Creates a {@link Response} from the {@link List} of {@link Object}s
-   * returned from an XML-RPC call. Throws {@link RemoteException} if the
-   * {@link StatusCode} is StatusCode.FAILURE.
-   *
-   * @param <T>
-   * @param response
-   *          the {@link List} of {@link Object}s returned from the XML-RPC call
-   * @param resultFactory
-   *          a {@link ResultFactory} that creates a result from the third
-   *          {@link Object} in the {@link Response}
-   * @return a {@link Response} using the specified {@link ResultFactory} to
-   *         generate the result
-   * @throws RemoteException
-   *           if the {@link Response}'s {@link StatusCode} indicates
-   *           StatusCode.FAILURE.
-   */
-  public static <T> Response<T> fromListCheckedFailure(List<Object> response,
-      ResultFactory<T> resultFactory) throws RemoteException {
-    StatusCode statusCode;
-    String message;
-    try {
-      statusCode = StatusCode.fromInt((Integer) response.get(0));
-      message = (String) response.get(1);
-      if (statusCode == StatusCode.FAILURE) {
-        throw new RemoteException(statusCode, message);
-      }
-
-    } catch (ClassCastException e) {
-      throw new RosRuntimeException(
-          "Remote side did not return correct type (status code/message).", e);
+    public static <T> Response<T> newError(String message, T value) {
+        return new Response<T>(StatusCode.ERROR, message, value);
     }
-    try {
-      return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
-    } catch (ClassCastException e) {
-      throw new RosRuntimeException("Remote side did not return correct value type.", e);
+
+    public static <T> Response<T> newFailure(String message, T value) {
+        return new Response<T>(StatusCode.FAILURE, message, value);
     }
-  }
 
-  /**
-   * Creates a {@link Response} from the {@link List} of {@link Object}s
-   * returned from an XML-RPC call. Throws {@link RemoteException} if the
-   * {@link StatusCode} is not a success.
-   *
-   * @param <T>
-   * @param response
-   *          the {@link List} of {@link Object}s returned from the XML-RPC call
-   * @param resultFactory
-   *          a {@link ResultFactory} that creates a result from the third
-   *          {@link Object} in the {@link Response}
-   * @return a {@link Response} using the specified {@link ResultFactory} to
-   *         generate the result
-   * @throws RemoteException
-   *           if the {@link Response}'s {@link StatusCode} does not indicate
-   *           success
-   */
-  public static <T> Response<T> fromListChecked(
-          final List<Object> response
-          ,final ResultFactory<T> resultFactory) throws RemoteException {
-    StatusCode statusCode=StatusCode.ERROR;
-    String message;
-    try {
-      statusCode = StatusCode.fromInt((Integer) response.get(0));
-      message = (String) response.get(1);
-      if (statusCode != StatusCode.SUCCESS) {
-        throw new RemoteException(statusCode, message);
-      }
-    } catch (ClassCastException e) {
-      throw new RosRuntimeException(
-          "Remote side did not return correct type (status code/message).", e);
+    public static <T> Response<T> newSuccess(String message, T value) {
+        return new Response<T>(StatusCode.SUCCESS, message, value);
     }
-    try {
-      return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
-    } catch (ClassCastException e) {
-      throw new RosRuntimeException("Remote side did not return correct value type.", e);
+
+    /**
+     * Creates a {@link Response} from the {@link List} of {@link Object}s
+     * returned from an XML-RPC call. Throws {@link RemoteException} if the
+     * {@link StatusCode} is StatusCode.FAILURE.
+     *
+     * @param <T>
+     * @param response      the {@link List} of {@link Object}s returned from the XML-RPC call
+     * @param resultFactory a {@link ResultFactory} that creates a result from the third
+     *                      {@link Object} in the {@link Response}
+     * @return a {@link Response} using the specified {@link ResultFactory} to
+     * generate the result
+     * @throws RemoteException if the {@link Response}'s {@link StatusCode} indicates
+     *                         StatusCode.FAILURE.
+     */
+    public static <T> Response<T> fromListCheckedFailure(List<Object> response,
+                                                         ResultFactory<T> resultFactory) throws RemoteException {
+        StatusCode statusCode;
+        String message;
+        try {
+            statusCode = StatusCode.fromInt((Integer) response.get(0));
+            message = (String) response.get(1);
+            if (statusCode == StatusCode.FAILURE) {
+                final RemoteException remoteException = new RemoteException(statusCode, message);
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("Failed: " + ExceptionUtils.getStackTrace(remoteException));
+                }
+                throw remoteException;
+            }
+
+        } catch (final ClassCastException classCastException) {
+
+            final RosRuntimeException rosRuntimeException = new RosRuntimeException("Remote side did not return correct type (status code/message).", classCastException);
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(rosRuntimeException));
+            }
+            throw rosRuntimeException;
+        }
+        try {
+            return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
+        } catch (final ClassCastException classCastException) {
+
+            final RosRuntimeException rosRuntimeException = new RosRuntimeException("Remote side did not return correct value type.", classCastException);
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(rosRuntimeException));
+            }
+            throw rosRuntimeException;
+        }
     }
-  }
 
-  public Response(int statusCode, String statusMessage, T value) {
-    this(StatusCode.fromInt(statusCode), statusMessage, value);
-  }
+    /**
+     * Creates a {@link Response} from the {@link List} of {@link Object}s
+     * returned from an XML-RPC call. Throws {@link RemoteException} if the
+     * {@link StatusCode} is not a success.
+     *
+     * @param <T>
+     * @param response      the {@link List} of {@link Object}s returned from the XML-RPC call
+     * @param resultFactory a {@link ResultFactory} that creates a result from the third
+     *                      {@link Object} in the {@link Response}
+     * @return a {@link Response} using the specified {@link ResultFactory} to
+     * generate the result
+     * @throws RemoteException if the {@link Response}'s {@link StatusCode} does not indicate
+     *                         success
+     */
+    public final static <T> Response<T> fromListChecked(
+            final List<Object> response
+            , final ResultFactory<T> resultFactory) throws RemoteException {
+        StatusCode statusCode = StatusCode.ERROR;
+        String message;
+        try {
+            statusCode = StatusCode.fromInt((Integer) response.get(0));
+            message = (String) response.get(1);
+            if (statusCode != StatusCode.SUCCESS) {
 
-  public Response(StatusCode statusCode, String statusMessage, T value) {
-    this.statusCode = statusCode;
-    this.statusMessage = statusMessage;
-    this.result = value;
-  }
+                throw new RemoteException(statusCode, message);
+            }
+        } catch (ClassCastException e) {
+            throw new RosRuntimeException("Remote side did not return correct type (status code/message).", e);
+        }
+        try {
+            return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
+        } catch (ClassCastException e) {
+            throw new RosRuntimeException("Remote side did not return correct value type.", e);
+        }
+    }
 
-  public List<Object> toList() {
-    return Lists.newArrayList(statusCode.toInt(), statusMessage, result == null ? "null" : result);
-  }
+    public Response(int statusCode, String statusMessage, T value) {
+        this(StatusCode.fromInt(statusCode), statusMessage, value);
+    }
 
-  public StatusCode getStatusCode() {
-    return statusCode;
-  }
+    public Response(StatusCode statusCode, String statusMessage, T value) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+        this.result = value;
+    }
 
-  public String getStatusMessage() {
-    return statusMessage;
-  }
+    public List<Object> toList() {
+        return Lists.newArrayList(statusCode.toInt(), statusMessage, result == null ? "null" : result);
+    }
 
-  public T getResult() {
-    return result;
-  }
+    public StatusCode getStatusCode() {
+        return statusCode;
+    }
 
-  @Override
-  public String toString() {
-    return "Response<" + statusCode + ", " + statusMessage + ", " + result + ">";
-  }
+    public String getStatusMessage() {
+        return statusMessage;
+    }
 
-  public boolean isSuccess() {
-    return statusCode == StatusCode.SUCCESS;
-  }
+    public T getResult() {
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Response<" + statusCode + ", " + statusMessage + ", " + result + ">";
+    }
+
+    public boolean isSuccess() {
+        return statusCode == StatusCode.SUCCESS;
+    }
 }

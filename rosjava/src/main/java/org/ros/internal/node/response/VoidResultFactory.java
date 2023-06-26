@@ -22,7 +22,7 @@ package org.ros.internal.node.response;
 public final class VoidResultFactory implements ResultFactory<Void> {
   
   @Override
-  public Void newFromValue(Object value) {
+  public final Void newFromValue(Object value) {
     return null;
   }
 }

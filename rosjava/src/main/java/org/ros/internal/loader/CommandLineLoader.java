@@ -243,7 +243,7 @@ public final class CommandLineLoader {
      */
     public NodeMain loadClass(String name) throws ClassNotFoundException, InstantiationException,
             IllegalAccessException {
-        Class<?> clazz = getClass().getClassLoader().loadClass(name);
-        return NodeMain.class.cast(clazz.newInstance());
+        final Class<?> clazz = getClass().getClassLoader().loadClass(name);
+        return (NodeMain) clazz.newInstance();
     }
 }

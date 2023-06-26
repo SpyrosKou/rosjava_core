@@ -42,9 +42,11 @@ import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manages topic, and service registrations of a {@link SlaveServer} with the
@@ -54,291 +56,233 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class Registrar implements TopicParticipantManagerListener, ServiceManagerListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 
-  private static final int SHUTDOWN_TIMEOUT = 5;
-  private static final TimeUnit SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
+    private static final int SHUTDOWN_TIMEOUT = 5;
+    private static final TimeUnit SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
-  private final MasterClient masterClient;
-  private final ScheduledExecutorService executorService;
-  private final RetryingExecutorService retryingExecutorService;
+    private final MasterClient masterClient;
+    private final ScheduledExecutorService executorService;
+    private final RetryingExecutorService retryingExecutorService;
 
-  private NodeIdentifier nodeIdentifier;
-  private boolean running;
+    private NodeIdentifier nodeIdentifier;
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
-  /**
-   * @param masterClient
-   *          a {@link MasterClient} for communicating with the ROS master
-   * @param executorService
-   *          a {@link ScheduledExecutorService} to be used for all asynchronous
-   *          operations
-   */
-  public Registrar(MasterClient masterClient, ScheduledExecutorService executorService) {
-    this.masterClient = masterClient;
-    this.executorService = executorService;
-    retryingExecutorService = new RetryingExecutorService(executorService);
-    nodeIdentifier = null;
-    running = false;
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
-    }
-  }
+    /**
+     * @param masterClient    a {@link MasterClient} for communicating with the ROS master
+     * @param executorService a {@link ScheduledExecutorService} to be used for all asynchronous
+     *                        operations
+     */
+    public Registrar(MasterClient masterClient, ScheduledExecutorService executorService) {
+        this.masterClient = masterClient;
+        this.executorService = executorService;
+        retryingExecutorService = new RetryingExecutorService(executorService);
+        nodeIdentifier = null;
 
-  /**
-   * Failed registration actions are retried periodically until they succeed.
-   * This method adjusts the delay between successive retry attempts for any
-   * particular registration action.
-   *
-   * @param delay
-   *          the delay in units of {@code unit} between retries
-   * @param unit
-   *          the unit of {@code delay}
-   */
-  public void setRetryDelay(long delay, TimeUnit unit) {
-    retryingExecutorService.setRetryDelay(delay, unit);
-  }
-
-  private boolean submit(Callable<Boolean> callable) {
-    if (running) {
-      retryingExecutorService.submit(callable);
-      return true;
-    }
-    LOGGER.warn("Registrar no longer running, request ignored.");
-    return false;
-  }
-
-  private <T> boolean callMaster(final Callable<Response<T>> callable) {
-    Preconditions.checkNotNull(nodeIdentifier, "Registrar not started.");
-    boolean success;
-    try {
-      final Response<T> response = callable.call();
-      if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("Response:"+response);
-      }
-      success = response.isSuccess();
-    } catch (Exception e) {
-
-      LOGGER.error("Exception caught while communicating with master."+ ExceptionUtils.getStackTrace(e));
-
-      success = false;
-    }
-    return success;
-  }
-
-  @Override
-  public void onPublisherAdded(final DefaultPublisher<?> publisher) {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Registering publisher: " + publisher);
-    }
-    boolean submitted = submit(() -> {
-      boolean success = callMaster(() -> masterClient.registerPublisher(publisher.toDeclaration()));
-      if (success) {
-        publisher.signalOnMasterRegistrationSuccess();
-      } else {
-        publisher.signalOnMasterRegistrationFailure();
-      }
-      return !success;
-    });
-    if (!submitted) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          publisher.signalOnMasterRegistrationFailure();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
         }
-      });
     }
-  }
 
-  @Override
-  public void onPublisherRemoved(final DefaultPublisher<?> publisher) {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Unregistering publisher: " + publisher);
+    /**
+     * Failed registration actions are retried periodically until they succeed.
+     * This method adjusts the delay between successive retry attempts for any
+     * particular registration action.
+     *
+     * @param delay the delay in units of {@code unit} between retries
+     * @param unit  the unit of {@code delay}
+     */
+    public void setRetryDelay(long delay, TimeUnit unit) {
+        retryingExecutorService.setRetryDelay(delay, unit);
     }
-    boolean submitted = submit(new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        boolean success = callMaster(new Callable<Response<Integer>>() {
-          @Override
-          public Response<Integer> call() throws Exception {
-            return masterClient.unregisterPublisher(publisher.getIdentifier());
-          }
-        });
-        if (success) {
-          publisher.signalOnMasterUnregistrationSuccess();
+
+    private final boolean submit(final Callable<Boolean> callable) {
+        if (this.running.get()) {
+            this.retryingExecutorService.submit(callable);
+            return true;
         } else {
-          publisher.signalOnMasterUnregistrationFailure();
+            LOGGER.warn("Registrar no longer running, request ignored.");
+            return false;
         }
-        return !success;
-      }
-    });
-    if (!submitted) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          publisher.signalOnMasterUnregistrationFailure();
-        }
-      });
     }
-  }
 
-  @Override
-  public void onSubscriberAdded(final DefaultSubscriber<?> subscriber) {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Registering subscriber: " + subscriber);
+    private final <T> boolean callMaster(final Callable<Response<T>> callable) {
+        Preconditions.checkNotNull(nodeIdentifier, "Registrar not started.");
+        boolean success;
+        try {
+            final Response<T> response = callable.call();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Response:" + response);
+            }
+            success = response.isSuccess();
+        } catch (final Exception exception) {
+
+            LOGGER.error("Exception caught while communicating with master." + ExceptionUtils.getStackTrace(exception));
+
+            success = false;
+        }
+        return success;
     }
-    boolean submitted = submit(new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        final Holder<Response<List<URI>>> holder = Holder.newEmpty();
-        boolean success = callMaster(new Callable<Response<List<URI>>>() {
-          @Override
-          public Response<List<URI>> call() throws Exception {
-            return holder.set(masterClient.registerSubscriber(nodeIdentifier, subscriber));
-          }
+
+    @Override
+    public final void onPublisherAdded(final DefaultPublisher<?> publisher) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Registering publisher: " + publisher);
+        }
+        final boolean submitted = this.submit(() -> {
+            final boolean success = callMaster(() -> this.masterClient.registerPublisher(publisher.toDeclaration()));
+            if (success) {
+                publisher.signalOnMasterRegistrationSuccess();
+            } else {
+                publisher.signalOnMasterRegistrationFailure();
+            }
+            return !success;
         });
-        if (success) {
-          Collection<PublisherIdentifier> publisherIdentifiers =
-              PublisherIdentifier.newCollectionFromUris(holder.get().getResult(),
-                  subscriber.getTopicDeclaration());
-          subscriber.updatePublishers(publisherIdentifiers);
-          subscriber.signalOnMasterRegistrationSuccess();
-        } else {
-          subscriber.signalOnMasterRegistrationFailure();
+        if (!submitted) {
+            this.executorService.execute(() -> publisher.signalOnMasterRegistrationFailure());
         }
-        return !success;
-      }
-    });
-    if (!submitted) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          subscriber.signalOnMasterRegistrationFailure();
-        }
-      });
     }
-  }
 
-  @Override
-  public void onSubscriberRemoved(final DefaultSubscriber<?> subscriber) {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Unregistering subscriber: " + subscriber);
-    }
-    boolean submitted = submit(new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        boolean success = callMaster(new Callable<Response<Integer>>() {
-          @Override
-          public Response<Integer> call() throws Exception {
-            return masterClient.unregisterSubscriber(nodeIdentifier, subscriber);
-          }
+    @Override
+    public final void onPublisherRemoved(final DefaultPublisher<?> publisher) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Unregistering publisher: " + publisher);
+        }
+        final boolean submitted = submit(() -> {
+            final boolean success = callMaster(() -> this.masterClient.unregisterPublisher(publisher.getIdentifier()));
+            if (success) {
+                publisher.signalOnMasterUnregistrationSuccess();
+            } else {
+                publisher.signalOnMasterUnregistrationFailure();
+            }
+            return !success;
         });
-        if (success) {
-          subscriber.signalOnMasterUnregistrationSuccess();
-        } else {
-          subscriber.signalOnMasterUnregistrationFailure();
+        if (!submitted) {
+            executorService.execute(() -> publisher.signalOnMasterUnregistrationFailure());
         }
-        return !success;
-      }
-    });
-    if (!submitted) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          subscriber.signalOnMasterUnregistrationFailure();
+    }
+
+    @Override
+    public final void onSubscriberAdded(final DefaultSubscriber<?> subscriber) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Registering subscriber: " + subscriber);
         }
-      });
-    }
-  }
-
-
-
-  @Override
-  public void onServiceServerAdded(final ServiceServer<?, ?> serviceServer) {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Registering service: " + serviceServer);
-    }
-    boolean submitted = submit(() -> {
-      boolean success = callMaster(() -> masterClient.registerService(nodeIdentifier, serviceServer));
-      if (success) {
-        serviceServer.onMasterRegistrationSuccess();
-      } else {
-        serviceServer.onMasterRegistrationFailure();
-      }
-      return !success;
-    });
-    if (!submitted) {
-      executorService.execute(() -> serviceServer.onMasterRegistrationFailure());
-    }
-  }
-
-  @Override
-  public void onServiceServerRemoved(final ServiceServer<?, ?> serviceServer) {
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Unregistering service: " + serviceServer);
-    }
-    boolean submitted = submit(new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        boolean success = callMaster(new Callable<Response<Integer>>() {
-          @Override
-          public Response<Integer> call() throws Exception {
-            return masterClient.unregisterService(nodeIdentifier, serviceServer);
-          }
+        final boolean submitted = submit(() -> {
+            final Holder<Response<List<URI>>> holder = Holder.newEmpty();
+            final boolean success = callMaster(() -> holder.set(masterClient.registerSubscriber(nodeIdentifier, subscriber)));
+            if (success) {
+                final Set<PublisherIdentifier> publisherIdentifiers =
+                        PublisherIdentifier.newCollectionFromUris(holder.get().getResult(), subscriber.getTopicDeclaration());
+                subscriber.updatePublishers(publisherIdentifiers);
+                subscriber.signalOnMasterRegistrationSuccess();
+            } else {
+                subscriber.signalOnMasterRegistrationFailure();
+            }
+            return !success;
         });
-        if (success) {
-          serviceServer.onMasterUnregistrationSuccess();
-        } else {
-          serviceServer.onMasterUnregistrationFailure();
+        if (!submitted) {
+            executorService.execute(() -> subscriber.signalOnMasterRegistrationFailure());
         }
-        return !success;
-      }
-    });
-    if (!submitted) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          serviceServer.onMasterUnregistrationFailure();
+    }
+
+    @Override
+    public final void onSubscriberRemoved(final DefaultSubscriber<?> subscriber) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Unregistering subscriber: " + subscriber);
         }
-      });
+        final boolean submitted = submit(() -> {
+            final boolean success = callMaster(() -> masterClient.unregisterSubscriber(nodeIdentifier, subscriber));
+            if (success) {
+                subscriber.signalOnMasterUnregistrationSuccess();
+            } else {
+                subscriber.signalOnMasterUnregistrationFailure();
+            }
+            return !success;
+        });
+        if (!submitted) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    subscriber.signalOnMasterUnregistrationFailure();
+                }
+            });
+        }
     }
-  }
 
-  /**
-   * Starts the {@link Registrar} for the {@link SlaveServer} identified by the
-   * given {@link NodeIdentifier}.
-   *
-   * @param nodeIdentifier
-   *          the {@link NodeIdentifier} for the {@link SlaveServer} this
-   *          {@link Registrar} is responsible for
-   */
-  public void start(NodeIdentifier nodeIdentifier) {
-    Preconditions.checkNotNull(nodeIdentifier);
-    Preconditions.checkState(this.nodeIdentifier == null, "Registrar already started.");
-    this.nodeIdentifier = nodeIdentifier;
-    running = true;
-  }
 
-  /**
-   * Shuts down the {@link Registrar}.
-   *
-   * <p>
-   * No further registration requests will be accepted. All queued registration
-   * jobs have up to {@link #SHUTDOWN_TIMEOUT} {@link #SHUTDOWN_TIMEOUT_UNITS}
-   * to complete before being canceled.
-   *
-   * <p>
-   * Calling {@link #shutdown()} more than once has no effect.
-   */
-  public void shutdown() {
-    if (!running) {
-      return;
+    @Override
+    public final void onServiceServerAdded(final ServiceServer<?, ?> serviceServer) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Registering service: " + serviceServer);
+        }
+        final boolean submitted = submit(() -> {
+            final boolean success = callMaster(() -> masterClient.registerService(nodeIdentifier, serviceServer));
+            if (success) {
+                serviceServer.onMasterRegistrationSuccess();
+            } else {
+                serviceServer.onMasterRegistrationFailure();
+            }
+            return !success;
+        });
+        if (!submitted) {
+            executorService.execute(() -> serviceServer.onMasterRegistrationFailure());
+        }
     }
-    running = false;
-    try {
-      retryingExecutorService.shutdown(SHUTDOWN_TIMEOUT, SHUTDOWN_TIMEOUT_UNITS);
-    } catch (InterruptedException e) {
-      throw new RosRuntimeException(e);
+
+    @Override
+    public final void onServiceServerRemoved(final ServiceServer<?, ?> serviceServer) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Unregistering service: " + serviceServer);
+        }
+        final boolean submitted = submit(() -> {
+            final boolean success = callMaster(() -> masterClient.unregisterService(nodeIdentifier, serviceServer));
+            if (success) {
+                serviceServer.onMasterUnregistrationSuccess();
+            } else {
+                serviceServer.onMasterUnregistrationFailure();
+            }
+            return !success;
+        });
+        if (!submitted) {
+            executorService.execute(() -> serviceServer.onMasterUnregistrationFailure());
+        }
     }
-  }
+
+    /**
+     * Starts the {@link Registrar} for the {@link SlaveServer} identified by the
+     * given {@link NodeIdentifier}.
+     *
+     * @param nodeIdentifier the {@link NodeIdentifier} for the {@link SlaveServer} this
+     *                       {@link Registrar} is responsible for
+     */
+    public final void start(NodeIdentifier nodeIdentifier) {
+        Preconditions.checkNotNull(nodeIdentifier);
+        Preconditions.checkState(this.nodeIdentifier == null, "Registrar already started.");
+        this.nodeIdentifier = nodeIdentifier;
+        running.set(true);
+    }
+
+    /**
+     * Shuts down the {@link Registrar}.
+     *
+     * <p>
+     * No further registration requests will be accepted. All queued registration
+     * jobs have up to {@link #SHUTDOWN_TIMEOUT} {@link #SHUTDOWN_TIMEOUT_UNITS}
+     * to complete before being canceled.
+     *
+     * <p>
+     * Calling {@link #shutdown()} more than once has no effect.
+     */
+    public final void shutdown() {
+        if (this.running.compareAndSet(true, false)) {
+            try {
+                this.retryingExecutorService.shutdown(SHUTDOWN_TIMEOUT, SHUTDOWN_TIMEOUT_UNITS);
+            } catch (final InterruptedException interruptedException) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Exception while waiting for shutdown:" + ExceptionUtils.getStackTrace(interruptedException));
+                }
+            }
+        }
+    }
 }

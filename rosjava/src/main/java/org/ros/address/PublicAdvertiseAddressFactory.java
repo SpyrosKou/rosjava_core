@@ -16,6 +16,8 @@
 
 package org.ros.address;
 
+import com.google.common.base.Preconditions;
+
 /**
  * An {@link AdvertiseAddressFactory} which creates public (non-loopback) addresses.
  * 
@@ -29,7 +31,8 @@ public final class PublicAdvertiseAddressFactory implements AdvertiseAddressFact
     this(InetAddressFactory.newNonLoopback().getCanonicalHostName());
   }
 
-  public PublicAdvertiseAddressFactory(String host) {
+  public PublicAdvertiseAddressFactory(final String host) {
+    Preconditions.checkNotNull(host);
     this.host = host;
   }
 

@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Wraps an {@link ScheduledExecutorService} to execute {@link Callable}s with
  * retries.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class RetryingExecutorService {
@@ -118,7 +118,7 @@ public final class RetryingExecutorService {
    * Submit a new {@link Callable} to be executed. The submitted
    * {@link Callable} should return {@code true} to be retried, {@code false}
    * otherwise.
-   * 
+   *
    * @param callable
    *          the {@link Callable} to execute
    * @throws RejectedExecutionException
@@ -150,7 +150,7 @@ public final class RetryingExecutorService {
   /**
    * Stops accepting new {@link Callable}s and waits for all submitted
    * {@link Callable}s to finish within the specified timeout.
-   * 
+   *
    * @param timeout
    *          the timeout in units of {@code unit}
    * @param unit
@@ -159,7 +159,7 @@ public final class RetryingExecutorService {
    */
   public void shutdown(long timeout, TimeUnit unit) throws InterruptedException {
     running = false;
-    for (CountDownLatch latch : latches.values()) {
+    for (final CountDownLatch latch : this.latches.values()) {
       latch.await(timeout, unit);
     }
     retryLoop.cancel();

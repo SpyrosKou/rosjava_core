@@ -52,7 +52,7 @@ public final class ListenerGroup<T> {
    * @return the {@link EventDispatcher} responsible for calling the specified
    *         listener
    */
-  public final EventDispatcher<T> add(T listener, int queueCapacity) {
+  public final EventDispatcher<T> add(final T listener,final int queueCapacity) {
     final EventDispatcher<T> eventDispatcher = new EventDispatcher<T>(listener, queueCapacity);
     this.eventDispatchers.add(eventDispatcher);
     this.executorService.execute(eventDispatcher);
@@ -82,10 +82,10 @@ public final class ListenerGroup<T> {
    * @return a {@link Collection} of {@link EventDispatcher}s responsible for
    *         calling the specified listeners
    */
-  public Collection<EventDispatcher<T>> addAll(Collection<T> listeners, int limit) {
-    Collection<EventDispatcher<T>> eventDispatchers = Lists.newArrayList();
-    for (T listener : listeners) {
-      eventDispatchers.add(add(listener, limit));
+  public List<EventDispatcher<T>> addAll(Collection<T> listeners, int limit) {
+    final List<EventDispatcher<T>> eventDispatchers = Lists.newArrayList();
+    for (final T listener : listeners) {
+      eventDispatchers.add(this.add(listener, limit));
     }
     return eventDispatchers;
   }
@@ -99,7 +99,7 @@ public final class ListenerGroup<T> {
    * @return a {@link Collection} of {@link EventDispatcher}s responsible for
    *         calling the specified listeners
    */
-  public Collection<EventDispatcher<T>> addAll(Collection<T> listeners) {
+  public List<EventDispatcher<T>> addAll(Collection<T> listeners) {
     return addAll(listeners, DEFAULT_QUEUE_CAPACITY);
   }
 
@@ -153,24 +153,22 @@ public final class ListenerGroup<T> {
    */
   public boolean signal(final SignalRunnable<T> signalRunnable, long timeout, TimeUnit unit)
       throws InterruptedException {
-    Collection<EventDispatcher<T>> copy = Lists.newArrayList(eventDispatchers);
+    final List<EventDispatcher<T>> copy = Lists.newArrayList(eventDispatchers);
     final CountDownLatch latch = new CountDownLatch(copy.size());
     for (EventDispatcher<T> eventDispatcher : copy) {
-      eventDispatcher.signal(new SignalRunnable<T>() {
-        @Override
-        public void run(T listener) {
-          signalRunnable.run(listener);
-          latch.countDown();
-        }
+      eventDispatcher.signal(listener -> {
+        signalRunnable.run(listener);
+        latch.countDown();
       });
     }
     return latch.await(timeout, unit);
   }
 
   public void shutdown() {
-    for (EventDispatcher<T> eventDispatcher : eventDispatchers) {
+    for (final EventDispatcher<T> eventDispatcher : eventDispatchers) {
+
       eventDispatcher.cancel();
     }
-    eventDispatchers.clear();
+    this.eventDispatchers.clear();
   }
 }

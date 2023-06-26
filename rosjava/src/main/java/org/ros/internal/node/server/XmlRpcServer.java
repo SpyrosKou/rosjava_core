@@ -88,12 +88,21 @@ public abstract class XmlRpcServer {
     }
 
     /**
+     * Shut down all resources, should call {@link XmlRpcServer#superShutdown()} and {@link XmlRpcServer#shutdownFinalization()}
+     */
+    public abstract void shutdown();
+
+    /**
      * Shut the remote call server down.
      */
-    public void shutdown() {
+    protected final void superShutdown() {
         this.webServer.shutdown();
     }
 
+    /**
+     * Should be the last statement of {@link XmlRpcServer#shutdown()} during resource shutting down.
+     * It is required to be called only once.
+     */
     protected final void shutdownFinalization() {
         this.shutdownLatch.countDown();
     }

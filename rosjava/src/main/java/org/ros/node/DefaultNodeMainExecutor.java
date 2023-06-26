@@ -121,7 +121,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
         scheduledExecutorService.execute(new Runnable() {
             @Override
             public void run() {
-                Collection<NodeListener> nodeListenersCopy = Lists.newArrayList();
+                final List<NodeListener> nodeListenersCopy = Lists.newArrayList();
                 nodeListenersCopy.add(new RegistrationListener());
                 nodeListenersCopy.add(nodeMain);
                 if (nodeListeners != null) {

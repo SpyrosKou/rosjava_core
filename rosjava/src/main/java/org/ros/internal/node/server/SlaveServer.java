@@ -80,12 +80,12 @@ public final class SlaveServer extends XmlRpcServer {
         // prevent recursive call of this method
         if (this.shutdownStarted.compareAndSet(false, true)) {
             this.shutdownStarted.set(true);
-            super.shutdown();
+            this.superShutdown();
             this.tcpRosServer.shutdown();
             if (this.node != null) {
                 this.node.shutdown();
             }
-            super.shutdownFinalization();
+            this.shutdownFinalization();
         }
     }
 

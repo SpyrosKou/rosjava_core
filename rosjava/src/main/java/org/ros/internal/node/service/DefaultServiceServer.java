@@ -24,7 +24,6 @@ import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.message.Message;
 import org.ros.internal.message.service.ServiceDescription;
-import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.MessageDeserializer;

@@ -488,7 +488,7 @@ public final class MasterServer extends XmlRpcServer implements MasterRegistrati
 
   @Override
   public final void shutdown() {
-    super.shutdown();
-    super.shutdownFinalization();
+    this.superShutdown();
+    this.shutdownFinalization();
   }
 }

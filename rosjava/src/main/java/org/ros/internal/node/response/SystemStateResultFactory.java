@@ -38,15 +38,15 @@ public final class SystemStateResultFactory implements ResultFactory<SystemState
 
 	@Override
 	public SystemState newFromValue(Object value) {
-		Object[] vals = (Object[]) value;
+		final Object[] vals = (Object[]) value;
 
-		Map<String, Set<String>> publisherMap = getPublishers(vals[0]);
-		Map<String, Set<String>> subscriberMap = getSubscribers(vals[1]);
+		final Map<String, Set<String>> publisherMap = getPublishers(vals[0]);
+		final Map<String, Set<String>> subscriberMap = getSubscribers(vals[1]);
 
-		Map<String, TopicSystemState> topics = Maps.newHashMap();
+		final Map<String, TopicSystemState> topics = Maps.newHashMap();
 
-		for (Entry<String, Set<String>> publisherData : publisherMap.entrySet()) {
-			String topicName = publisherData.getKey();
+		for (final Entry<String, Set<String>> publisherData : publisherMap.entrySet()) {
+			final String topicName = publisherData.getKey();
 
 			Set<String> subscriberNodes = subscriberMap.remove(topicName);
 
@@ -60,11 +60,11 @@ public final class SystemStateResultFactory implements ResultFactory<SystemState
 							subscriberNodes));
 		}
 
-		for (Entry<String, Set<String>> subscriberData : subscriberMap
+		for (final Entry<String, Set<String>> subscriberData : subscriberMap
 				.entrySet()) {
 			// At this point there are no publishers with the same topic name
-			HashSet<String> noPublishers = Sets.newHashSet();
-			String topicName = subscriberData.getKey();
+			final HashSet<String> noPublishers = Sets.newHashSet();
+			final String topicName = subscriberData.getKey();
 			topics.put(topicName, new TopicSystemState(topicName,
 					noPublishers, subscriberData.getValue()));
 		}
@@ -83,15 +83,15 @@ public final class SystemStateResultFactory implements ResultFactory<SystemState
    * 
    * @return a mapping from topic name to the set of publishers for that topic
    */
-	private Map<String, Set<String>> getPublishers(Object pubPairs) {
-		Map<String, Set<String>> topicToPublishers = Maps.newHashMap();
+	private final Map<String, Set<String>> getPublishers(Object pubPairs) {
+		final Map<String, Set<String>> topicToPublishers = Maps.newHashMap();
 
-		for (Object topicData : Arrays.asList((Object[]) pubPairs)) {
-			String topicName = (String) ((Object[]) topicData)[0];
+		for (final Object topicData : Arrays.asList((Object[]) pubPairs)) {
+			final String topicName = (String) ((Object[]) topicData)[0];
 
-			Set<String> publishers =Sets.newHashSet();
-			Object[] publisherData = (Object[])((Object[]) topicData)[1];
-			for (Object publisher : publisherData) {
+			final Set<String> publishers =Sets.newHashSet();
+			final Object[] publisherData = (Object[])((Object[]) topicData)[1];
+			for (final Object publisher : publisherData) {
 				publishers.add(publisher.toString());
 			}
 
@@ -112,14 +112,14 @@ public final class SystemStateResultFactory implements ResultFactory<SystemState
 	 *         topic
 	 */
 	private Map<String, Set<String>> getSubscribers(Object subPairs) {
-		Map<String, Set<String>> topicToSubscribers = Maps.newHashMap();
+		final Map<String, Set<String>> topicToSubscribers = Maps.newHashMap();
 
-		for (Object topicData : Arrays.asList((Object[]) subPairs)) {
-			String topicName = (String) ((Object[]) topicData)[0];
+		for (final Object topicData : Arrays.asList((Object[]) subPairs)) {
+			final 	String topicName = (String) ((Object[]) topicData)[0];
 
-			Set<String> subscribers =Sets.newHashSet();
-			Object[] subscriberData = (Object[])((Object[]) topicData)[1];
-			for (Object subscriber : subscriberData) {
+			final Set<String> subscribers =Sets.newHashSet();
+			final Object[] subscriberData = (Object[])((Object[]) topicData)[1];
+			for (final Object subscriber : subscriberData) {
 				subscribers.add(subscriber.toString());
 			}
 
