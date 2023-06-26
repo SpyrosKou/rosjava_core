@@ -21,7 +21,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-
+import java.util.Set;
 
 
 import org.ros.internal.node.service.ServiceIdentifier;
@@ -333,8 +333,8 @@ public final class MasterRegistrationManagerImpl {
    * 
    * @return An immutable collection of topics.
    */
-  public Collection<TopicRegistrationInfo> getAllTopics() {
-    return Collections.unmodifiableCollection(topics.values());
+  public final Set<TopicRegistrationInfo> getAllTopics() {
+    return Collections.unmodifiableSet(topics.values());
   }
 
   /**
