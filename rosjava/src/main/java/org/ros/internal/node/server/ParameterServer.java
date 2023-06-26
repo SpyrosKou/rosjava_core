@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A ROS parameter server.
@@ -38,7 +39,7 @@ public final class ParameterServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Map<String, Object> tree = Maps.newConcurrentMap();
-    private final Multimap<GraphName, NodeIdentifier> subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, NodeIdentifier>create());
+    private final Multimap<GraphName, NodeIdentifier> subscribers = Multimaps.synchronizedMultimap(HashMultimap.create());
     private final GraphName masterName = GraphName.of("/master");
 
     public final void subscribe(GraphName name, NodeIdentifier nodeIdentifier) {
@@ -88,17 +89,14 @@ public final class ParameterServer {
         }
     }
 
-    private interface Updater {
-        void update(SlaveClient client);
-    }
 
-    private final <T> void update(GraphName name, T value, Updater updater) {
+    private final <T> void update(final GraphName name,final T value, final Consumer<SlaveClient> updater) {
         this.setValue(name, value);
         synchronized (subscribers) {
             for (final NodeIdentifier nodeIdentifier : subscribers.get(name)) {
                 final SlaveClient client = new SlaveClient(masterName, nodeIdentifier.getUri());
                 try {
-                    updater.update(client);
+                    updater.accept(client);
                 } catch (Exception e) {
                     LOGGER.error(ExceptionUtils.getStackTrace(e));
                 }
@@ -107,61 +105,31 @@ public final class ParameterServer {
     }
 
     public final void set(final GraphName name, final boolean value) {
-        update(name, value, new Updater() {
-            @Override
-            public void update(SlaveClient client) {
-                client.paramUpdate(name, value);
-            }
-        });
+        update(name, value, client -> client.paramUpdate(name, value));
     }
 
-    public void set(final GraphName name, final int value) {
-        update(name, value, new Updater() {
-            @Override
-            public void update(SlaveClient client) {
-                client.paramUpdate(name, value);
-            }
-        });
+    public final void set(final GraphName name, final int value) {
+        update(name, value, client -> client.paramUpdate(name, value));
     }
 
-    public void set(final GraphName name, final double value) {
-        update(name, value, new Updater() {
-            @Override
-            public void update(SlaveClient client) {
-                client.paramUpdate(name, value);
-            }
-        });
+    public final void set(final GraphName name, final double value) {
+        update(name, value, client -> client.paramUpdate(name, value));
     }
 
-    public void set(final GraphName name, final String value) {
-        update(name, value, new Updater() {
-            @Override
-            public void update(SlaveClient client) {
-                client.paramUpdate(name, value);
-            }
-        });
+    public final void set(final GraphName name, final String value) {
+        update(name, value, client -> client.paramUpdate(name, value));
     }
 
-    public void set(final GraphName name, final List<?> value) {
-        update(name, value, new Updater() {
-            @Override
-            public void update(SlaveClient client) {
-                client.paramUpdate(name, value);
-            }
-        });
+    public final void set(final GraphName name, final List<?> value) {
+        update(name, value, client -> client.paramUpdate(name, value));
     }
 
-    public void set(final GraphName name, final Map<?, ?> value) {
-        update(name, value, new Updater() {
-            @Override
-            public void update(SlaveClient client) {
-                client.paramUpdate(name, value);
-            }
-        });
+    public final void set(final GraphName name, final Map<?, ?> value) {
+        update(name, value, client -> client.paramUpdate(name, value));
     }
 
     @SuppressWarnings("unchecked")
-    public void delete(GraphName name) {
+    public final void delete(GraphName name) {
         Preconditions.checkArgument(name.isGlobal());
         Stack<String> parts = getGraphNameParts(name);
         Map<String, Object> subtree = tree;
@@ -175,7 +143,7 @@ public final class ParameterServer {
         }
     }
 
-    public Object search(GraphName namespace, GraphName name) {
+    public final Object search(GraphName namespace, GraphName name) {
         GraphName search = namespace;
         GraphName result = search.join(name.toRelative());
         if (has(result)) {
@@ -192,7 +160,7 @@ public final class ParameterServer {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean has(GraphName name) {
+    public final boolean has(GraphName name) {
         Preconditions.checkArgument(name.isGlobal());
         Stack<String> parts = getGraphNameParts(name);
         Map<String, Object> subtree = tree;
@@ -206,7 +174,7 @@ public final class ParameterServer {
     }
 
     @SuppressWarnings("unchecked")
-    private Set<GraphName> getSubtreeNames(GraphName parent, Map<String, Object> subtree,
+    private final Set<GraphName> getSubtreeNames(GraphName parent, Map<String, Object> subtree,
                                            Set<GraphName> names) {
         for (String name : subtree.keySet()) {
             Object possibleSubtree = subtree.get(name);
