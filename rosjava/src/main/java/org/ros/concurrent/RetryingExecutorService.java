@@ -52,14 +52,17 @@ public final class RetryingExecutorService {
   private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
 
   private final ScheduledExecutorService scheduledExecutorService;
-  private final RetryLoop retryLoop;
-  private final Map<Callable<Boolean>, CountDownLatch> latches;
-  private final Map<Future<Boolean>, Callable<Boolean>> callables;
+  private final RetryLoop retryLoop=new RetryLoop();;
+  private final Map<Callable<Boolean>, CountDownLatch> latches=Maps.newConcurrentMap();;
+  private final Map<Future<Boolean>, Callable<Boolean>> callables=Maps.newConcurrentMap();;
   private final CompletionService<Boolean> completionService;
-  private final Object mutex;
+  private final Object mutex= new Object();
 
-  private long retryDelay;
-  private TimeUnit retryTimeUnit;
+
+
+
+  private long retryDelay= DEFAULT_RETRY_DELAY;
+  private TimeUnit retryTimeUnit= DEFAULT_RETRY_TIME_UNIT;
   private boolean running;
 
   private class RetryLoop extends CancellableLoop {
@@ -102,13 +105,10 @@ public final class RetryingExecutorService {
    */
   public RetryingExecutorService(ScheduledExecutorService scheduledExecutorService) {
     this.scheduledExecutorService = scheduledExecutorService;
-    retryLoop = new RetryLoop();
-    latches = Maps.newConcurrentMap();
-    callables = Maps.newConcurrentMap();
+
+
     completionService = new ExecutorCompletionService<Boolean>(scheduledExecutorService);
-    mutex = new Object();
-    retryDelay = DEFAULT_RETRY_DELAY;
-    retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
+
     running = true;
     // TODO(damonkohler): Unify this with the passed in ExecutorService.
     scheduledExecutorService.execute(retryLoop);
@@ -124,10 +124,10 @@ public final class RetryingExecutorService {
    * @throws RejectedExecutionException
    *           if the {@link RetryingExecutorService} is shutting down
    */
-  public void submit(Callable<Boolean> callable) {
+  public void submit(final Callable<Boolean> callable) {
     synchronized (mutex) {
       if (running) {
-        Future<Boolean> future = completionService.submit(callable);
+        final Future<Boolean> future = completionService.submit(callable);
         latches.put(callable, new CountDownLatch(1));
         callables.put(future, callable);
       } else {
@@ -142,7 +142,7 @@ public final class RetryingExecutorService {
    * @param unit
    *          the {@link TimeUnit} of the delay
    */
-  public void setRetryDelay(long delay, TimeUnit unit) {
+  public final void setRetryDelay(final long delay,final TimeUnit unit) {
     retryDelay = delay;
     retryTimeUnit = unit;
   }
