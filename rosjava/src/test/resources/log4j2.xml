@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Author: Spyros Koukas-->
+<Configuration status="ERROR">
+    <Properties>
+    </Properties>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yy.MM.dd-HH:mm:ss.SSS}[%p]%F(%L)%M-%m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="TRACE">
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+
+        <Logger name="org.apache" level="DEBUG"/>
+        <Logger name="org.ros" level="DEBUG"/>
+        <Logger name="org.apache.http.impl.conn.Wire" level="TRACE"/>
+
+        <Logger name="httpclient.wire.header" level="ERROR"/>
+        <Logger name="httpclient.wire.content" level="ERROR"/>
+        <Logger name="org.apache.commons.httpclient" level="ERROR"/>
+
+    </Loggers>
+</Configuration>
