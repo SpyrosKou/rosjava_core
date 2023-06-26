@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
+import java.util.Arrays;
 
 /**
  * Modified version of {@link org.apache.xmlrpc.client.util.ClientFactory} that
@@ -44,8 +45,7 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
 
     private final XmlRpcClient client;
     private final TypeConverterFactory typeConverterFactory;
-    //uninitialized boolean defaults to false
-    private boolean objectMethodLocal = false;
+
 
     /**
      * Creates a new instance.
@@ -55,7 +55,7 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
      * @param pTypeConverterFactory Creates instances of {@link TypeConverterFactory}, which are used
      *                              to transform the result object in its target representation.
      */
-    public XmlRpcClientFactory(final XmlRpcClient pClient,final TypeConverterFactory pTypeConverterFactory) {
+    public XmlRpcClientFactory(final XmlRpcClient pClient, final TypeConverterFactory pTypeConverterFactory) {
         this.typeConverterFactory = pTypeConverterFactory;
         this.client = pClient;
     }
@@ -82,21 +82,6 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
         return client;
     }
 
-    /**
-     * Returns, whether a method declared by the {@link Object Object class} is
-     * performed by the local object, rather than by the server. Defaults to true.
-     */
-    public final boolean isObjectMethodLocal() {
-        return objectMethodLocal;
-    }
-
-    /**
-     * Sets, whether a method declared by the {@link Object Object class} is
-     * performed by the local object, rather than by the server. Defaults to true.
-     */
-    public void setObjectMethodLocal(boolean pObjectMethodLocal) {
-        objectMethodLocal = pObjectMethodLocal;
-    }
 
     /**
      * Creates an object, which is implementing the given interface. The objects
@@ -143,14 +128,29 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
         }
 
         @Override
+        public String toString() {
+            return XmlRpcClientFactory.this.toString() + "-LocalInvocationHandler{" +
+                    "pRemoteName='" + pRemoteName + '\'' +
+                    ", timeout=" + timeout +
+                    ", includePremoteName=" + includePremoteName +
+                    '}';
+        }
+
+        @Override
         public final Object invoke(final Object pProxy, final Method pMethod, final Object[] pArgs) throws Throwable {
             if (logger.isTraceEnabled()) {
                 logger.trace("Trying to invoke pMethod:" + pMethod + " args" + (pArgs == null ? ": " + null : "size: " + pArgs.length));
             }
             try {
-                if (isObjectMethodLocal() && pMethod.getDeclaringClass().equals(Object.class)) {
+
+
+                if (pMethod.getDeclaringClass().equals(Object.class)) {
                     try {
-                        return pMethod.invoke(pProxy, pArgs);
+                        if (pMethod.getName().equals("toString")) {
+                            return this.toString();
+                        } else {
+                            return pMethod.invoke(pProxy, pArgs);
+                        }
                     } catch (final IllegalAccessException illegalAccessException) {
                         if (logger.isErrorEnabled()) {
                             logger.error("pMethod:" + pMethod + " " + ExceptionUtils.getStackTrace(illegalAccessException));
@@ -164,6 +164,7 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
                         logger.trace("pMethod:" + pMethod + " Non directly invoked");
                     }
                 }
+
                 final String methodName;
                 if (this.includePremoteName) {
                     methodName = pMethod.getName();
@@ -173,19 +174,20 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
                 Object result;
                 try {
                     final TimingOutCallback callback = new TimingOutCallback(timeout);
-                    client.executeAsync(methodName, pArgs, callback);
+                    XmlRpcClientFactory.this.client.executeAsync(methodName, pArgs, callback);
+
                     result = callback.waitForResponse();
-                } catch (final TimingOutCallback.TimeoutException timeoutException ) {
-                    LOGGER.error("pRemoteName:" + pRemoteName + " " + ExceptionUtils.getStackTrace(timeoutException));
+                } catch (final TimingOutCallback.TimeoutException timeoutException) {
+                    LOGGER.error("methodName:" + methodName + " pRemoteName:" + pRemoteName + " args:" + Arrays.toString(pArgs) + " client.Config" + client.getConfig().toString() + " " + ExceptionUtils.getStackTrace(timeoutException));
                     throw new XmlRpcTimeoutException(timeoutException);
                 } catch (final InterruptedException interruptedException) {
-                    LOGGER.error("pRemoteName:" + pRemoteName + " " + ExceptionUtils.getStackTrace(interruptedException));
+                    LOGGER.error("methodName:" + methodName + " pRemoteName:" + pRemoteName + " args:" + Arrays.toString(pArgs) + " client.Config" + client.getConfig().toString() + " " + ExceptionUtils.getStackTrace(interruptedException));
                     throw new XmlRpcTimeoutException(interruptedException);
                 } catch (final UndeclaredThrowableException undeclaredThrowableException) {
-                    LOGGER.error("pRemoteName:" + pRemoteName + " " + ExceptionUtils.getStackTrace(undeclaredThrowableException));
+                    LOGGER.error("methodName:" + methodName + " pRemoteName:" + pRemoteName + " args:" + Arrays.toString(pArgs) + " client.Config" + client.getConfig().toString() + " " + ExceptionUtils.getStackTrace(undeclaredThrowableException));
                     throw new RuntimeException(undeclaredThrowableException);
                 } catch (final XmlRpcException xmlRpcException) {
-                    LOGGER.error("pRemoteName:" + pRemoteName + " " + ExceptionUtils.getStackTrace(xmlRpcException));
+                    LOGGER.error("methodName:" + methodName + " pRemoteName:" + pRemoteName + " args:" + Arrays.toString(pArgs) + " client.Config" + client.getConfig().toString() + " " + ExceptionUtils.getStackTrace(xmlRpcException));
                     final Throwable linkedException = xmlRpcException.linkedException;
                     if (linkedException == null) {
                         throw new RuntimeException(xmlRpcException);
@@ -194,21 +196,29 @@ public final class XmlRpcClientFactory<T extends org.ros.internal.node.xmlrpc.Xm
                     for (int i = 0; i < exceptionTypes.length; i++) {
                         final Class<?> c = exceptionTypes[i];
                         if (c.isAssignableFrom(linkedException.getClass())) {
-                            LOGGER.error("pRemoteName:" + pRemoteName + " " + ExceptionUtils.getStackTrace(xmlRpcException));
+                            LOGGER.error("methodName:" + methodName + " pRemoteName:" + pRemoteName + " args:" + Arrays.toString(pArgs) + " client.Config" + client.getConfig().toString() + " " + ExceptionUtils.getStackTrace(xmlRpcException));
                             throw linkedException;
                         }
                     }
                     throw new RuntimeException(linkedException);
                 } catch (Throwable e) {
-                    LOGGER.error("pRemoteName:" + pRemoteName + " " + ExceptionUtils.getStackTrace(e));
+                    LOGGER.error("methodName:" + methodName + " pRemoteName:" + pRemoteName + " args:" + Arrays.toString(pArgs) + " client.Config" + client.getConfig().toString() + " " + ExceptionUtils.getStackTrace(e));
                     throw e;
                 }
-                final TypeConverter typeConverter = typeConverterFactory.getTypeConverter(pMethod.getReturnType());
+                final TypeConverter typeConverter = XmlRpcClientFactory.this.typeConverterFactory.getTypeConverter(pMethod.getReturnType());
                 return typeConverter.convert(result);
             } catch (final Exception exception) {
                 LOGGER.error(ExceptionUtils.getStackTrace(exception));
                 throw exception;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "XmlRpcClientFactory{" +
+                "client=" + client +
+                ", typeConverterFactory=" + typeConverterFactory +
+                '}';
     }
 }

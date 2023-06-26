@@ -46,23 +46,23 @@ public abstract class RosTest {
 
     @Before
     public void setUp() throws InterruptedException {
-        rosCore = RosCore.newPrivate();
-        rosCore.start();
-        assertTrue(rosCore.awaitStart(1, TimeUnit.SECONDS));
-        nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
-        nodeConfiguration = NodeConfiguration.newPrivate(rosCore.getUri());
+        this.rosCore = RosCore.newPrivate();
+        this.rosCore.start();
+        assertTrue(this.rosCore.awaitStart(1, TimeUnit.SECONDS));
+        this.nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+        this.nodeConfiguration = NodeConfiguration.newPrivate(rosCore.getUri());
     }
 
     @After
     public void tearDown() {
-        nodeMainExecutor.shutdown();
+        this.nodeMainExecutor.shutdown();
 
-        rosCore.shutdown();
+        this.rosCore.shutdown();
         try {
-            rosCore.awaitShutdown(30, TimeUnit.SECONDS);
-            logger.info("Shutdown roscore ok");
+            this.rosCore.awaitShutdown(30, TimeUnit.SECONDS);
+            this.logger.info("Shutdown roscore ok");
         } catch (final Exception exception) {
-            logger.info("Error while shutting down roscore: " + ExceptionUtils.getStackTrace(exception));
+            this.logger.info("Error while shutting down roscore: " + ExceptionUtils.getStackTrace(exception));
         }
 
     }
