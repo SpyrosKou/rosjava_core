@@ -1,7 +1,11 @@
 dependencies {
     implementation project(':rosjava')
     implementation 'com.google.guava:guava:31.1-jre'
-    implementation 'org.yaml:snakeyaml:1.30'
-    testImplementation 'junit:junit:4.13.2'
+    implementation 'org.yaml:snakeyaml:2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     testImplementation project(':rosjava').sourceSets.test.output
+}
+test {
+    useJUnitPlatform()
 }
