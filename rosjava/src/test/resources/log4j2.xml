@@ -14,7 +14,7 @@
         </Root>
 
         <Logger name="org.apache" level="DEBUG"/>
-        <Logger name="org.ros" level="DEBUG"/>
+        <Logger name="org.ros" level="TRACE"/>
         <Logger name="org.apache.http.impl.conn.Wire" level="TRACE"/>
 
         <Logger name="httpclient.wire.header" level="ERROR"/>
