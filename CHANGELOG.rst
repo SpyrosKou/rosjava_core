@@ -6,9 +6,16 @@ Changelog
 latest
 -----------------
 * Gradle update to 7.5
-* Import 'org.apache.xmlrpc:xmlrpc-client:3.1.3', 'org.apache.xmlrpc:xmlrpc-common:3.1.3', 'org.apache.xmlrpc:xmlrpc-server:3.1.3' instead of compiling.
-* Can wait for roscore to shutdown
+* Import 'org.apache.xmlrpc:xmlrpc-client:3.1.3', 'org.apache.xmlrpc:xmlrpc-common:3.1.3', 'org.apache.xmlrpc:xmlrpc-server:3.1.3' instead of compiling a modified copy of the sources.
+* Required changes have been implemented with inheritance
+* Added methods that allow to code to wait for roscore to shutdown
 * Most classes are now final, excluding inheritance
+* Updated dependencies
+    - Use Junit 5
+    - Use Mockito 5
+    - Pin specific dependencies, replacing ranges (for ros messages)
+* Contributors: Spyros Koukas
+
 
 
 
@@ -22,7 +29,6 @@ latest
 * Reduced inheritance potential by declaring methods and classes final.
 * Has only been tested in JRE (not android)
 * Stricter, more programmer friendly generics
-
 * Contributors: Spyros Koukas
 
 0.3.7 (2019-01-22)
