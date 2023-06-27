@@ -18,12 +18,12 @@ package org.ros.internal.node.server;
 
 import com.google.common.base.Preconditions;
 import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
 import org.apache.xmlrpc.webserver.WebServer;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.exception.RosRuntimeException;
+
 import org.ros.internal.system.Process;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -65,12 +66,20 @@ public abstract class XmlRpcServer {
     public final <T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> void start(final T instance) {
         Preconditions.checkNotNull(instance);
         final org.apache.xmlrpc.server.XmlRpcServer xmlRpcServer = this.webServer.getXmlRpcServer();
-        final PropertyHandlerMapping phm = new PropertyHandlerMapping();
+        final RosPropertyHandlerMapping phm = new RosPropertyHandlerMapping();
         phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
         try {
             phm.addHandler("", instance.getClass());
         } catch (final XmlRpcException e) {
             throw new RosRuntimeException(e);
+        }
+        if(LOGGER.isTraceEnabled()){
+            try {
+                LOGGER.trace("Class:"+this.getClass().getCanonicalName()+": Methods:"+Arrays.toString(phm.getListMethods()));
+            }catch (final Exception exception){
+                LOGGER.debug("Class:"+this.getClass().getCanonicalName()+": Error while trying to list methods.");
+            }
+
         }
         xmlRpcServer.setHandlerMapping(phm);
         final XmlRpcServerConfigImpl serverConfig = (XmlRpcServerConfigImpl) xmlRpcServer.getConfig();
