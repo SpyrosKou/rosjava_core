@@ -10,7 +10,7 @@ public final class TestXmlRpcServer extends XmlRpcServer {
 
     @Override
     public final void shutdown() {
-        this.shutdown();
+        this.superShutdown();
         this.shutdownFinalization();
     }
 }
