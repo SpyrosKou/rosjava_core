@@ -16,16 +16,11 @@
 
 package org.ros.internal.loader;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.ros.Assert.assertGraphNameEquals;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import junit.framework.Assert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.CommandLineVariables;
 import org.ros.EnvironmentVariables;
 import org.ros.namespace.GraphName;
@@ -38,6 +33,10 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.ros.Assert.assertGraphNameEquals;
 
 /**
  * Test CommandLineLoader.
@@ -57,7 +56,7 @@ public class CommandLineLoaderTest {
     return env;
   }
 
-  @Before
+  @BeforeEach
   public void setup() throws URISyntaxException {
     defaultMasterUri = new URI("http://localhost:33133");
     defaultRosRoot = new File(System.getProperty("user.dir"));

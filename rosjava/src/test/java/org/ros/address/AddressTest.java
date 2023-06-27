@@ -16,15 +16,14 @@
 
 package org.ros.address;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import static junit.framework.Assert.*;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -48,7 +47,8 @@ public class AddressTest {
   // TODO(damonkohler): This test fails if the host isn't registered with DNS.
   // These tests need to be changed to inject behavior into the
   // getAllInetAddressesByName() method.
-  @Test @Ignore
+  @Test
+  @Disabled
   public void testPublicHost() throws UnknownHostException {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     InetAddress publicHost = InetAddressFactory.newFromHostString(host);

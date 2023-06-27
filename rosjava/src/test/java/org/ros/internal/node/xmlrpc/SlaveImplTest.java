@@ -18,8 +18,7 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.junit.Test;
-import org.mockito.Matchers;
+import org.junit.jupiter.api.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
@@ -31,7 +30,9 @@ import org.ros.namespace.GraphName;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +44,7 @@ public class SlaveImplTest {
     @Test
     public void testGetPublicationsEmptyList() {
         SlaveServer mockSlave = mock(SlaveServer.class);
-        when(mockSlave.getPublications()).thenReturn(Lists.<DefaultPublisher<?>>newArrayList());
+        when(mockSlave.getPublications()).thenReturn(Lists.newArrayList());
         SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
         List<Object> response = slave.getPublications("/foo");
         assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
@@ -54,7 +55,7 @@ public class SlaveImplTest {
     public void testGetPublications() {
         SlaveServer mockSlave = mock(SlaveServer.class);
         DefaultPublisher<?> mockPublisher = mock(DefaultPublisher.class);
-        when(mockSlave.getPublications()).thenReturn(Lists.<DefaultPublisher<?>>newArrayList(mockPublisher));
+        when(mockSlave.getPublications()).thenReturn(Lists.newArrayList(mockPublisher));
         when(mockPublisher.getTopicName()).thenReturn(GraphName.of("/bar"));
         when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
         when(mockPublisher.getTopicDeclarationAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
@@ -73,8 +74,8 @@ public class SlaveImplTest {
         address.setStaticPort(1234);
         final ProtocolDescription protocol = ProtocolDescription.createTcpRosProtocolDescription(address);
         when(
-                mockSlave.requestTopic(Matchers.<String>any(),
-                        Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(
+                mockSlave.requestTopic(any(),
+                        eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(
                 protocol);
         SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
         Object[][] protocols = new Object[][]{{ProtocolNames.TCPROS}, {ProtocolNames.UDPROS}};

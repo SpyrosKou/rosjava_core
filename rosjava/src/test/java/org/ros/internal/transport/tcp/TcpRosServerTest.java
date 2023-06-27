@@ -16,46 +16,43 @@
 
 package org.ros.internal.transport.tcp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.address.InetAddressFactory;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+
+import static junit.framework.Assert.*;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TcpRosServerTest {
-  private ScheduledExecutorService executorService;
+  private ExecutorService executorService;
 
-  @Before
+  @BeforeEach
   public void setup() {
-    executorService = Executors.newScheduledThreadPool(10);
+    executorService = Executors.newCachedThreadPool();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     executorService.shutdown();
   }
 
   @Test
-  public void testGetAddressFailsIfServerNotRunning() throws UnknownHostException {
+  public void testGetAddressFailsIfServerNotRunning() {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
-            executorService);
-
+            new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
+                    executorService);
     try {
+
       tcpRosServer.getAddress();
       fail();
     } catch (RuntimeException e) {

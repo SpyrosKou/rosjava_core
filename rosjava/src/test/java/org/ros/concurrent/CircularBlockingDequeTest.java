@@ -16,13 +16,8 @@
 
 package org.ros.concurrent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -31,6 +26,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.Assert.*;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -38,7 +35,7 @@ public class CircularBlockingDequeTest {
 
   private ExecutorService executorService;
 
-  @Before
+  @BeforeEach
   public void before() {
     executorService = Executors.newCachedThreadPool();
   }

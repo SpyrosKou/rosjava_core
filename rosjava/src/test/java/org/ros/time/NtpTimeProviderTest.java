@@ -16,9 +16,7 @@
 
 package org.ros.time;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.ros.RosTest;
 import org.ros.address.InetAddressFactory;
 import org.ros.namespace.GraphName;
@@ -29,6 +27,8 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

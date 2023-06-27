@@ -1,24 +1,26 @@
 package org.ros.internal.node.service;
 
 
+import org.junit.jupiter.api.Test;
+import org.ros.RosTest;
 import org.ros.exception.RemoteException;
+import org.ros.message.MessageFactory;
+import org.ros.namespace.GraphName;
 import org.ros.node.*;
+import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceResponseBuilder;
+import org.ros.node.service.ServiceResponseListener;
+import org.ros.node.service.ServiceServer;
 import rosjava_test_msgs.AddTwoInts;
 import rosjava_test_msgs.AddTwoIntsRequest;
 import rosjava_test_msgs.AddTwoIntsResponse;
-import org.ros.RosTest;
-import org.ros.message.MessageFactory;
-import org.ros.namespace.GraphName;
-import org.ros.node.service.*;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 /**
  * Class for running a multi-threaded service request

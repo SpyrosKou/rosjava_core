@@ -34,7 +34,7 @@ public class RightHandRule extends AbstractNodeMain {
   }
 
   @Override
-  public void onStart(ConnectedNode connectedNode) {
+  public void onStart(final ConnectedNode connectedNode) {
     final Publisher<geometry_msgs.Twist> publisher =
         connectedNode.newPublisher("cmd_vel", geometry_msgs.Twist._TYPE);
     final geometry_msgs.Twist twist = publisher.newMessage();

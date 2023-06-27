@@ -16,9 +16,9 @@
 
 package org.ros.math;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

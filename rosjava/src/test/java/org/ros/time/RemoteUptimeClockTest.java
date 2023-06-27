@@ -16,13 +16,13 @@
 
 package org.ros.time;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.time.RemoteUptimeClock.LocalUptimeProvider;
 
 import java.util.concurrent.Callable;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -38,7 +38,7 @@ public class RemoteUptimeClockTest {
   private int latencyOutlierFilterSampleSize;
   private double latencyOutlierFilterThreshold;
 
-  @Before
+  @BeforeEach
   public void setup() {
     localUptime = 0;
     remoteUptime = 0;

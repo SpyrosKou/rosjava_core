@@ -16,11 +16,8 @@
 
 package org.ros.internal.transport.queue;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.message.DefaultMessageFactory;
 import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
@@ -34,6 +31,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -45,7 +45,7 @@ public class MessageDispatcherTest {
   private CircularBlockingDeque<LazyMessage<std_msgs.Int32>> lazyMessages;
   private MessageFactory messageFactory;
 
-  @Before
+  @BeforeEach
   public void before() {
     executorService = Executors.newCachedThreadPool();
     lazyMessages = new CircularBlockingDeque<LazyMessage<std_msgs.Int32>>(128);

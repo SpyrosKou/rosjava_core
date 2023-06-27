@@ -16,21 +16,20 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Lists;
-
-import org.junit.Test;
-import org.mockito.Matchers;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for the {@link MasterXmlRpcEndpointImpl}.
@@ -65,7 +64,7 @@ public class MasterXmlRpcEndpointImplTest {
   @Test
   public void testLookupNodeNotExisting() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
-    when(mockMaster.lookupNode(Matchers.<GraphName>any())).thenReturn(null);
+    when(mockMaster.lookupNode(ArgumentMatchers.any())).thenReturn(null);
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response = master.lookupNode("/caller", "/foo");
     assertEquals(StatusCode.ERROR.toInt(), response.get(0));
@@ -76,9 +75,9 @@ public class MasterXmlRpcEndpointImplTest {
   public void testRegisterPublisherWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
     when(
-        mockMaster.registerPublisher(Matchers.<GraphName>any(), Matchers.<URI>any(),
-            Matchers.<GraphName>any(), Matchers.<String>any())).thenReturn(
-        Lists.<URI>newArrayList());
+        mockMaster.registerPublisher(ArgumentMatchers.any(), ArgumentMatchers.any(),
+            ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+        Lists.newArrayList());
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response = master.registerPublisher("/caller", "/foo", "/bar", "http://baz");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
@@ -108,8 +107,8 @@ public class MasterXmlRpcEndpointImplTest {
   public void testRegisterSubscriberWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
     when(
-        mockMaster.registerSubscriber(Matchers.<GraphName>any(), Matchers.<URI>any(),
-            Matchers.<GraphName>any(), Matchers.<String>any())).thenReturn(
+        mockMaster.registerSubscriber(ArgumentMatchers.any(), ArgumentMatchers.any(),
+            ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
         Lists.<URI>newArrayList());
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response = master.registerSubscriber("/caller", "/foo", "/bar", "http://baz");

@@ -16,9 +16,9 @@
 
 package org.ros;
 
-import static org.junit.Assert.assertEquals;
-
 import org.ros.namespace.GraphName;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

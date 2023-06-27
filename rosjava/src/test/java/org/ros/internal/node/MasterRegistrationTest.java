@@ -2,9 +2,7 @@
 
 package org.ros.internal.node;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.ros.RosCore;
 import org.ros.RosTest;
 import org.ros.namespace.GraphName;
@@ -13,9 +11,9 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.topic.CountDownPublisherListener;
 import org.ros.node.topic.Publisher;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
+
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -46,8 +44,7 @@ public class MasterRegistrationTest extends RosTest {
   }
 
   @Test
-  public void testRegisterPublisherRetries() throws InterruptedException, IOException,
-      URISyntaxException {
+  public void testRegisterPublisherRetries() throws InterruptedException {
     int port = rosCore.getUri().getPort();
     publisherListener = CountDownPublisherListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {

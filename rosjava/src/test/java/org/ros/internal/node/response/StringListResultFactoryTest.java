@@ -16,13 +16,11 @@
 
 package org.ros.internal.node.response;
 
-import java.util.List;
-
-import junit.framework.TestCase;
-
-import org.junit.Test;
-
 import com.google.common.collect.Lists;
+import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)

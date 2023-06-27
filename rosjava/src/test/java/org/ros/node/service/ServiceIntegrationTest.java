@@ -16,8 +16,8 @@
 
 package org.ros.node.service;
 
-import org.junit.Assert;
-import org.junit.Test;
+import junit.framework.Assert;
+import org.junit.jupiter.api.Test;
 import org.ros.RosTest;
 import org.ros.exception.*;
 import org.ros.namespace.GraphName;
@@ -30,7 +30,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.*;
+
+
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

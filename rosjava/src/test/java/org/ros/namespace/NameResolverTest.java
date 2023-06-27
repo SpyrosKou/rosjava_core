@@ -16,13 +16,13 @@
 
 package org.ros.namespace;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.ros.Assert.assertGraphNameEquals;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-import org.junit.Test;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
+import static org.ros.Assert.assertGraphNameEquals;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)

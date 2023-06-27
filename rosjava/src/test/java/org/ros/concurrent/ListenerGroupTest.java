@@ -16,16 +16,16 @@
 
 package org.ros.concurrent;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,7 +35,7 @@ public class ListenerGroupTest {
   private ExecutorService executorService;
   private ListenerGroup<Runnable> listenerGroup;
 
-  @Before
+  @BeforeEach
   public void before() {
     executorService = Executors.newCachedThreadPool();
     listenerGroup = new ListenerGroup<Runnable>(executorService);

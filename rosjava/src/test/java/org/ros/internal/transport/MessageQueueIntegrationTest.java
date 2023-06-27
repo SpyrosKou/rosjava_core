@@ -16,25 +16,15 @@
 
 package org.ros.internal.transport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-
-
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.message.DefaultMessageDeserializer;
 import org.ros.internal.message.DefaultMessageFactory;
@@ -61,6 +51,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -110,7 +104,7 @@ public class MessageQueueIntegrationTest {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     executorService = Executors.newCachedThreadPool();
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
@@ -131,7 +125,7 @@ public class MessageQueueIntegrationTest {
     secondTcpClientManager.addNamedChannelHandler(secondIncomingMessageQueue.getMessageReceiver());
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if(this.outgoingMessageQueue!=null){
       this.outgoingMessageQueue.shutdown();

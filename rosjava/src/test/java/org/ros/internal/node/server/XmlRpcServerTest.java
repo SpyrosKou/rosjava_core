@@ -16,17 +16,15 @@
 
 package org.ros.internal.node.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.net.URI;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.ros.address.Address;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
+
+import java.net.URI;
+
+import static junit.framework.Assert.*;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)

@@ -16,16 +16,10 @@
 
 package org.ros.node.parameter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.RosTest;
 import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
@@ -39,6 +33,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.Assert.*;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -46,7 +42,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
 
   private ParameterTree parameters;
 
-  @Before
+  @BeforeEach
   public void setup() throws InterruptedException {
     final CountDownLatch latch = new CountDownLatch(1);
     nodeMainExecutor.execute(new AbstractNodeMain() {

@@ -16,8 +16,8 @@
 package org.ros.helpers;
 
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.RosTest;
 import org.ros.exception.ParameterNotFoundException;
 import org.ros.namespace.GraphName;
@@ -29,9 +29,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 
 /**
@@ -42,8 +41,9 @@ public class ParameterLoaderNodeTest extends RosTest {
     private ParameterTree parameters;
     private RosLog rosLog;
 
-    @Before
+    @BeforeEach
     public void setup() throws InterruptedException {
+        super.setUp();
         final CountDownLatch latch = new CountDownLatch(1);
         nodeMainExecutor.execute(new AbstractNodeMain() {
             @Override

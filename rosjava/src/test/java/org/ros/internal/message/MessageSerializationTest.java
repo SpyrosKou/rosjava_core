@@ -16,18 +16,17 @@
 
 package org.ros.internal.message;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.Lists;
-
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -56,7 +55,7 @@ public class MessageSerializationTest {
     void setData(List<std_msgs.String> value);
   }
 
-  @Before
+  @BeforeEach
   public void before() {
     messageDefinitionReflectionProvider = new MessageDefinitionReflectionProvider();
     messageDefinitionReflectionProvider.add(Nested._TYPE, Nested._DEFINITION);

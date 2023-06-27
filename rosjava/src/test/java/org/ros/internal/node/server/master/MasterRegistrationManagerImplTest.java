@@ -3,22 +3,18 @@
  */
 package org.ros.internal.node.server.master;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import com.google.common.collect.Sets;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.Subscriber;
 
 import java.net.URI;
+
+import static junit.framework.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for the {@link MasterRegistrationManagerImpl}.
@@ -30,7 +26,7 @@ public class MasterRegistrationManagerImplTest {
   private MasterRegistrationManagerImpl masterRegistrationManager;
   private MasterRegistrationListener registrationListener;
 
-  @Before
+  @BeforeEach
   public void setup() {
     registrationListener = mock(MasterRegistrationListener.class);
     masterRegistrationManager = new MasterRegistrationManagerImpl(registrationListener);

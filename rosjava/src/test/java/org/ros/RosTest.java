@@ -16,12 +16,10 @@
 
 package org.ros;
 
-import static org.junit.Assert.assertTrue;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
@@ -31,20 +29,22 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.Assert.assertTrue;
+
 /**
  * This is a base class for tests that sets up and tears down a {@link RosCore}
  * and a {@link NodeMainExecutor}.
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-@Ignore
+@Disabled
 public abstract class RosTest {
     private final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     protected RosCore rosCore;
     protected NodeConfiguration nodeConfiguration;
     protected NodeMainExecutor nodeMainExecutor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws InterruptedException {
         this.rosCore = RosCore.newPrivate();
         this.rosCore.start();
@@ -53,7 +53,7 @@ public abstract class RosTest {
         this.nodeConfiguration = NodeConfiguration.newPrivate(rosCore.getUri());
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         this.nodeMainExecutor.shutdown();
 

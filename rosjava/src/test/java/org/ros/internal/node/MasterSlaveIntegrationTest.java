@@ -16,13 +16,12 @@
 
 package org.ros.internal.node;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
@@ -38,8 +37,10 @@ import org.ros.namespace.GraphName;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -52,7 +53,7 @@ public class MasterSlaveIntegrationTest {
     private SlaveClient slaveClient;
     private ExecutorService executorService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         try {
             this.executorService = Executors.newCachedThreadPool();
@@ -73,11 +74,11 @@ public class MasterSlaveIntegrationTest {
             this.slaveClient = new SlaveClient(GraphName.of("/bar"), slaveServer.getUri());
 
         } catch (final Exception exception) {
-            Assume.assumeNoException(exception);
+            Assumptions.assumeTrue(false, ExceptionUtils.getStackTrace(exception));
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         try {
             this.masterServer.shutdown();
