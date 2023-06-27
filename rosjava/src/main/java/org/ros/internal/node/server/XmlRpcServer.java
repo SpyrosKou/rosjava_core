@@ -19,11 +19,9 @@ package org.ros.internal.node.server;
 import com.google.common.base.Preconditions;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
-import org.apache.xmlrpc.webserver.WebServer;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.exception.RosRuntimeException;
-
 import org.ros.internal.system.Process;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +41,16 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class XmlRpcServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private final WebServer webServer;
+    private final RosWebServer rosWebServer;
     private final AdvertiseAddress advertiseAddress;
     private final CountDownLatch startLatch = new CountDownLatch(1);
     private final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
     public XmlRpcServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
         final InetSocketAddress address = bindAddress.toInetSocketAddress();
-        this.webServer = new WebServer(address.getPort(), address.getAddress());
+        this.rosWebServer = new RosWebServer(address.getPort(), address.getAddress());
         this.advertiseAddress = advertiseAddress;
-        this.advertiseAddress.setPortCallable(() -> webServer.getPort());
+        this.advertiseAddress.setPortCallable(() -> rosWebServer.getPort());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("New WebServer Address:" + address.getAddress() + " port:" + address.getPort());
         }
@@ -65,7 +63,7 @@ public abstract class XmlRpcServer {
      */
     public final <T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> void start(final T instance) {
         Preconditions.checkNotNull(instance);
-        final org.apache.xmlrpc.server.XmlRpcServer xmlRpcServer = this.webServer.getXmlRpcServer();
+        final org.apache.xmlrpc.server.XmlRpcServer xmlRpcServer = this.rosWebServer.getXmlRpcServer();
         final RosPropertyHandlerMapping phm = new RosPropertyHandlerMapping();
         phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
         try {
@@ -86,7 +84,7 @@ public abstract class XmlRpcServer {
         serverConfig.setEnabledForExtensions(false);
         serverConfig.setContentLengthOptional(false);
         try {
-            this.webServer.start();
+            this.rosWebServer.start();
         } catch (final IOException e) {
             throw new RosRuntimeException(e);
         }
@@ -105,7 +103,7 @@ public abstract class XmlRpcServer {
      * Shut the remote call server down.
      */
     protected final void superShutdown() {
-        this.webServer.shutdown();
+        this.rosWebServer.shutdown();
     }
 
     /**
