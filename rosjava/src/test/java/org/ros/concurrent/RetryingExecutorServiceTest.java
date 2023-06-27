@@ -40,8 +40,8 @@ public class RetryingExecutorServiceTest {
 
   @Test
   public void testNoRetry_calledOnce() throws Exception {
-    RetryingExecutorService service = new RetryingExecutorService(executorService);
-    Callable<Boolean> callable = mock(Callable.class);
+    final RetryingExecutorService service = new RetryingExecutorService(executorService);
+    final Callable<Boolean> callable = mock(Callable.class);
     when(callable.call()).thenReturn(false);
     service.submit(callable);
     service.shutdown(10, TimeUnit.SECONDS);

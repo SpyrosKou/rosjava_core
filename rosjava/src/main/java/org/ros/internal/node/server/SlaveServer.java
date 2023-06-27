@@ -33,6 +33,7 @@ import org.ros.node.Node;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -49,7 +50,7 @@ public final class SlaveServer extends XmlRpcServer {
     private final Node node;
     private final AtomicBoolean shutdownStarted;
 
-    public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress, AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress, AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicParticipantManager topicParticipantManager, ServiceManager serviceManager, ParameterManager parameterManager, ScheduledExecutorService executorService, Node node) {
+    public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress, AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress, AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicParticipantManager topicParticipantManager, ServiceManager serviceManager, ParameterManager parameterManager, ExecutorService executorService, Node node) {
         super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
         this.nodeName = nodeName;
         this.masterClient = master;

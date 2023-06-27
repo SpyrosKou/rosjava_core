@@ -38,6 +38,7 @@ import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -58,16 +59,27 @@ public final class TcpRosServer {
     private final AdvertiseAddress advertiseAddress;
     private final TopicParticipantManager topicParticipantManager;
     private final ServiceManager serviceManager;
-    private final ScheduledExecutorService executorService;
+    private final ExecutorService executorService;
 
     private ChannelFactory channelFactory;
     private ServerBootstrap bootstrap;
     private Channel outgoingChannel;
     private ChannelGroup incomingChannelGroup;
 
-    public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
-                        TopicParticipantManager topicParticipantManager, ServiceManager serviceManager,
-                        ScheduledExecutorService executorService) {
+    /**
+     *
+     * @param bindAddress
+     * @param advertiseAddress
+     * @param topicParticipantManager
+     * @param serviceManager
+     * @param executorService {@link ScheduledExecutorService} is preferred, {@link java.util.concurrent.Executors#newCachedThreadPool()} is another alternative.
+     */
+    public TcpRosServer(
+            final BindAddress bindAddress
+            ,final  AdvertiseAddress advertiseAddress
+            ,final TopicParticipantManager topicParticipantManager
+            ,final ServiceManager serviceManager
+            ,final ExecutorService executorService) {
         this.bindAddress = bindAddress;
         this.advertiseAddress = advertiseAddress;
         this.topicParticipantManager = topicParticipantManager;
@@ -77,22 +89,17 @@ public final class TcpRosServer {
 
     public void start() {
         Preconditions.checkState(outgoingChannel == null);
-        channelFactory = new NioServerSocketChannelFactory(executorService, executorService);
-        bootstrap = new ServerBootstrap(channelFactory);
-        bootstrap.setOption("child.bufferFactory",
+        this.channelFactory = new NioServerSocketChannelFactory(executorService, executorService);
+        this.bootstrap = new ServerBootstrap(channelFactory);
+        this.bootstrap.setOption("child.bufferFactory",
                 new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-        bootstrap.setOption("child.keepAlive", true);
-        incomingChannelGroup = new DefaultChannelGroup();
-        bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup,
+        this.bootstrap.setOption("child.keepAlive", true);
+        this.incomingChannelGroup = new DefaultChannelGroup();
+        this.bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup,
                 topicParticipantManager, serviceManager));
 
-        outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());
-        advertiseAddress.setPortCallable(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort();
-            }
-        });
+        this.outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());
+        this.advertiseAddress.setPortCallable(() -> ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Bound to: " + bindAddress + " Advertising: " + advertiseAddress);
         }
@@ -104,12 +111,12 @@ public final class TcpRosServer {
      * <p>
      * Calling this method more than once has no effect.
      */
-    public void shutdown() {
+    public final void shutdown() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Shutting down: " + getAddress());
         }
 
-        if (outgoingChannel != null) {
+        if (this.outgoingChannel != null) {
             this.outgoingChannel.close().awaitUninterruptibly();
         }
         if (this.incomingChannelGroup != null) {
