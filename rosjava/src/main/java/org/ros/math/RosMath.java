@@ -23,11 +23,12 @@ public class RosMath {
 
   private RosMath() {
     // Utility class.
+    throw new AssertionError("Utility class");
   }
 
-  public static double clamp(double value, double minmum, double maximum) {
-    if (value < minmum) {
-      return minmum;
+  public static double clamp(double value, double minimum, double maximum) {
+    if (value < minimum) {
+      return minimum;
     }
     if (value > maximum) {
       return maximum;
@@ -35,9 +36,9 @@ public class RosMath {
     return value;
   }
 
-  public static float clamp(float value, float minmum, float maximum) {
-    if (value < minmum) {
-      return minmum;
+  public static float clamp(float value, float minimum, float maximum) {
+    if (value < minimum) {
+      return minimum;
     }
     if (value > maximum) {
       return maximum;
@@ -45,9 +46,9 @@ public class RosMath {
     return value;
   }
 
-  public static int clamp(int value, int minmum, int maximum) {
-    if (value < minmum) {
-      return minmum;
+  public static int clamp(int value, int minimum, int maximum) {
+    if (value < minimum) {
+      return minimum;
     }
     if (value > maximum) {
       return maximum;
@@ -55,9 +56,9 @@ public class RosMath {
     return value;
   }
 
-  public static long clamp(long value, long minmum, long maximum) {
-    if (value < minmum) {
-      return minmum;
+  public static long clamp(long value, long minimum, long maximum) {
+    if (value < minimum) {
+      return minimum;
     }
     if (value > maximum) {
       return maximum;

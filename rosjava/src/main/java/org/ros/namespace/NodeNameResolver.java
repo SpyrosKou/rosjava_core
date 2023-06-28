@@ -25,7 +25,7 @@ import org.ros.node.Node;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class NodeNameResolver extends NameResolver {
+public final class NodeNameResolver extends NameResolver {
 
   private final GraphName privateNamespace;
 
