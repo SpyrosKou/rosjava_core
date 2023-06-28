@@ -37,11 +37,11 @@ import java.util.Set;
 public final class SystemStateResultFactory implements ResultFactory<SystemState> {
 
 	@Override
-	public SystemState newFromValue(Object value) {
-		final Object[] vals = (Object[]) value;
+	public final SystemState newFromValue(Object value) {
+		final Object[] values = (Object[]) value;
 
-		final Map<String, Set<String>> publisherMap = getPublishers(vals[0]);
-		final Map<String, Set<String>> subscriberMap = getSubscribers(vals[1]);
+		final Map<String, Set<String>> publisherMap = getPublishers(values[0]);
+		final Map<String, Set<String>> subscriberMap = getSubscribers(values[1]);
 
 		final Map<String, TopicSystemState> topics = Maps.newHashMap();
 

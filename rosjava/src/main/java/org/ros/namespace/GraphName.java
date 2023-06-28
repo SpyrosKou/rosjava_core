@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class GraphName {
+public final class GraphName {
 
   @VisibleForTesting
   static final String ANONYMOUS_PREFIX = "anonymous_";

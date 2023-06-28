@@ -28,5 +28,5 @@ public interface ResultFactory<T> {
    * @param value
    * @return a value to be returned as the result part of a {@link Response}
    */
-  public T newFromValue(Object value);
+  public T newFromValue(final Object value);
 }

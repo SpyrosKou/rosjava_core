@@ -22,7 +22,7 @@ package org.ros.internal.node.response;
 public final class StringResultFactory implements ResultFactory<String> {
   
   @Override
-  public String newFromValue(Object value) {
+  public final String newFromValue(Object value) {
     return (String) value;
   }
 }

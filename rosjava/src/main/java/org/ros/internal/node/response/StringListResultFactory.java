@@ -27,10 +27,10 @@ import com.google.common.collect.Lists;
 public final class StringListResultFactory implements ResultFactory<List<String>> {
 
   @Override
-  public List<String> newFromValue(Object value) {
-    List<String> strings = Lists.newArrayList();
-    List<Object> objects = Arrays.asList((Object[]) value);
-    for (Object topic : objects) {
+  public final List<String> newFromValue(Object value) {
+    final List<String> strings = Lists.newArrayList();
+    final List<Object> objects = Arrays.asList((Object[]) value);
+    for (final Object topic : objects) {
       strings.add((String) topic);
     }
     return strings;
