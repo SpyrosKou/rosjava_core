@@ -16,15 +16,7 @@
 
 package org.ros.internal.node.client;
 
-import com.google.common.collect.Lists;
-
-import org.ros.internal.node.response.BooleanResultFactory;
-import org.ros.internal.node.response.IntegerResultFactory;
-import org.ros.internal.node.response.ObjectResultFactory;
-import org.ros.internal.node.response.Response;
-import org.ros.internal.node.response.StringListResultFactory;
-import org.ros.internal.node.response.StringResultFactory;
-import org.ros.internal.node.response.VoidResultFactory;
+import org.ros.internal.node.response.*;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.xmlrpc.ParameterServerXmlRpcEndpoint;

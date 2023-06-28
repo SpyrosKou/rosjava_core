@@ -17,13 +17,9 @@
 package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
-
-
 import org.ros.concurrent.Holder;
 import org.ros.concurrent.RetryingExecutorService;
-import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
@@ -33,14 +29,12 @@ import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicParticipantManagerListener;
-import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
