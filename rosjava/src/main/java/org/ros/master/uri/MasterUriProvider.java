@@ -46,23 +46,5 @@ public interface MasterUriProvider {
    */
   URI getMasterUri() throws RosRuntimeException;
 
-  /**
-   * Get a master URI within a given amount of time.
-   * 
-   * <p>
-   * There is no guarantee that calling this class twice will provide the same
-   * URI.
-   * 
-   * <p>
-   * This call may or may not block until a URI is available.
-   * 
-   * @param timeout
-   *          the amount of time to wait for a URI
-   * @param unit
-   *          the time unit for the wait time
-   * 
-   * @return a master URI or {@code null} if none could be obtained within the
-   *         timeout
-   */
-  URI getMasterUri(long timeout, TimeUnit unit);
+
 }

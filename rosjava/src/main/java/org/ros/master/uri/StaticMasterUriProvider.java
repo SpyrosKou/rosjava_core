@@ -40,8 +40,5 @@ public final class StaticMasterUriProvider implements MasterUriProvider {
     return uri;
   }
 
-  @Override
-  public final URI getMasterUri(long timeout, TimeUnit unit) {
-    return uri;
-  }
+
 }

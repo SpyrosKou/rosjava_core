@@ -62,11 +62,11 @@ public final class SwitchableMasterUriProvider implements MasterUriProvider {
         ProviderRequest requestToUse = null;
 
         synchronized (mutex) {
-            if (provider != null) {
-                providerToUse = provider;
+            if (this.provider != null) {
+                providerToUse = this.provider;
             } else {
                 requestToUse = new ProviderRequest();
-                pendingRequests.add(requestToUse);
+                this.pendingRequests.add(requestToUse);
             }
         }
 
@@ -77,30 +77,7 @@ public final class SwitchableMasterUriProvider implements MasterUriProvider {
         }
     }
 
-    @Override
-    public final URI getMasterUri(long timeout, TimeUnit unit) {
-        // We can't really switch providers, but people are willing to wait. It
-        // seems appropriate to wait rather than to return immediately.
 
-        MasterUriProvider providerToUse = null;
-        synchronized (mutex) {
-            if (provider != null) {
-                providerToUse = provider;
-            }
-        }
-
-        if (providerToUse != null) {
-            return providerToUse.getMasterUri(timeout, unit);
-        } else {
-            try {
-                Thread.sleep(unit.toMillis(timeout));
-            } catch (InterruptedException e) {
-                // Don't care
-            }
-
-            return null;
-        }
-    }
 
     /**
      * Switch between providers.
