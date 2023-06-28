@@ -25,7 +25,7 @@ public abstract class AbstractNamedChannelHandler extends SimpleChannelHandler i
     NamedChannelHandler {
 
   @Override
-  public String toString() {
+  public final String toString() {
     return String.format("NamedChannelHandler<%s, %s>", getName(), super.toString());
   }
 }

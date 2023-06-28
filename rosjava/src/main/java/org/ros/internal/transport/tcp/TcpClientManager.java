@@ -33,15 +33,15 @@ import java.util.concurrent.Executor;
 public final class TcpClientManager {
 
   private final ChannelGroup channelGroup;
-  private final Collection<TcpClient> tcpClients;
+  private final List<TcpClient> tcpClients;
   private final List<NamedChannelHandler> namedChannelHandlers;
   private final Executor executor;
 
   public TcpClientManager(Executor executor) {
     this.executor = executor;
-    channelGroup = new DefaultChannelGroup();
-    tcpClients = Lists.newArrayList();
-    namedChannelHandlers = Lists.newArrayList();
+    this.channelGroup = new DefaultChannelGroup();
+    this.tcpClients = Lists.newArrayList();
+    this.namedChannelHandlers = Lists.newArrayList();
   }
 
   public void addNamedChannelHandler(NamedChannelHandler namedChannelHandler) {
