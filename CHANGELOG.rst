@@ -7,9 +7,13 @@ latest
 -----------------
 * Gradle update to 7.5
 * Import 'org.apache.xmlrpc:xmlrpc-client:3.1.3', 'org.apache.xmlrpc:xmlrpc-common:3.1.3', 'org.apache.xmlrpc:xmlrpc-server:3.1.3' instead of compiling a modified copy of the sources.
-* Required changes have been implemented with inheritance
+* Changes in xmlrpc, needed for rosjava,  have been implemented with inheritance
 * Added methods that allow to code to wait for roscore to shutdown
-* Most classes are now final, excluding inheritance
+* Most classes are now final, excluding unwanted inheritance
+* Collection<T> has been replaced with List<T> or Set<T> in return parameters.
+* Some internal classes have been hidden (public access level has been restricted to package access level)
+* Less object instantiations, replace instantiation of FunctionalInterface implementing classes with method references.
+* Removed functional interface ResultFactory<T>, replaced with Function<Object,T>
 * Updated dependencies
     - Use Junit 5
     - Use Mockito 5
