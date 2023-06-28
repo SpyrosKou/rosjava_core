@@ -336,8 +336,8 @@ public final class MasterRegistrationManagerImpl {
      *
      * @return An immutable collection of services.
      */
-    public Collection<ServiceRegistrationInfo> getAllServices() {
-        return Collections.unmodifiableCollection(services.values());
+    public Set<ServiceRegistrationInfo> getAllServices() {
+        return Collections.unmodifiableSet(new HashSet<>(services.values()));
     }
 
     /**

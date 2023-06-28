@@ -33,6 +33,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides access to the ROS {@link ParameterServer}.
@@ -98,7 +99,7 @@ public final class DefaultParameterTree implements ParameterTree {
     }
 
     @Override
-    public final List<GraphName> getNames() {
+    public final Set<GraphName> getNames() {
         return parameterClient.getParamNames().getResult();
     }
 

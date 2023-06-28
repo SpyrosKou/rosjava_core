@@ -45,14 +45,14 @@ public final class InetAddressFactory {
     return address.getAddress().length == 4;
   }
 
-  private static Collection<InetAddress> getAllInetAddresses() {
-    List<NetworkInterface> networkInterfaces;
+  private static List<InetAddress> getAllInetAddresses() {
+    final List<NetworkInterface> networkInterfaces;
     try {
       networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
     } catch (SocketException e) {
       throw new RosRuntimeException(e);
     }
-    List<InetAddress> inetAddresses = Lists.newArrayList();
+    final List<InetAddress> inetAddresses = Lists.newArrayList();
     for (NetworkInterface networkInterface : networkInterfaces) {
       try {
         if (networkInterface.isUp()) {
@@ -79,11 +79,11 @@ public final class InetAddressFactory {
     return filterInetAddresses(getAllInetAddresses());
   }
 
-  public static InetAddress newNonLoopbackForNetworkInterface(NetworkInterface networkInterface) {
+  public static InetAddress newNonLoopbackForNetworkInterface(final NetworkInterface networkInterface) {
     return filterInetAddresses(Collections.list(networkInterface.getInetAddresses()));
   }
 
-  private static Collection<InetAddress> getAllInetAddressesByName(String host) {
+  private static final List<InetAddress> getAllInetAddressesByName(String host) {
     InetAddress[] allAddressesByName;
     try {
       allAddressesByName = org.xbill.DNS.Address.getAllByName(host);
@@ -127,7 +127,7 @@ public final class InetAddressFactory {
     } catch (UnknownHostException e) {
       throw new RosRuntimeException(e);
     }
-    Collection<InetAddress> allAddressesByName = getAllInetAddressesByName(host);
+    final List<InetAddress> allAddressesByName = getAllInetAddressesByName(host);
     // First, try to find a non-loopback IPv4 address.
     for (InetAddress address : allAddressesByName) {
       if (!address.isLoopbackAddress() && isIpv4(address)) {

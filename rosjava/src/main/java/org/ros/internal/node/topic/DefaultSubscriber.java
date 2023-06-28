@@ -124,7 +124,7 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
     return new SubscriberDeclaration(toIdentifier(), getTopicDeclaration());
   }
 
-  public Collection<String> getSupportedProtocols() {
+  public final Set<String> getSupportedProtocols() {
     return ProtocolNames.SUPPORTED;
   }
 

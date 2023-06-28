@@ -24,6 +24,7 @@ import org.ros.namespace.GraphName;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides access to a {@link ParameterServer}.
@@ -366,7 +367,7 @@ public interface ParameterTree {
   /**
    * @return all known parameter names
    */
-  Collection<GraphName> getNames();
+  Set<GraphName> getNames();
 
   /**
    * Subscribes to changes to the specified parameter.

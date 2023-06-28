@@ -33,6 +33,7 @@ import org.ros.node.Node;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -160,7 +161,7 @@ public final class SlaveServer extends XmlRpcServer {
         if (topicParticipantManager.hasSubscriber(graphName)) {
             final DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(graphName);
             final TopicDeclaration topicDeclaration = subscriber.getTopicDeclaration();
-            final Collection<PublisherIdentifier> identifiers = PublisherIdentifier.newCollectionFromUris(publisherUris, topicDeclaration);
+            final Set<PublisherIdentifier> identifiers = PublisherIdentifier.newCollectionFromUris(publisherUris, topicDeclaration);
             subscriber.updatePublishers(identifiers);
         }
     }
