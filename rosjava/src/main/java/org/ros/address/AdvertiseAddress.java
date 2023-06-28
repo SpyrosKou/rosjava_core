@@ -34,7 +34,8 @@ import java.util.concurrent.Callable;
  * An {@link AdvertiseAddress} encourages lazy lookups of port information to
  * prevent accidentally storing a bind port (e.g. 0 for OS picked) instead of
  * the advertised port.
- * 
+ *
+ * Should be created by an {@link AdvertiseAddressFactory}
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class AdvertiseAddress {
@@ -46,7 +47,7 @@ public final class AdvertiseAddress {
 
 
 
-  public AdvertiseAddress(String host) {
+  AdvertiseAddress(String host) {
     Preconditions.checkNotNull(host);
     this.host = host;
   }

@@ -27,26 +27,27 @@ public final class PublicAdvertiseAddressFactory implements AdvertiseAddressFact
 
   private final String host;
 
+  /**
+   * Best effort method, returns a new {@link AdvertiseAddress} where the host
+   *     is determined automatically.
+   *
+   *     @return a suitable {@link AdvertiseAddress} for a publicly accessible
+   *             {@link BindAddress}
+   */
   public PublicAdvertiseAddressFactory() {
     this(InetAddressFactory.newNonLoopback().getCanonicalHostName());
   }
 
+  /**
+   * Used defined host
+   * @param host
+   */
   public PublicAdvertiseAddressFactory(final String host) {
     Preconditions.checkNotNull(host);
     this.host = host;
   }
-  /**
-   *
-   *    @deprecated use {@link PrivateAdvertiseAddressFactory#newDefault()}
-   *
-   *
 
-   * Best effort method, returns a new {@link AdvertiseAddress} where the host
-   * is determined automatically.
-   *
-   * @return a suitable {@link AdvertiseAddress} for a publicly accessible
-   *         {@link BindAddress}
-   */
+
   @Override
   public final AdvertiseAddress newDefault() {
     return new AdvertiseAddress(host);

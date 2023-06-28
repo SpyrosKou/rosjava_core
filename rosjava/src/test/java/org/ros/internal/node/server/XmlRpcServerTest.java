@@ -17,10 +17,7 @@
 package org.ros.internal.node.server;
 
 import org.junit.jupiter.api.Test;
-import org.ros.address.Address;
-import org.ros.address.AdvertiseAddress;
-import org.ros.address.BindAddress;
-import org.ros.address.PrivateAdvertiseAddressFactory;
+import org.ros.address.*;
 import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
 
 import java.net.URI;
@@ -39,7 +36,10 @@ public class XmlRpcServerTest {
   @Test
   public void testGetPublicUri() {
     BindAddress bindAddress = BindAddress.newPublic();
-    final TestXmlRpcServer xmlRpcServer = new TestXmlRpcServer(bindAddress, new AdvertiseAddress("override"));
+    final String host="override";
+    final PublicAdvertiseAddressFactory publicAdvertiseAddressFactory=new PublicAdvertiseAddressFactory(host);
+    final AdvertiseAddress advertiseAddress = publicAdvertiseAddressFactory.newDefault();
+    final TestXmlRpcServer xmlRpcServer = new TestXmlRpcServer(bindAddress, advertiseAddress);
     try {
       xmlRpcServer.getUri();
       fail("Should not have succeeded before startup.");

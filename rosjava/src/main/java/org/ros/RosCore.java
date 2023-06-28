@@ -44,8 +44,16 @@ public final class RosCore {
 
     private final MasterServer masterServer;
 
+    /**
+     *
+     * @param host should be public for public usage
+     * @param port
+     * @return
+     */
     public static RosCore newPublic(String host, int port) {
-        return new RosCore(BindAddress.newPublic(port), new AdvertiseAddress(host));
+        final PublicAdvertiseAddressFactory publicAdvertiseAddressFactory = new PublicAdvertiseAddressFactory(host);
+        final AdvertiseAddress advertiseAddress = publicAdvertiseAddressFactory.newDefault();
+        return new RosCore(BindAddress.newPublic(port), advertiseAddress);
     }
 
     public static RosCore newPublic(int port) {
