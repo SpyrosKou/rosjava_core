@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 import org.ros.address.AdvertiseAddress;
+import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.when;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SlaveImplTest {
-
+    private final PrivateAdvertiseAddressFactory privateAdvertiseAddressFactory = new PrivateAdvertiseAddressFactory();
     @Test
     public void testGetPublicationsEmptyList() {
         SlaveServer mockSlave = mock(SlaveServer.class);
@@ -70,7 +71,7 @@ public class SlaveImplTest {
     @Test
     public void testRequestTopic() throws ServerException {
         SlaveServer mockSlave = mock(SlaveServer.class);
-        AdvertiseAddress address = AdvertiseAddress.newPrivate();
+        final AdvertiseAddress address = privateAdvertiseAddressFactory.newDefault();
         address.setStaticPort(1234);
         final ProtocolDescription protocol = ProtocolDescription.createTcpRosProtocolDescription(address);
         when(
@@ -87,7 +88,7 @@ public class SlaveImplTest {
     @Test
     public void testGetPid() {
         SlaveServer mockSlave = mock(SlaveServer.class);
-        AdvertiseAddress address = AdvertiseAddress.newPrivate();
+        final AdvertiseAddress address = privateAdvertiseAddressFactory.newDefault();
         address.setStaticPort(1234);
         when(mockSlave.getPid()).thenReturn(1234);
         SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
@@ -99,7 +100,7 @@ public class SlaveImplTest {
     @Test
     public void testGetPidNotSupported() {
         SlaveServer mockSlave = mock(SlaveServer.class);
-        AdvertiseAddress address = AdvertiseAddress.newPrivate();
+        final AdvertiseAddress address = privateAdvertiseAddressFactory.newDefault();
         address.setStaticPort(1234);
         when(mockSlave.getPid()).thenThrow(new UnsupportedOperationException());
         SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);

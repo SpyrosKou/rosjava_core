@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.parameter.ParameterManager;
@@ -46,7 +47,7 @@ import static junit.framework.Assert.assertTrue;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MasterSlaveIntegrationTest {
-
+    private final PrivateAdvertiseAddressFactory privateAdvertiseAddressFactory = new PrivateAdvertiseAddressFactory();
     private MasterServer masterServer;
     private MasterClient masterClient;
     private SlaveServer slaveServer;
@@ -57,7 +58,7 @@ public class MasterSlaveIntegrationTest {
     public void setUp() {
         try {
             this.executorService = Executors.newCachedThreadPool();
-            this.masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
+            this.masterServer = new MasterServer(BindAddress.newPrivate(), privateAdvertiseAddressFactory.newDefault());
             this.masterServer.start();
             this.masterServer.awaitStart(10, TimeUnit.SECONDS);
             this.masterClient = new MasterClient(masterServer.getUri());
@@ -66,7 +67,7 @@ public class MasterSlaveIntegrationTest {
             final ParameterManager parameterManager = new ParameterManager(executorService);
             this.slaveServer =
                     new SlaveServer(GraphName.of("/foo"), BindAddress.newPrivate(),
-                            AdvertiseAddress.newPrivate(), BindAddress.newPrivate(), AdvertiseAddress.newPrivate(),
+                            privateAdvertiseAddressFactory.newDefault(), BindAddress.newPrivate(), privateAdvertiseAddressFactory.newDefault(),
                             masterClient, topicParticipantManager, serviceManager, parameterManager,
                             executorService, null);
             this.slaveServer.start();

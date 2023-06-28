@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.ros.address.Address;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
 
 import java.net.URI;
@@ -30,6 +31,7 @@ import static junit.framework.Assert.*;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class XmlRpcServerTest {
+  private final PrivateAdvertiseAddressFactory privateAdvertiseAddressFactory = new PrivateAdvertiseAddressFactory();
 
   class FakeNode implements XmlRpcEndpoint {
   }
@@ -55,7 +57,7 @@ public class XmlRpcServerTest {
   @Test
   public void testGetPrivateUri() {
     BindAddress bindAddress = BindAddress.newPrivate();
-    final TestXmlRpcServer xmlRpcServer = new TestXmlRpcServer(bindAddress, AdvertiseAddress.newPrivate());
+    final TestXmlRpcServer xmlRpcServer = new TestXmlRpcServer(bindAddress, privateAdvertiseAddressFactory.newDefault());
     try {
       xmlRpcServer.getUri();
       fail("Should not have succeeded before startup.");

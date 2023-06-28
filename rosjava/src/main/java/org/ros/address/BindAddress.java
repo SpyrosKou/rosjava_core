@@ -38,11 +38,11 @@ public final class BindAddress {
    * @return a {@link BindAddress} instance with specified port that will bind
    *         to all network interfaces on the host
    */
-  public static BindAddress newPublic(int port) {
+  public static final BindAddress newPublic(int port) {
     return new BindAddress(new InetSocketAddress(port));
   }
 
-  public static BindAddress newPublic() {
+  public static final BindAddress newPublic() {
     return newPublic(0);
   }
 
@@ -51,25 +51,25 @@ public final class BindAddress {
    * @return a {@link BindAddress} instance with specified port that will bind
    *         to the loopback interface on the host
    */
-  public static BindAddress newPrivate(int port) {
+  public static final BindAddress newPrivate(int port) {
     return new BindAddress(new InetSocketAddress(InetAddressFactory.newLoopback(), port));
   }
 
-  public static BindAddress newPrivate() {
+  public static final BindAddress newPrivate() {
     return newPrivate(0);
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "BindAddress<" + address + ">";
   }
 
-  public InetSocketAddress toInetSocketAddress() {
+  public final InetSocketAddress toInetSocketAddress() {
     return address;
   }
 
   @Override
-  public int hashCode() {
+  public final int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((address == null) ? 0 : address.hashCode());
@@ -77,7 +77,7 @@ public final class BindAddress {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public final boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;

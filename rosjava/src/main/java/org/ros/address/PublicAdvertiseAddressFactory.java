@@ -35,9 +35,20 @@ public final class PublicAdvertiseAddressFactory implements AdvertiseAddressFact
     Preconditions.checkNotNull(host);
     this.host = host;
   }
+  /**
+   *
+   *    @deprecated use {@link PrivateAdvertiseAddressFactory#newDefault()}
+   *
+   *
 
+   * Best effort method, returns a new {@link AdvertiseAddress} where the host
+   * is determined automatically.
+   *
+   * @return a suitable {@link AdvertiseAddress} for a publicly accessible
+   *         {@link BindAddress}
+   */
   @Override
-  public AdvertiseAddress newDefault() {
+  public final AdvertiseAddress newDefault() {
     return new AdvertiseAddress(host);
   }
 }

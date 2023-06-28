@@ -19,9 +19,7 @@ package org.ros.internal.transport.tcp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.ros.address.AdvertiseAddress;
-import org.ros.address.BindAddress;
-import org.ros.address.InetAddressFactory;
+import org.ros.address.*;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +32,7 @@ import static junit.framework.Assert.*;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TcpRosServerTest {
+  private final PublicAdvertiseAddressFactory publicAdvertiseAddressFactory = new PublicAdvertiseAddressFactory();
   private ExecutorService executorService;
 
   @BeforeEach
@@ -49,7 +48,7 @@ public class TcpRosServerTest {
   @Test
   public void testGetAddressFailsIfServerNotRunning() {
     TcpRosServer tcpRosServer =
-            new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
+            new TcpRosServer(BindAddress.newPublic(),publicAdvertiseAddressFactory.newDefault(), null, null,
                     executorService);
     try {
 
@@ -77,13 +76,13 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfPortTaken() {
     TcpRosServer firstServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
+        new TcpRosServer(BindAddress.newPublic(), publicAdvertiseAddressFactory.newDefault(), null, null,
             executorService);
     firstServer.start();
     try {
       TcpRosServer secondServer =
           new TcpRosServer(BindAddress.newPublic(firstServer.getAddress().getPort()),
-              AdvertiseAddress.newPublic(), null, null, executorService);
+                  publicAdvertiseAddressFactory.newDefault(), null, null, executorService);
       secondServer.start();
       fail();
     } catch (RuntimeException e) {
@@ -95,7 +94,7 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfStartedWhileRunning() {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
+        new TcpRosServer(BindAddress.newPublic(), publicAdvertiseAddressFactory.newDefault(), null, null,
             executorService);
     tcpRosServer.start();
     try {
