@@ -29,40 +29,40 @@ public class StringListResultFactoryTest extends TestCase {
 
   @Test
   public void testEncodeAndDecode() {
-    StringListResultFactory factory = new StringListResultFactory();
+
     List<String> expected;
     List<String> value;
 
     expected = Lists.newArrayList();
-    value = factory.apply(new Object[] {});
+    value = StringListResultFactory.applyStatic(new Object[] {});
     assertEquals(expected, value);
-    value = factory.apply(new String[] {});
+    value = StringListResultFactory.applyStatic(new String[] {});
     assertEquals(expected, value);
 
     expected = Lists.newArrayList(new String[] { "foo" });
-    value = factory.apply(new Object[] { "foo" });
+    value = StringListResultFactory.applyStatic(new Object[] { "foo" });
     assertEquals(expected, value);
-    value = factory.apply(new String[] { "foo" });
+    value = StringListResultFactory.applyStatic(new String[] { "foo" });
     assertEquals(expected, value);
 
     expected = Lists.newArrayList(new String[] { "foo", "bar" });
-    value = factory.apply(new Object[] { "foo", "bar" });
+    value = StringListResultFactory.applyStatic(new Object[] { "foo", "bar" });
     assertEquals(expected, value);
-    value = factory.apply(new String[] { "foo", "bar" });
+    value = StringListResultFactory.applyStatic(new String[] { "foo", "bar" });
     assertEquals(expected, value);
 
     try {
-      factory.apply("bad");
+      StringListResultFactory.applyStatic("bad");
       fail("should not have converted");
     } catch (ClassCastException e) {
     }
     try {
-      factory.apply(new Object[] { 1 });
+      StringListResultFactory.applyStatic(new Object[] { 1 });
       fail("should not have converted");
     } catch (ClassCastException e) {
     }
     try {
-      factory.apply(new Object[] { "1", 1 });
+      StringListResultFactory.applyStatic(new Object[] { "1", 1 });
       fail("should not have converted");
     } catch (ClassCastException e) {
     }

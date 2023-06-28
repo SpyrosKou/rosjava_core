@@ -22,11 +22,11 @@ package org.ros.internal.node.response;
 public final class ObjectResultFactory implements ResultFactory<Object> {
 
     @Override
-    public Object apply(Object value) {
+    public final Object apply(Object value) {
         return applyStatic(value);
     }
 
-    public final Object applyStatic(Object value) {
+    public static final Object applyStatic(Object value) {
         return value;
     }
 }

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * The response from an XML-RPC call.
@@ -66,7 +67,7 @@ public final class Response<T> {
      *                         StatusCode.FAILURE.
      */
     public static <T> Response<T> fromListCheckedFailure(final List<Object> response,
-                                                         final ResultFactory<T> resultFactory) throws RemoteException {
+                                                         final Function<Object, T> resultFactory) throws RemoteException {
         StatusCode statusCode;
         String message;
         try {
@@ -116,7 +117,7 @@ public final class Response<T> {
      */
     public final static <T> Response<T> fromListChecked(
             final List<Object> response
-            , final ResultFactory<T> resultFactory) throws RemoteException {
+            , final Function<Object, T> resultFactory) throws RemoteException {
         StatusCode statusCode = StatusCode.ERROR;
         String message;
         try {
@@ -126,8 +127,8 @@ public final class Response<T> {
 
                 throw new RemoteException(statusCode, message);
             }
-        } catch (ClassCastException e) {
-            throw new RosRuntimeException("Remote side did not return correct type (status code/message).", e);
+        } catch (ClassCastException classCastException) {
+            throw new RosRuntimeException("Remote side did not return correct type (status code/message).", classCastException);
         }
         try {
             return new Response<T>(statusCode, message, resultFactory.apply(response.get(2)));

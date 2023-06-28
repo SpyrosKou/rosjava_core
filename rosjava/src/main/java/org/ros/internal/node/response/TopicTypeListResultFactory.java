@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
  * @author Keith M. Hughes
  */
 public final class TopicTypeListResultFactory implements
-        Function<Object, List<TopicType>> {
+        ResultFactory<List<TopicType>> {
 
     @Override
     public final List<TopicType> apply(Object value) { return applyStatic(value);}
