@@ -34,35 +34,35 @@ public class StringListResultFactoryTest extends TestCase {
     List<String> value;
 
     expected = Lists.newArrayList();
-    value = factory.newFromValue(new Object[] {});
+    value = factory.apply(new Object[] {});
     assertEquals(expected, value);
-    value = factory.newFromValue(new String[] {});
+    value = factory.apply(new String[] {});
     assertEquals(expected, value);
 
     expected = Lists.newArrayList(new String[] { "foo" });
-    value = factory.newFromValue(new Object[] { "foo" });
+    value = factory.apply(new Object[] { "foo" });
     assertEquals(expected, value);
-    value = factory.newFromValue(new String[] { "foo" });
+    value = factory.apply(new String[] { "foo" });
     assertEquals(expected, value);
 
     expected = Lists.newArrayList(new String[] { "foo", "bar" });
-    value = factory.newFromValue(new Object[] { "foo", "bar" });
+    value = factory.apply(new Object[] { "foo", "bar" });
     assertEquals(expected, value);
-    value = factory.newFromValue(new String[] { "foo", "bar" });
+    value = factory.apply(new String[] { "foo", "bar" });
     assertEquals(expected, value);
 
     try {
-      factory.newFromValue("bad");
+      factory.apply("bad");
       fail("should not have converted");
     } catch (ClassCastException e) {
     }
     try {
-      factory.newFromValue(new Object[] { 1 });
+      factory.apply(new Object[] { 1 });
       fail("should not have converted");
     } catch (ClassCastException e) {
     }
     try {
-      factory.newFromValue(new Object[] { "1", 1 });
+      factory.apply(new Object[] { "1", 1 });
       fail("should not have converted");
     } catch (ClassCastException e) {
     }

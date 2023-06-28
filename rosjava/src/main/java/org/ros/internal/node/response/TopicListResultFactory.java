@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -30,21 +30,25 @@ import java.util.List;
 /**
  * A {@link ResultFactory} to take an object and turn it into a list of
  * {@link TopicDeclaration} instances.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class TopicListResultFactory implements ResultFactory<List<TopicDeclaration>> {
 
-  @Override
-  public List<TopicDeclaration> newFromValue(Object value) {
-    final List<TopicDeclaration> descriptions = Lists.newArrayList();
-    final List<Object> topics = Arrays.asList((Object[]) value);
-    for (final Object topic : topics) {
-      final String name = (String) ((Object[]) topic)[0];
-      final String type = (String) ((Object[]) topic)[1];
-      descriptions.add(TopicDeclaration.newFromTopicName(GraphName.of(name), new TopicDescription(type, null,
-          null), null));
+    @Override
+    public final List<TopicDeclaration> apply(Object value) {
+        return applyStatic(value);
     }
-    return descriptions;
-  }
+
+    public static final List<TopicDeclaration> applyStatic(Object value) {
+        final List<TopicDeclaration> descriptions = Lists.newArrayList();
+        final List<Object> topics = Arrays.asList((Object[]) value);
+        for (final Object topic : topics) {
+            final String name = (String) ((Object[]) topic)[0];
+            final String type = (String) ((Object[]) topic)[1];
+            descriptions.add(TopicDeclaration.newFromTopicName(GraphName.of(name), new TopicDescription(type, null,
+                    null), null));
+        }
+        return descriptions;
+    }
 }

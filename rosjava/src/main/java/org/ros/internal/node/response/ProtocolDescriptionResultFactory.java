@@ -31,12 +31,16 @@ import java.util.List;
 public final class ProtocolDescriptionResultFactory implements ResultFactory<ProtocolDescription> {
 
     @Override
-    public final ProtocolDescription newFromValue(Object value) {
+    public final ProtocolDescription apply(Object value) {
+        return applyStatic(value);
+    }
+
+    public static final ProtocolDescription applyStatic(Object value) {
         final List<Object> protocolParameters = Arrays.asList((Object[]) value);
         Preconditions.checkState(protocolParameters.size() == 3);
         Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
-        final String host=(String) protocolParameters.get(1);
-        final PublicAdvertiseAddressFactory publicAdvertiseAddressFactory=new PublicAdvertiseAddressFactory(host);
+        final String host = (String) protocolParameters.get(1);
+        final PublicAdvertiseAddressFactory publicAdvertiseAddressFactory = new PublicAdvertiseAddressFactory(host);
         final AdvertiseAddress advertiseAddress = publicAdvertiseAddressFactory.newDefault();
         advertiseAddress.setStaticPort((Integer) protocolParameters.get(2));
         return ProtocolDescription.createTcpRosProtocolDescription(advertiseAddress);

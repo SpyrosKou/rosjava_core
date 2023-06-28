@@ -23,9 +23,7 @@ import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.dnssec.R;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
@@ -67,8 +65,8 @@ public final class Response<T> {
      * @throws RemoteException if the {@link Response}'s {@link StatusCode} indicates
      *                         StatusCode.FAILURE.
      */
-    public static <T> Response<T> fromListCheckedFailure(List<Object> response,
-                                                         ResultFactory<T> resultFactory) throws RemoteException {
+    public static <T> Response<T> fromListCheckedFailure(final List<Object> response,
+                                                         final ResultFactory<T> resultFactory) throws RemoteException {
         StatusCode statusCode;
         String message;
         try {
@@ -91,7 +89,7 @@ public final class Response<T> {
             throw rosRuntimeException;
         }
         try {
-            return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
+            return new Response<T>(statusCode, message, resultFactory.apply(response.get(2)));
         } catch (final ClassCastException classCastException) {
 
             final RosRuntimeException rosRuntimeException = new RosRuntimeException("Remote side did not return correct value type.", classCastException);
@@ -132,7 +130,7 @@ public final class Response<T> {
             throw new RosRuntimeException("Remote side did not return correct type (status code/message).", e);
         }
         try {
-            return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
+            return new Response<T>(statusCode, message, resultFactory.apply(response.get(2)));
         } catch (ClassCastException e) {
             throw new RosRuntimeException("Remote side did not return correct value type.", e);
         }

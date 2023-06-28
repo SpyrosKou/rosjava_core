@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2012 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -31,101 +31,101 @@ import java.util.Set;
 /**
  * A {@link ResultFactory} to take an object and turn it into a
  * {@link SystemState} instance.
- * 
+ *
  * @author Keith M. Hughes
  */
 public final class SystemStateResultFactory implements ResultFactory<SystemState> {
 
-	@Override
-	public final SystemState newFromValue(Object value) {
-		final Object[] values = (Object[]) value;
+    @Override
+    public final SystemState apply(Object value) {
+        return applyStatic(value);
+    }
 
-		final Map<String, Set<String>> publisherMap = getPublishers(values[0]);
-		final Map<String, Set<String>> subscriberMap = getSubscribers(values[1]);
+    public static final SystemState applyStatic(Object value) {
+        final Object[] values = (Object[]) value;
 
-		final Map<String, TopicSystemState> topics = Maps.newHashMap();
+        final Map<String, Set<String>> publisherMap = getPublishers(values[0]);
+        final Map<String, Set<String>> subscriberMap = getSubscribers(values[1]);
 
-		for (final Entry<String, Set<String>> publisherData : publisherMap.entrySet()) {
-			final String topicName = publisherData.getKey();
+        final Map<String, TopicSystemState> topics = Maps.newHashMap();
 
-			Set<String> subscriberNodes = subscriberMap.remove(topicName);
+        for (final Entry<String, Set<String>> publisherData : publisherMap.entrySet()) {
+            final String topicName = publisherData.getKey();
 
-			// Return empty lists if no subscribers
-			if (subscriberNodes == null) {
-				subscriberNodes = Sets.newHashSet();
-			}
+            Set<String> subscriberNodes = subscriberMap.remove(topicName);
 
-			topics.put(topicName,
-					new TopicSystemState(topicName, publisherData.getValue(),
-							subscriberNodes));
-		}
+            // Return empty lists if no subscribers
+            if (subscriberNodes == null) {
+                subscriberNodes = Sets.newHashSet();
+            }
 
-		for (final Entry<String, Set<String>> subscriberData : subscriberMap
-				.entrySet()) {
-			// At this point there are no publishers with the same topic name
-			final HashSet<String> noPublishers = Sets.newHashSet();
-			final String topicName = subscriberData.getKey();
-			topics.put(topicName, new TopicSystemState(topicName,
-					noPublishers, subscriberData.getValue()));
-		}
+            topics.put(topicName,
+                    new TopicSystemState(topicName, publisherData.getValue(),
+                            subscriberNodes));
+        }
 
-		// TODO(keith): Get service state in here.
+        for (final Entry<String, Set<String>> subscriberData : subscriberMap
+                .entrySet()) {
+            // At this point there are no publishers with the same topic name
+            final HashSet<String> noPublishers = Sets.newHashSet();
+            final String topicName = subscriberData.getKey();
+            topics.put(topicName, new TopicSystemState(topicName,
+                    noPublishers, subscriberData.getValue()));
+        }
 
-		return new SystemState(topics.values());
-	}
+        // TODO(keith): Get service state in here.
 
-	  /**
-   * Extract out the publisher data.
-   * 
-   * @param pubPairs
-   *          the list of lists containing both a topic name and a list of
-   *          publisher nodes for that topic
-   * 
-   * @return a mapping from topic name to the set of publishers for that topic
-   */
-	private final Map<String, Set<String>> getPublishers(Object pubPairs) {
-		final Map<String, Set<String>> topicToPublishers = Maps.newHashMap();
+        return new SystemState(topics.values());
+    }
 
-		for (final Object topicData : Arrays.asList((Object[]) pubPairs)) {
-			final String topicName = (String) ((Object[]) topicData)[0];
+    /**
+     * Extract out the publisher data.
+     *
+     * @param pubPairs the list of lists containing both a topic name and a list of
+     *                 publisher nodes for that topic
+     * @return a mapping from topic name to the set of publishers for that topic
+     */
+    private static final Map<String, Set<String>> getPublishers(Object pubPairs) {
+        final Map<String, Set<String>> topicToPublishers = Maps.newHashMap();
 
-			final Set<String> publishers =Sets.newHashSet();
-			final Object[] publisherData = (Object[])((Object[]) topicData)[1];
-			for (final Object publisher : publisherData) {
-				publishers.add(publisher.toString());
-			}
+        for (final Object topicData : Arrays.asList((Object[]) pubPairs)) {
+            final String topicName = (String) ((Object[]) topicData)[0];
 
-			topicToPublishers.put(topicName, publishers);
-		}
+            final Set<String> publishers = Sets.newHashSet();
+            final Object[] publisherData = (Object[]) ((Object[]) topicData)[1];
+            for (final Object publisher : publisherData) {
+                publishers.add(publisher.toString());
+            }
 
-		return topicToPublishers;
-	}
+            topicToPublishers.put(topicName, publishers);
+        }
 
-	/**
-	 * Extract out the subscriber data.
-	 * 
-	 * @param subPairs
-	 *            the list of lists containing both a topic name and a list of
-	 *            subscriber nodes for that topic
-	 * 
-	 * @return a mapping from topic name to the set of subscribers for that
-	 *         topic
-	 */
-	private Map<String, Set<String>> getSubscribers(Object subPairs) {
-		final Map<String, Set<String>> topicToSubscribers = Maps.newHashMap();
+        return topicToPublishers;
+    }
 
-		for (final Object topicData : Arrays.asList((Object[]) subPairs)) {
-			final 	String topicName = (String) ((Object[]) topicData)[0];
+    /**
+     * Extract out the subscriber data.
+     *
+     * @param subPairs the list of lists containing both a topic name and a list of
+     *                 subscriber nodes for that topic
+     * @return a mapping from topic name to the set of subscribers for that
+     * topic
+     */
+    private static final Map<String, Set<String>> getSubscribers(Object subPairs) {
+        final Map<String, Set<String>> topicToSubscribers = Maps.newHashMap();
 
-			final Set<String> subscribers =Sets.newHashSet();
-			final Object[] subscriberData = (Object[])((Object[]) topicData)[1];
-			for (final Object subscriber : subscriberData) {
-				subscribers.add(subscriber.toString());
-			}
+        for (final Object topicData : Arrays.asList((Object[]) subPairs)) {
+            final String topicName = (String) ((Object[]) topicData)[0];
 
-			topicToSubscribers.put(topicName, subscribers);
-		}
+            final Set<String> subscribers = Sets.newHashSet();
+            final Object[] subscriberData = (Object[]) ((Object[]) topicData)[1];
+            for (final Object subscriber : subscriberData) {
+                subscribers.add(subscriber.toString());
+            }
 
-		return topicToSubscribers;
-	}
+            topicToSubscribers.put(topicName, subscribers);
+        }
+
+        return topicToSubscribers;
+    }
 }

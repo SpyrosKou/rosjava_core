@@ -33,7 +33,8 @@ import com.google.common.collect.Lists;
 public final class UriListResultFactory implements ResultFactory<List<URI>> {
 
 	@Override
-	public List<URI> newFromValue(Object value) {
+	public final List<URI> apply(Object value) { return applyStatic(value);}
+	public static final List<URI> applyStatic(Object value) {
 		final List<Object> values = Arrays.asList((Object[]) value);
 		final List<URI> uris = Lists.newArrayList();
 		for (Object uri : values) {

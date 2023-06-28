@@ -22,7 +22,10 @@ package org.ros.internal.node.response;
 public final class IntegerResultFactory implements ResultFactory<Integer> {
   
   @Override
-  public Integer newFromValue(Object value) {
+  public final Integer apply(Object value) {
+    return applyStatic(value);
+  }
+  public static final Integer applyStatic(Object value) {
     return (Integer) value;
   }
 }

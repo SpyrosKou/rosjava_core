@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2012 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,6 +17,7 @@
 package org.ros.internal.node.response;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.ros.master.client.TopicType;
 
@@ -25,22 +26,23 @@ import com.google.common.collect.Lists;
 /**
  * A {@link ResultFactory} to take an object and turn it into a list of
  * {@link TopicType} instances.
- * 
+ *
  * @author Keith M. Hughes
  */
 public final class TopicTypeListResultFactory implements
-		ResultFactory<List<TopicType>> {
+        Function<Object, List<TopicType>> {
 
-	@Override
-	public List<TopicType> newFromValue(Object value) {
-		final List<TopicType> topics = Lists.newArrayList();
+    @Override
+    public final List<TopicType> apply(Object value) { return applyStatic(value);}
+    public static final List<TopicType> applyStatic(Object value) {
+        final List<TopicType> topics = Lists.newArrayList();
 
-		for (final Object pair : (Object[]) value) {
-			topics.add(new TopicType((String) ((Object[]) pair)[0],
-					(String) ((Object[]) pair)[1]));
-		}
+        for (final Object pair : (Object[]) value) {
+            topics.add(new TopicType((String) ((Object[]) pair)[0],
+                    (String) ((Object[]) pair)[1]));
+        }
 
-		return topics;
-	}
+        return topics;
+    }
 
 }

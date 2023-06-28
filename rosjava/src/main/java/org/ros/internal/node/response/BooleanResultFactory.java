@@ -22,7 +22,10 @@ package org.ros.internal.node.response;
 public final class BooleanResultFactory implements ResultFactory<Boolean> {
   
   @Override
-  public Boolean newFromValue(Object value) {
+  public Boolean apply(Object value) {
+    return applyStatic(value);
+  }
+  public static final Boolean applyStatic(Object value) {
     return (Boolean) value;
   }
 }

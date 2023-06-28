@@ -22,7 +22,10 @@ package org.ros.internal.node.response;
 public final class StringResultFactory implements ResultFactory<String> {
   
   @Override
-  public final String newFromValue(Object value) {
+  public final String apply(Object value) {
+    return applyStatic(value);
+  }
+  public static final String applyStatic(Object value) {
     return (String) value;
   }
 }

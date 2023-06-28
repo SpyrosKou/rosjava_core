@@ -16,17 +16,19 @@
 
 package org.ros.internal.node.response;
 
+import java.util.function.Function;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <T>
  *          the result type
  */
-public interface ResultFactory<T> {
+public interface ResultFactory<T> extends Function<Object,T> {
 
   /**
    * @param value
    * @return a value to be returned as the result part of a {@link Response}
    */
-  public T newFromValue(final Object value);
+  public T apply(final Object value);
 }

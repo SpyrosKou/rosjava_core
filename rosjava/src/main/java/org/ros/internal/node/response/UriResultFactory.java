@@ -27,7 +27,8 @@ import org.ros.exception.RosRuntimeException;
 public final class UriResultFactory implements ResultFactory<URI> {
 
   @Override
-  public URI newFromValue(Object value) {
+  public final URI apply(Object value) {return applyStatic(value);}
+  public static final URI applyStatic(Object value) {
     try {
       return new URI((String) value);
     } catch (URISyntaxException e) {

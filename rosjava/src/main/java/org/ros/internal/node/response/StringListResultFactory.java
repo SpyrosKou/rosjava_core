@@ -27,7 +27,11 @@ import com.google.common.collect.Lists;
 public final class StringListResultFactory implements ResultFactory<List<String>> {
 
   @Override
-  public final List<String> newFromValue(Object value) {
+  public final List<String> apply(Object value) {
+    return applyStatic(value);
+  }
+
+  public static final List<String> applyStatic(Object value) {
     final List<String> strings = Lists.newArrayList();
     final List<Object> objects = Arrays.asList((Object[]) value);
     for (final Object topic : objects) {
