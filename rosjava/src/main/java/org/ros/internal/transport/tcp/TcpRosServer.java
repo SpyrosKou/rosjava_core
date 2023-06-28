@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -99,7 +98,7 @@ public final class TcpRosServer {
                 topicParticipantManager, serviceManager));
 
         this.outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());
-        this.advertiseAddress.setPortCallable(() -> ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort());
+        this.advertiseAddress.setPortSupplier(() -> ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Bound to: " + bindAddress + " Advertising: " + advertiseAddress);
         }

@@ -50,7 +50,7 @@ public abstract class XmlRpcServer {
         final InetSocketAddress address = bindAddress.toInetSocketAddress();
         this.rosWebServer = new RosWebServer(address.getPort(), address.getAddress());
         this.advertiseAddress = advertiseAddress;
-        this.advertiseAddress.setPortCallable(() -> rosWebServer.getPort());
+        this.advertiseAddress.setPortSupplier(() -> rosWebServer.getPort());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("New WebServer Address:" + address.getAddress() + " port:" + address.getPort());
         }

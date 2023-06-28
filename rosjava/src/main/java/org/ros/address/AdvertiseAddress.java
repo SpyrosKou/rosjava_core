@@ -18,6 +18,7 @@ package org.ros.address;
 
 import com.google.common.base.Preconditions;
 
+import com.google.common.base.Supplier;
 import org.ros.exception.RosRuntimeException;
 
 import java.net.InetAddress;
@@ -40,98 +41,81 @@ public final class AdvertiseAddress {
 
   private final String host;
 
-  private Callable<Integer> portCallable;
+  private Supplier<Integer> portSupplier;
 
-  public static AdvertiseAddress newPrivate() {
-    return new PrivateAdvertiseAddressFactory().newDefault();
-  }
 
-  /**
-   * Best effort method, returns a new {@link AdvertiseAddress} where the host
-   * is determined automatically.
-   * 
-   * @return a suitable {@link AdvertiseAddress} for a publicly accessible
-   *         {@link BindAddress}
-   */
-  public static AdvertiseAddress newPublic() {
-    return new PublicAdvertiseAddressFactory().newDefault();
-  }
+
 
   public AdvertiseAddress(String host) {
     Preconditions.checkNotNull(host);
     this.host = host;
   }
 
-  public String getHost() {
+  public final String getHost() {
     return host;
   }
 
-  public void setStaticPort(final int port) {
-    portCallable = new Callable<Integer>() {
-      @Override
-      public Integer call() throws Exception {
-        return port;
-      }
-    };
+  public final void setStaticPort(final int port) {
+    this.portSupplier = () -> port;
   }
 
-  public int getPort() {
+  public final int getPort() {
     try {
-      return portCallable.call();
+      return portSupplier.get();
     } catch (Exception e) {
       throw new RosRuntimeException(e);
     }
   }
 
-  public void setPortCallable(Callable<Integer> portCallable) {
-    this.portCallable = portCallable;
+  public final void setPortSupplier(final Supplier<Integer> portSupplier) {
+    this.portSupplier = portSupplier;
   }
 
-  public InetAddress toInetAddress() {
+  public final InetAddress toInetAddress() {
     return InetAddressFactory.newFromHostString(host);
   }
 
-  public InetSocketAddress toInetSocketAddress() {
-    Preconditions.checkNotNull(portCallable);
+  public final InetSocketAddress toInetSocketAddress() {
+    Preconditions.checkNotNull(portSupplier);
     try {
       InetAddress address = toInetAddress();
-      return new InetSocketAddress(address, portCallable.call());
+      return new InetSocketAddress(address, portSupplier.get());
     } catch (Exception e) {
       throw new RosRuntimeException(e);
     }
   }
 
-  public URI toUri(String scheme) {
-    Preconditions.checkNotNull(portCallable);
+  public final URI toUri(String scheme) {
+    Preconditions.checkNotNull(portSupplier);
     try {
-      return new URI(scheme, null, host, portCallable.call(), "/", null, null);
+      return new URI(scheme, null, host, portSupplier.get(), "/", null, null);
     } catch (Exception e) {
       throw new RosRuntimeException("Failed to create URI: " + this, e);
     }
   }
 
-  public boolean isLoopbackAddress() {
+  public final boolean isLoopbackAddress() {
     return toInetAddress().isLoopbackAddress();
   }
 
   @Override
-  public String toString() {
-    Preconditions.checkNotNull(portCallable);
+  public final String toString() {
+    Preconditions.checkNotNull(portSupplier);
     try {
-      return "AdvertiseAddress<" + host + ", " + portCallable.call() + ">";
+      return "AdvertiseAddress<" + host + ", " + portSupplier.get() + ">";
     } catch (Exception e) {
       throw new RosRuntimeException(e);
     }
   }
 
   @Override
-  public int hashCode() {
-    Preconditions.checkNotNull(portCallable);
+  public final int hashCode() {
+    Preconditions.checkNotNull(portSupplier);
     final int prime = 31;
     int result = 1;
     result = prime * result + ((host == null) ? 0 : host.hashCode());
     try {
-      result = prime * result + portCallable.call();
+      result = prime * result + portSupplier.get();
     } catch (Exception e) {
       throw new RosRuntimeException(e);
     }
@@ -139,8 +123,8 @@ public final class AdvertiseAddress {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    Preconditions.checkNotNull(portCallable);
+  public final  boolean equals(Object obj) {
+    Preconditions.checkNotNull(portSupplier);
     if (this == obj)
       return true;
     if (obj == null)
@@ -154,7 +138,7 @@ public final class AdvertiseAddress {
     } else if (!host.equals(other.host))
       return false;
     try {
-      if (portCallable.call() != other.portCallable.call())
+      if (portSupplier.get() != other.portSupplier.get())
         return false;
     } catch (Exception e) {
       throw new RosRuntimeException(e);
