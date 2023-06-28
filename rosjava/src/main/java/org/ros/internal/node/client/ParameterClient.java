@@ -116,7 +116,7 @@ public final class ParameterClient extends Client<ParameterServerXmlRpcEndpoint>
 
   public final Response<Boolean> hasParam(GraphName parameterName) {
     return Response.fromListChecked(xmlRpcEndpoint.hasParam(nodeName, parameterName.toString()),
-        new BooleanResultFactory());
+        BooleanResultFactory::applyStatic);
   }
 
   public final Response<Void> deleteParam(GraphName parameterName) {
