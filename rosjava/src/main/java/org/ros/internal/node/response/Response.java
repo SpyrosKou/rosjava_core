@@ -59,9 +59,9 @@ public final class Response<T> {
      *
      * @param <T>
      * @param response      the {@link List} of {@link Object}s returned from the XML-RPC call
-     * @param resultFactory a {@link ResultFactory} that creates a result from the third
+     * @param resultFactory a {@link Function<Object,T>} that creates a result from the third
      *                      {@link Object} in the {@link Response}
-     * @return a {@link Response} using the specified {@link ResultFactory} to
+     * @return a {@link Response} using the specified {@link Function<Object,T>} to
      * generate the result
      * @throws RemoteException if the {@link Response}'s {@link StatusCode} indicates
      *                         StatusCode.FAILURE.
@@ -108,9 +108,9 @@ public final class Response<T> {
      *
      * @param <T>
      * @param response      the {@link List} of {@link Object}s returned from the XML-RPC call
-     * @param resultFactory a {@link ResultFactory} that creates a result from the third
+     * @param resultFactory a {@link Function<Object,T>} that creates a result from the third
      *                      {@link Object} in the {@link Response}
-     * @return a {@link Response} using the specified {@link ResultFactory} to
+     * @return a {@link Response} using the specified {@link Function<Object,T>} to
      * generate the result
      * @throws RemoteException if the {@link Response}'s {@link StatusCode} does not indicate
      *                         success

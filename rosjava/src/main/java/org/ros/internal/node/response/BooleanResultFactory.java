@@ -16,10 +16,12 @@
 
 package org.ros.internal.node.response;
 
+import java.util.function.Function;
+
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public final class BooleanResultFactory implements ResultFactory<Boolean> {
+public final class BooleanResultFactory implements Function<Object,Boolean> {
   
   @Override
   public Boolean apply(Object value) {

@@ -24,11 +24,12 @@ import org.ros.internal.transport.ProtocolNames;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class ProtocolDescriptionResultFactory implements ResultFactory<ProtocolDescription> {
+public final class ProtocolDescriptionResultFactory implements Function<Object,ProtocolDescription> {
 
     @Override
     public final ProtocolDescription apply(Object value) {

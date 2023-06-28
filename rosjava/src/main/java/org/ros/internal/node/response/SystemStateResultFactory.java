@@ -18,7 +18,6 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import org.ros.master.client.SystemState;
 import org.ros.master.client.TopicSystemState;
 
@@ -27,14 +26,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
- * A {@link ResultFactory} to take an object and turn it into a
+ * A {@link Function<Object,T>} to take an object and turn it into a
  * {@link SystemState} instance.
  *
  * @author Keith M. Hughes
  */
-public final class SystemStateResultFactory implements ResultFactory<SystemState> {
+public final class SystemStateResultFactory implements Function<Object,SystemState> {
 
     @Override
     public final SystemState apply(Object value) {

@@ -16,21 +16,21 @@
 
 package org.ros.internal.node.response;
 
+import com.google.common.collect.Lists;
+import org.ros.exception.RosRuntimeException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
-
-import org.ros.exception.RosRuntimeException;
-
-import com.google.common.collect.Lists;
+import java.util.function.Function;
 
 /**
- * A {@link ResultFactory} to take an object and turn it into a list of URLIs.
+ * A {@link Function<Object,List<URI>>} to take an object and turn it into a list of URLIs.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class UriListResultFactory implements ResultFactory<List<URI>> {
+public final class UriListResultFactory implements Function<Object,List<URI>> {
 
 	@Override
 	public final List<URI> apply(Object value) { return applyStatic(value);}

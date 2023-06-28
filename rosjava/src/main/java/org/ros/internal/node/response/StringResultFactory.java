@@ -16,10 +16,12 @@
 
 package org.ros.internal.node.response;
 
+import java.util.function.Function;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class StringResultFactory implements ResultFactory<String> {
+public final class StringResultFactory implements Function<Object,String> {
   
   @Override
   public final String apply(Object value) {

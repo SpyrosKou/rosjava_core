@@ -16,15 +16,16 @@
 
 package org.ros.internal.node.response;
 
+import com.google.common.collect.Lists;
+
 import java.util.Arrays;
 import java.util.List;
-
-import com.google.common.collect.Lists;
+import java.util.function.Function;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public final class StringListResultFactory implements ResultFactory<List<String>> {
+public final class StringListResultFactory implements Function<Object,List<String>> {
 
   @Override
   public final List<String> apply(Object value) {

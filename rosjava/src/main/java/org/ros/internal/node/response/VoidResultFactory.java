@@ -16,10 +16,12 @@
 
 package org.ros.internal.node.response;
 
+import java.util.function.Function;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class VoidResultFactory implements ResultFactory<Void> {
+public final class VoidResultFactory implements Function<Object,Void> {
 
     @Override
     public final Void apply(Object value) {

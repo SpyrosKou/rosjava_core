@@ -17,23 +17,21 @@
 package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
-
 import org.ros.internal.message.topic.TopicDescription;
-
-
 import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.namespace.GraphName;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 /**
- * A {@link ResultFactory} to take an object and turn it into a list of
+ * A {@link Function<Object,T>} to take an object and turn it into a list of
  * {@link TopicDeclaration} instances.
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class TopicListResultFactory implements ResultFactory<List<TopicDeclaration>> {
+public final class TopicListResultFactory implements Function<Object,List<TopicDeclaration>> {
 
     @Override
     public final List<TopicDeclaration> apply(Object value) {

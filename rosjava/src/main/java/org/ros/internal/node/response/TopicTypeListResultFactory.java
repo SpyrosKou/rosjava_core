@@ -24,16 +24,19 @@ import org.ros.master.client.TopicType;
 import com.google.common.collect.Lists;
 
 /**
- * A {@link ResultFactory} to take an object and turn it into a list of
+ * A {@link Function<Object,List<TopicType>>} to take an object and turn it into a list of
  * {@link TopicType} instances.
  *
  * @author Keith M. Hughes
  */
 public final class TopicTypeListResultFactory implements
-        ResultFactory<List<TopicType>> {
+        Function<Object, List<TopicType>> {
 
     @Override
-    public final List<TopicType> apply(Object value) { return applyStatic(value);}
+    public final List<TopicType> apply(Object value) {
+        return applyStatic(value);
+    }
+
     public static final List<TopicType> applyStatic(Object value) {
         final List<TopicType> topics = Lists.newArrayList();
 

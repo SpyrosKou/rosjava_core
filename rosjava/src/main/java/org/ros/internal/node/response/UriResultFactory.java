@@ -16,15 +16,16 @@
 
 package org.ros.internal.node.response;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import org.ros.exception.RosRuntimeException;
+import java.util.function.Function;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class UriResultFactory implements ResultFactory<URI> {
+public final class UriResultFactory implements Function<Object,URI> {
 
   @Override
   public final URI apply(Object value) {return applyStatic(value);}
