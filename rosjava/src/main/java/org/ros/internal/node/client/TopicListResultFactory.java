@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
 import com.google.common.collect.Lists;
 import org.ros.internal.message.topic.TopicDescription;
@@ -31,7 +31,7 @@ import java.util.function.Function;
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class TopicListResultFactory implements Function<Object,List<TopicDeclaration>> {
+final class TopicListResultFactory implements Function<Object,List<TopicDeclaration>> {
 
     @Override
     public final List<TopicDeclaration> apply(Object value) {

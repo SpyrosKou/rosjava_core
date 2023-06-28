@@ -14,14 +14,13 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
+
+import com.google.common.collect.Lists;
+import org.ros.master.client.TopicType;
 
 import java.util.List;
 import java.util.function.Function;
-
-import org.ros.master.client.TopicType;
-
-import com.google.common.collect.Lists;
 
 /**
  * A {@link Function<Object,List<TopicType>>} to take an object and turn it into a list of
@@ -29,7 +28,7 @@ import com.google.common.collect.Lists;
  *
  * @author Keith M. Hughes
  */
-public final class TopicTypeListResultFactory implements
+final class TopicTypeListResultFactory implements
         Function<Object, List<TopicType>> {
 
     @Override

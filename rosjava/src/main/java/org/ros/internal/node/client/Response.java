@@ -14,13 +14,13 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
 import com.google.common.collect.Lists;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.node.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

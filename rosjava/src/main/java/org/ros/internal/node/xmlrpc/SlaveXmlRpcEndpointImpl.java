@@ -21,7 +21,7 @@ import com.google.common.collect.Sets;
 
 
 
-import org.ros.internal.node.response.Response;
+import org.ros.internal.node.client.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;

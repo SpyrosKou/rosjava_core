@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
 import com.google.common.collect.Lists;
 import org.ros.exception.RosRuntimeException;
@@ -30,7 +30,7 @@ import java.util.function.Function;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class UriListResultFactory implements Function<Object,List<URI>> {
+final class UriListResultFactory implements Function<Object,List<URI>> {
 
 	@Override
 	public final List<URI> apply(Object value) { return applyStatic(value);}

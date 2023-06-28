@@ -14,20 +14,26 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
+import org.ros.exception.RosRuntimeException;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.function.Function;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class StringResultFactory implements Function<Object,String> {
-  
+final class UriResultFactory implements Function<Object,URI> {
+
   @Override
-  public final String apply(Object value) {
-    return applyStatic(value);
-  }
-  public static final String applyStatic(Object value) {
-    return (String) value;
+  public final URI apply(Object value) {return applyStatic(value);}
+  public static final URI applyStatic(Object value) {
+    try {
+      return new URI((String) value);
+    } catch (URISyntaxException e) {
+      throw new RosRuntimeException(e);
+    }
   }
 }

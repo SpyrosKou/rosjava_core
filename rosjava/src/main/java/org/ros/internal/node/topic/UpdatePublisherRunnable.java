@@ -20,7 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.exception.RemoteException;
 import org.ros.internal.message.Message;
 import org.ros.internal.node.client.SlaveClient;
-import org.ros.internal.node.response.Response;
+import org.ros.internal.node.client.Response;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;

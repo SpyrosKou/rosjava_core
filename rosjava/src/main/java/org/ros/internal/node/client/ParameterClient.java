@@ -16,7 +16,6 @@
 
 package org.ros.internal.node.client;
 
-import org.ros.internal.node.response.*;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.xmlrpc.ParameterServerXmlRpcEndpoint;

@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.concurrent.Holder;
 import org.ros.concurrent.RetryingExecutorService;
-import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.master.MasterServer;

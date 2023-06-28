@@ -18,7 +18,7 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.node.response.Response;
+import org.ros.internal.node.client.Response;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.server.master.MasterServer;

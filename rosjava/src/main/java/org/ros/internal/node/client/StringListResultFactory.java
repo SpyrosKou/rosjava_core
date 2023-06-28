@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -14,21 +14,30 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
+import com.google.common.collect.Lists;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public final class ObjectResultFactory implements Function<Object,Object> {
+final class StringListResultFactory implements Function<Object,List<String>> {
 
-    @Override
-    public final Object apply(Object value) {
-        return applyStatic(value);
-    }
+  @Override
+  public final List<String> apply(Object value) {
+    return applyStatic(value);
+  }
 
-    public static final Object applyStatic(Object value) {
-        return value;
+  public static final List<String> applyStatic(Object value) {
+    final List<String> strings = Lists.newArrayList();
+    final List<Object> objects = Arrays.asList((Object[]) value);
+    for (final Object topic : objects) {
+      strings.add((String) topic);
     }
+    return strings;
+  }
 }

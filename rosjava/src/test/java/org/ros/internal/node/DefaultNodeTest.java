@@ -25,7 +25,7 @@ import org.ros.RosCore;
 import org.ros.RosTest;
 import org.ros.concurrent.Holder;
 import org.ros.internal.node.client.SlaveClient;
-import org.ros.internal.node.response.Response;
+import org.ros.internal.node.client.Response;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;

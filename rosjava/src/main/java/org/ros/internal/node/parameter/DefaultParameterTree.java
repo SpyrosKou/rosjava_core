@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
 import org.ros.internal.node.client.ParameterClient;
-import org.ros.internal.node.response.Response;
+import org.ros.internal.node.client.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.ParameterServer;

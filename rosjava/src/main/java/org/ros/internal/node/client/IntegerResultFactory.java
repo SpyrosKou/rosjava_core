@@ -14,30 +14,20 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
-import com.google.common.collect.Lists;
-
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 
 /**
- * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public final class StringListResultFactory implements Function<Object,List<String>> {
-
+final class IntegerResultFactory implements Function<Object,Integer> {
+  
   @Override
-  public final List<String> apply(Object value) {
+  public final Integer apply(Object value) {
     return applyStatic(value);
   }
-
-  public static final List<String> applyStatic(Object value) {
-    final List<String> strings = Lists.newArrayList();
-    final List<Object> objects = Arrays.asList((Object[]) value);
-    for (final Object topic : objects) {
-      strings.add((String) topic);
-    }
-    return strings;
+  public static final Integer applyStatic(Object value) {
+    return (Integer) value;
   }
 }

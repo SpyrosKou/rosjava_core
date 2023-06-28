@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
 import org.ros.address.AdvertiseAddress;
@@ -29,7 +29,7 @@ import java.util.function.Function;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class ProtocolDescriptionResultFactory implements Function<Object,ProtocolDescription> {
+final class ProtocolDescriptionResultFactory implements Function<Object,ProtocolDescription> {
 
     @Override
     public final ProtocolDescription apply(Object value) {

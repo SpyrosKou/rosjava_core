@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -34,7 +34,7 @@ import java.util.function.Function;
  *
  * @author Keith M. Hughes
  */
-public final class SystemStateResultFactory implements Function<Object,SystemState> {
+final class SystemStateResultFactory implements Function<Object,SystemState> {
 
     @Override
     public final SystemState apply(Object value) {

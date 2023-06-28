@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
+package org.ros.internal.node.client;
 
 import com.google.common.collect.Lists;
 import junit.framework.TestCase;
