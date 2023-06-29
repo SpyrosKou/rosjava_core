@@ -95,7 +95,9 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             this.retryingExecutorService.submit(callable);
             return true;
         } else {
-            LOGGER.warn("Registrar no longer running, request ignored.");
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Registrar no longer running, request ignored.");
+            }
             return false;
         }
     }
@@ -194,12 +196,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             return !success;
         });
         if (!submitted) {
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    subscriber.signalOnMasterUnregistrationFailure();
-                }
-            });
+            this.executorService.execute(() -> subscriber.signalOnMasterUnregistrationFailure());
         }
     }
 
@@ -210,7 +207,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             LOGGER.info("Registering service: " + serviceServer);
         }
         final boolean submitted = submit(() -> {
-            final boolean success = callMaster(() -> masterClient.registerService(nodeIdentifier, serviceServer));
+            final boolean success = this.callMaster(() -> masterClient.registerService(nodeIdentifier, serviceServer));
             if (success) {
                 serviceServer.onMasterRegistrationSuccess();
             } else {
@@ -219,7 +216,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             return !success;
         });
         if (!submitted) {
-            executorService.execute(() -> serviceServer.onMasterRegistrationFailure());
+            this.executorService.execute(() -> serviceServer.onMasterRegistrationFailure());
         }
     }
 

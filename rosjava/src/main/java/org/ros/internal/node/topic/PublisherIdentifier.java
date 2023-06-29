@@ -67,7 +67,7 @@ public final class PublisherIdentifier {
     return connectionHeader;
   }
 
-  public NodeIdentifier getNodeIdentifier() {
+  public final NodeIdentifier getNodeIdentifier() {
     return nodeIdentifier;
   }
 
@@ -75,38 +75,38 @@ public final class PublisherIdentifier {
    * @return the {@link GraphName} of the {@link Node} hosting this
    *         {@link Publisher}
    */
-  public GraphName getNodeName() {
+  public final GraphName getNodeName() {
     return nodeIdentifier.getName();
   }
 
   /**
    * @return the {@link URI} of the {@link Node} hosting this {@link Publisher}
    */
-  public URI getNodeUri() {
+  public final URI getNodeUri() {
     return nodeIdentifier.getUri();
   }
 
   /**
    * @return the {@link TopicIdentifier} for the {@link Publisher}'s topic
    */
-  public TopicIdentifier getTopicIdentifier() {
+  public final TopicIdentifier getTopicIdentifier() {
     return topicIdentifier;
   }
 
   /**
    * @return the {@link GraphName} of this {@link Publisher}'s topic
    */
-  public GraphName getTopicName() {
+  public final GraphName getTopicName() {
     return topicIdentifier.getName();
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "PublisherIdentifier<" + nodeIdentifier + ", " + topicIdentifier + ">";
   }
 
   @Override
-  public int hashCode() {
+  public final int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + nodeIdentifier.hashCode();
@@ -115,7 +115,7 @@ public final class PublisherIdentifier {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public final boolean equals(Object obj) {
     if (this == obj)
       return true;
     if (obj == null)

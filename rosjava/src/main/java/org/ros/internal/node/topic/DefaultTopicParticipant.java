@@ -38,8 +38,8 @@ public abstract class DefaultTopicParticipant implements TopicParticipant {
   /**
    * @return the {@link TopicDeclaration} of this {@link TopicParticipant}
    */
-  public TopicDeclaration getTopicDeclaration() {
-    return topicDeclaration;
+  public final TopicDeclaration getTopicDeclaration() {
+    return this.topicDeclaration;
   }
 
   public List<String> getTopicDeclarationAsList() {
