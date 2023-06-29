@@ -11,43 +11,34 @@ import org.slf4j.Marker;
 public interface RosLog {
     String getName();
 
-    boolean isTraceEnabled();
-
     boolean isDebugEnabled();
-
-
-    boolean isErrorEnabled();
-
 
     boolean isInfoEnabled();
 
-
     boolean isWarnEnabled();
+    boolean isErrorEnabled();
 
-
-    void trace(String message);
-
-    void trace(String message, Throwable t);
+    boolean isFatalEnabled();
 
     void debug(String message);
 
-    void debug(String message, Throwable t);
+    void debug(String message, Throwable throwable);
 
     void info(String message);
 
-    void info(String message, Throwable t);
+    void info(String message, Throwable throwable);
 
     void warn(String message);
 
-    void warn(String message, Throwable t);
+    void warn(String message, Throwable throwable);
 
     void error(String message);
 
-    void error(String message, Throwable t);
+    void error(String message, Throwable throwable);
 
     void fatal(String message);
 
-    void fatal(String message, Throwable t);
+    void fatal(String message, Throwable throwable);
 
 
 

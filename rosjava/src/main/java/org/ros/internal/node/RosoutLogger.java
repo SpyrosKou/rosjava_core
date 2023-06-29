@@ -27,20 +27,22 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import rosgraph_msgs.Log;
 
+import java.lang.invoke.MethodHandles;
 import java.util.function.Consumer;
 
 /**
  * Logger that logs to both an underlying {@link org.slf4j.Logger} as well as /rosout.
  * The graph name of the node is added as {@link Marker} after the connection.
- *
+ * The logging in general can be configured by configuring the {@link RosoutLogger}
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 final class RosoutLogger implements org.ros.node.RosLog {
 
     private ConnectedNode connectedNode;
     private Publisher<rosgraph_msgs.Log> publisher;
-    private final Logger logger;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private Marker marker = null;
 
     final void connect(final ConnectedNode connectedNode) {
@@ -51,14 +53,11 @@ final class RosoutLogger implements org.ros.node.RosLog {
     }
 
 
-
     /**
      * Starts logging disconnected from ROS, using only {@link Logger}
      * It needs to be connected using
      */
     public RosoutLogger() {
-        final String loggerName = RosoutLogger.class.getCanonicalName();
-        this.logger = LoggerFactory.getLogger(loggerName);
     }
 
     /**
@@ -98,182 +97,181 @@ final class RosoutLogger implements org.ros.node.RosLog {
 
     @Override
     public final String getName() {
-        return this.logger.getName();
+        return LOGGER.getName();
     }
 
-    @Override
-    public final boolean isTraceEnabled() {
-        return this.logger.isTraceEnabled();
-    }
 
     @Override
     public final boolean isDebugEnabled() {
-        return this.logger.isDebugEnabled();
-    }
-
-
-    @Override
-    public final boolean isErrorEnabled() {
-        return this.logger.isErrorEnabled();
+        return LOGGER.isDebugEnabled();
     }
 
 
     @Override
     public final boolean isInfoEnabled() {
-        return this.logger.isInfoEnabled();
+        return LOGGER.isInfoEnabled();
     }
 
 
     @Override
     public final boolean isWarnEnabled() {
-        return this.logger.isWarnEnabled();
+        return LOGGER.isWarnEnabled();
+    }
+
+
+
+    @Override
+    public final boolean isErrorEnabled() {
+        return LOGGER.isErrorEnabled();
     }
 
 
     @Override
-    public final void trace(final String message) {
-
-        if (this.marker == null) {
-            this.logger.info(message);
-        } else {
-            this.logger.info(this.marker, message);
-        }
-
-        if (this.logger.isDebugEnabled() && this.publisher != null) {
-            this.publish(Log.DEBUG, message);
-        }
+    public final boolean isFatalEnabled() {
+        return LOGGER.isErrorEnabled();
     }
 
-    @Override
-    public final void trace(final String message, final Throwable t) {
-        if (this.marker == null) {
-            this.logger.trace(message, t);
-        } else {
-            this.logger.trace(this.marker, message, t);
-        }
-        if (this.logger.isTraceEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.DEBUG, message, t);
-        }
-    }
+
 
     @Override
     public final void debug(final String message) {
-        if (this.marker == null) {
-            this.logger.debug(message);
-        } else {
-            this.logger.debug(this.marker, message);
-        }
-        if (this.logger.isDebugEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.DEBUG, message);
+        if (this.isDebugEnabled()) {
+            if (this.marker == null) {
+                LOGGER.debug(message);
+            } else {
+                LOGGER.debug(this.marker, message);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.DEBUG, message);
+            }
         }
     }
 
     @Override
-    public final void debug(final String message, final Throwable t) {
-        if (this.marker == null) {
-            this.logger.debug(message, t);
-        } else {
-            this.logger.debug(this.marker, message, t);
-        }
-        if (this.logger.isDebugEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.DEBUG, message, t);
+    public final void debug(final String message, final Throwable throwable) {
+        if (this.isDebugEnabled()) {
+            if (this.marker == null) {
+                LOGGER.debug(message, throwable);
+            } else {
+                LOGGER.debug(this.marker, message, throwable);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.DEBUG, message, throwable);
+            }
         }
     }
 
     @Override
     public final void info(final String message) {
-        if (this.marker == null) {
-            this.logger.info(message);
-        } else {
-            this.logger.info(this.marker, message);
-        }
-        if (this.logger.isInfoEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.INFO, message);
+        if (this.isInfoEnabled()) {
+            if (this.marker == null) {
+                LOGGER.info(message);
+            } else {
+                LOGGER.info(this.marker, message);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.INFO, message);
+            }
         }
     }
 
     @Override
-    public final void info(final String message, final Throwable t) {
-        if (this.marker == null) {
-            this.logger.info(message, t);
-        } else {
-            this.logger.info(this.marker, message, t);
-        }
-        if (this.logger.isInfoEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.INFO, message, t);
+    public final void info(final String message, final Throwable throwable) {
+        if (this.isInfoEnabled()) {
+            if (this.marker == null) {
+                LOGGER.info(message, throwable);
+            } else {
+                LOGGER.info(this.marker, message, throwable);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.INFO, message, throwable);
+            }
         }
     }
 
     @Override
     public final void warn(final String message) {
-        if (this.marker == null) {
-            this.logger.warn(message);
-        } else {
-            this.logger.warn(this.marker, message);
-        }
-        if (this.logger.isWarnEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.WARN, message);
+        if (this.isWarnEnabled()) {
+            if (this.marker == null) {
+                LOGGER.warn(message);
+            } else {
+                LOGGER.warn(this.marker, message);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.WARN, message);
+            }
         }
     }
 
     @Override
-    public final void warn(final String message, final Throwable t) {
-        if (this.marker == null) {
-            this.logger.warn(message, t);
-        } else {
-            this.logger.warn(this.marker, message, t);
-        }
-        if (this.logger.isWarnEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.WARN, message, t);
+    public final void warn(final String message, final Throwable throwable) {
+        if (this.isWarnEnabled()) {
+            if (this.marker == null) {
+                LOGGER.warn(message, throwable);
+            } else {
+                LOGGER.warn(this.marker, message, throwable);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.WARN, message, throwable);
+            }
         }
     }
 
     @Override
     public final void error(final String message) {
-        if (this.marker == null) {
-            this.logger.error(message);
-        } else {
-            this.logger.error(this.marker, message);
-        }
-        if (this.logger.isErrorEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.ERROR, message);
+        if (this.isErrorEnabled()) {
+            if (this.marker == null) {
+                LOGGER.error(message);
+            } else {
+                LOGGER.error(this.marker, message);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.ERROR, message);
+            }
         }
     }
 
     @Override
-    public final void error(final String message, final Throwable t) {
-        if (this.marker == null) {
-            this.logger.error(message, t);
-        } else {
-            this.logger.error(this.marker, message, t);
-        }
-        if (this.logger.isErrorEnabled() && this.publisher != null) {
-            this.publish(rosgraph_msgs.Log.ERROR, message, t);
+    public final void error(final String message, final Throwable throwable) {
+        if (this.isErrorEnabled()) {
+            if (this.marker == null) {
+                LOGGER.error(message, throwable);
+            } else {
+                LOGGER.error(this.marker, message, throwable);
+            }
+            if (this.publisher != null) {
+                this.publish(rosgraph_msgs.Log.ERROR, message, throwable);
+            }
         }
     }
 
     @Override
     public final void fatal(final String message) {
-        if (this.marker == null) {
-            this.logger.error(message);
-        } else {
-            this.logger.error(this.marker, message);
-        }
-        if (this.logger.isErrorEnabled() && this.publisher != null) {
-            this.publish(Log.FATAL, message);
+        if (this.isFatalEnabled()) {
+            if (this.marker == null) {
+                LOGGER.error(message);
+            } else {
+                LOGGER.error(this.marker, message);
+            }
+            if (this.publisher != null) {
+                this.publish(Log.FATAL, message);
+            }
         }
     }
 
     @Override
-    public final void fatal(final String message, final Throwable t) {
-        if (this.marker == null) {
-            this.logger.error(message, t);
-        } else {
-            this.logger.error(this.marker, message, t);
-        }
-        if (this.logger.isErrorEnabled() && this.publisher != null) {
-            this.publish(Log.FATAL, message, t);
+    public final void fatal(final String message, final Throwable throwable) {
+        if (this.isFatalEnabled()) {
+            if (this.marker == null) {
+                LOGGER.error(message, throwable);
+            } else {
+                LOGGER.error(this.marker, message, throwable);
+            }
+            if (this.publisher != null) {
+                this.publish(Log.FATAL, message, throwable);
+            }
         }
     }
-
 }
+
+
