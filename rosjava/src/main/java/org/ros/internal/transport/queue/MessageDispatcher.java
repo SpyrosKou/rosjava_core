@@ -21,13 +21,13 @@ import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.concurrent.EventDispatcher;
 import org.ros.concurrent.ListenerGroup;
-import org.ros.concurrent.SignalRunnable;
 import org.ros.message.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -46,7 +46,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    * Ensures that a messages are not dispatched twice when adding a listener
    * while latch mode is enabled.
    */
-  private final Object mutex;
+  private final Object mutex = new Object();;
 
   private boolean latchMode;
   private LazyMessage<T> latchedMessage;
@@ -55,7 +55,6 @@ public final class MessageDispatcher<T> extends CancellableLoop {
       ExecutorService executorService) {
     this.lazyMessages = lazyMessages;
     messageListeners = new ListenerGroup<>(executorService);
-    mutex = new Object();
     latchMode = false;
   }
 
@@ -75,7 +74,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
       EventDispatcher<MessageListener<T>> eventDispatcher =
           messageListeners.add(messageListener, limit);
       if (latchMode && latchedMessage != null) {
-        eventDispatcher.signal(newSignalRunnable(latchedMessage));
+        eventDispatcher.signal(newSignaler(latchedMessage));
       }
     }
   }
@@ -88,7 +87,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    *
    * @see ListenerGroup#remove(Object)
    */
-  public boolean removeListener(MessageListener<T> messageListener) {
+  public boolean removeListener(final MessageListener<T> messageListener) {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Removing listener.");
     }
@@ -102,24 +101,24 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    *
    * @see ListenerGroup#shutdown()
    */
-  public void removeAllListeners() {
+  public final void removeAllListeners() {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Removing all listeners.");
     }
     synchronized (mutex) {
-      messageListeners.shutdown();
+      this.messageListeners.shutdown();
     }
   }
 
   /**
-   * Returns a newly allocated {@link SignalRunnable} for the specified
+   * Returns a newly allocated {@link Consumer} for the specified
    * {@link LazyMessage}.
    * 
    * @param lazyMessage
    *          the {@link LazyMessage} to signal {@link MessageListener}s with
-   * @return the newly allocated {@link SignalRunnable}
+   * @return the newly allocated {@link Consumer}
    */
-  private final SignalRunnable<MessageListener<T>> newSignalRunnable(final LazyMessage<T> lazyMessage) {
+  private final Consumer<MessageListener<T>> newSignaler(final LazyMessage<T> lazyMessage) {
     return messageListener -> messageListener.onNewMessage(lazyMessage.get());
   }
 
@@ -147,7 +146,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Dispatching message: " + latchedMessage.get());
       }
-      messageListeners.signal(newSignalRunnable(latchedMessage));
+      messageListeners.signal(newSignaler(latchedMessage));
     }
   }
 

@@ -35,8 +35,8 @@ public final class EventDispatcher<T> extends CancellableLoop {
     this.events = new CircularBlockingDeque<>(queueCapacity);
   }
 
-  public final void signal(final SignalRunnable<T> signalRunnable) {
-    this.events.addLast(signalRunnable);
+  public final void signal(final Consumer<T> signalConsumer) {
+    this.events.addLast(signalConsumer);
   }
 
   @Override

@@ -18,11 +18,7 @@ package org.ros.internal.node.topic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-
-
-
 import org.ros.concurrent.ListenerGroup;
-import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.message.Message;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ProtocolNames;
@@ -30,7 +26,10 @@ import org.ros.internal.transport.queue.IncomingMessageQueue;
 import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
-import org.ros.node.topic.*;
+import org.ros.node.topic.LoggingSubscriberListener;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.SubscriberListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

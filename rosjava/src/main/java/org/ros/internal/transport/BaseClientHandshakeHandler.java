@@ -21,7 +21,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.ros.concurrent.ListenerGroup;
-import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 
 import java.util.concurrent.ExecutorService;

@@ -21,7 +21,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
 import org.ros.concurrent.ListenerGroup;
-import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.message.Message;
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.transport.ConnectionHeader;

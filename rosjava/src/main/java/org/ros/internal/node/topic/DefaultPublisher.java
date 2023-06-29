@@ -17,11 +17,9 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.ros.concurrent.ListenerGroup;
-import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.message.Message;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
@@ -29,7 +27,10 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.queue.OutgoingMessageQueue;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
-import org.ros.node.topic.*;
+import org.ros.node.topic.LoggingPublisherListener;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
+import org.ros.node.topic.Subscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

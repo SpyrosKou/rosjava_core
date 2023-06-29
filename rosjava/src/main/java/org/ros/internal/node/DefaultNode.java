@@ -23,7 +23,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
-import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
@@ -90,7 +89,7 @@ public final class DefaultNode implements ConnectedNode {
     private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
 
     private final NodeConfiguration nodeConfiguration;
-    private final ListenerGroup<NodeListener> nodeListeners;
+    private final ListenerGroup<NodeListener> nodeListenerListenerGroup;
     private final ScheduledExecutorService scheduledExecutorService;
     private final URI masterUri;
     private final MasterClient masterClient;
@@ -122,8 +121,8 @@ public final class DefaultNode implements ConnectedNode {
             , final Collection<NodeListener> nodeListeners
             , final ScheduledExecutorService scheduledExecutorService) {
         this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
-        this.nodeListeners = new ListenerGroup<>(scheduledExecutorService);
-        this.nodeListeners.addAll(nodeListeners);
+        this.nodeListenerListenerGroup = new ListenerGroup<>(scheduledExecutorService);
+        this.nodeListenerListenerGroup.addAll(nodeListeners);
         this.scheduledExecutorService = scheduledExecutorService;
         this.masterUri = nodeConfiguration.getMasterUri();
         this.masterClient = new MasterClient(this.masterUri);
@@ -493,38 +492,38 @@ public final class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public void addListener(NodeListener listener) {
-        this.nodeListeners.add(listener);
+    public final void addListener(final NodeListener listener) {
+        this.nodeListenerListenerGroup.add(listener);
     }
 
     /**
-     * SignalRunnable all {@link NodeListener}s that the {@link Node} has
+     * Signal all {@link Consumer} all {@link NodeListener}s that the {@link Node} has
      * experienced an error.
      * <p>
      * Each listener is called in a separate thread.
      */
     private void signalOnError(final Throwable throwable) {
         final Node node = this;
-        nodeListeners.signal(listener -> listener.onError(node, throwable));
+        nodeListenerListenerGroup.signal(listener -> listener.onError(node, throwable));
     }
 
     @Override
     public void removeListeners() {
-        nodeListeners.shutdown();
+        nodeListenerListenerGroup.shutdown();
     }
 
     /**
-     * SignalRunnable all {@link NodeListener}s that the {@link Node} has started.
+     * Signal {@link Consumer} all {@link NodeListener}s that the {@link Node} has started.
      * <p>
      * Each listener is called in a separate thread.
      */
     private void signalOnStart() {
         final ConnectedNode connectedNode = this;
-        nodeListeners.signal(listener -> listener.onStart(connectedNode));
+        nodeListenerListenerGroup.signal(listener -> listener.onStart(connectedNode));
     }
 
     /**
-     * SignalRunnable all {@link NodeListener}s that the {@link Node} has started
+     * Signal all {@link Consumer} all {@link NodeListener}s that the {@link Node} has started
      * shutting down.
      * <p>
      * Each listener is called in a separate thread.
@@ -532,7 +531,7 @@ public final class DefaultNode implements ConnectedNode {
     private void signalOnShutdown() {
         final Node node = this;
         try {
-            nodeListeners.signal(listener -> listener.onShutdown(node), MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+            nodeListenerListenerGroup.signal(listener -> listener.onShutdown(node), MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
         } catch (InterruptedException e) {
             // Ignored since we do not guarantee that all listeners will finish
             // before
@@ -541,14 +540,14 @@ public final class DefaultNode implements ConnectedNode {
     }
 
     /**
-     * SignalRunnable all {@link NodeListener}s that the {@link Node} has shut
+     * Signal {@link Consumer} all {@link NodeListener}s that the {@link Node} has shut
      * down.
      * <p>
      * Each listener is called in a separate thread.
      */
     private void signalOnShutdownComplete() {
         final Node node = this;
-        nodeListeners.signal(listener -> {
+        nodeListenerListenerGroup.signal(listener -> {
             try {
                 listener.onShutdownComplete(node);
             } catch (Throwable e) {

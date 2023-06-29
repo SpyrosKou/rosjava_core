@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * A group of listeners.
@@ -77,12 +78,11 @@ public final class ListenerGroup<T> {
      * @return a {@link Collection} of {@link EventDispatcher}s responsible for
      * calling the specified listeners
      */
-    public List<EventDispatcher<T>> addAll(Collection<T> listeners, int limit) {
-        final List<EventDispatcher<T>> eventDispatchers = Lists.newArrayList();
+    public final void addAll(Collection<T> listeners, int limit) {
         for (final T listener : listeners) {
-            eventDispatchers.add(this.add(listener, limit));
+            this.add(listener, limit);
         }
-        return eventDispatchers;
+
     }
 
     /**
@@ -93,8 +93,8 @@ public final class ListenerGroup<T> {
      * @return a {@link Collection} of {@link EventDispatcher}s responsible for
      * calling the specified listeners
      */
-    public List<EventDispatcher<T>> addAll(Collection<T> listeners) {
-        return addAll(listeners, DEFAULT_QUEUE_CAPACITY);
+    public final void addAll(Collection<T> listeners) {
+        this.addAll(listeners, DEFAULT_QUEUE_CAPACITY);
     }
 
     /**
@@ -104,13 +104,14 @@ public final class ListenerGroup<T> {
      * @param listener the listener to remove
      * @return flag indicating successful removal
      */
-    public boolean remove(T listener) {
+    public final boolean remove(final T listener) {
         Preconditions.checkNotNull(listener);
-        for (EventDispatcher<T> eventDispatcher : eventDispatchers) {
+        boolean result = false;
+        for (final EventDispatcher<T> eventDispatcher : eventDispatchers) {
             if (listener.equals(eventDispatcher.getListener())) {
                 eventDispatcher.cancel();
                 eventDispatchers.remove(eventDispatcher);
-                return true;
+                result = true;
             }
         }
         return false;
@@ -119,19 +120,19 @@ public final class ListenerGroup<T> {
     /**
      * @return the number of listeners in the group
      */
-    public int size() {
+    public final int size() {
         return eventDispatchers.size();
     }
 
     /**
      * Signals all listeners.
      * <p>
-     * Each {@link SignalRunnable} is executed in a separate thread.
+     * Each {@link Consumer} is executed in a separate thread.
      */
-    public final int signal(final SignalRunnable<T> signalRunnable) {
+    public final int signal(final Consumer<T> signalConsumer) {
         int counter = 0;
         for (final EventDispatcher<T> eventDispatcher : this.eventDispatchers) {
-            eventDispatcher.signal(signalRunnable);
+            eventDispatcher.signal(signalConsumer);
             counter++;
         }
         return counter;
@@ -140,8 +141,8 @@ public final class ListenerGroup<T> {
     /**
      * Signals all listeners and waits for the result.
      * <p>
-     * Each {@link SignalRunnable} is executed in a separate thread. In the event
-     * that the {@link SignalRunnable} is be dropped from the
+     * Each {@link Consumer} is executed in a separate thread. In the event
+     * that the {@link Consumer} is dropped from the
      * {@link EventDispatcher}'s queue and thus not executed, this method will
      * block for the entire specified timeout.
      *
@@ -149,22 +150,21 @@ public final class ListenerGroup<T> {
      * limit, {@code false} otherwise
      * @throws InterruptedException
      */
-    public boolean signal(final SignalRunnable<T> signalRunnable, long timeout, TimeUnit unit)
+    public final boolean signal(final Consumer<T> signalConsumer, long timeout, TimeUnit unit)
             throws InterruptedException {
         final List<EventDispatcher<T>> copy = Lists.newArrayList(eventDispatchers);
         final CountDownLatch latch = new CountDownLatch(copy.size());
-        for (EventDispatcher<T> eventDispatcher : copy) {
+        for (final EventDispatcher<T> eventDispatcher : copy) {
             eventDispatcher.signal(listener -> {
-                signalRunnable.run(listener);
+                signalConsumer.accept(listener);
                 latch.countDown();
             });
         }
         return latch.await(timeout, unit);
     }
 
-    public void shutdown() {
-        for (final EventDispatcher<T> eventDispatcher : eventDispatchers) {
-
+    public final void shutdown() {
+        for (final EventDispatcher<T> eventDispatcher : this.eventDispatchers) {
             eventDispatcher.cancel();
         }
         this.eventDispatchers.clear();
