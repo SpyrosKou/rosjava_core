@@ -146,12 +146,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      */
     public final void onMasterRegistrationSuccess() {
         final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-            @Override
-            public final void run(ServiceServerListener<T, S> listener) {
-                listener.onMasterRegistrationSuccess(serviceServer);
-            }
-        });
+        this.listenerGroup.signal(listener -> listener.onMasterRegistrationSuccess(serviceServer));
     }
 
     /**
@@ -163,12 +158,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      */
     public final void onMasterRegistrationFailure() {
         final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-            @Override
-            public final void run(ServiceServerListener<T, S> listener) {
-                listener.onMasterRegistrationFailure(serviceServer);
-            }
-        });
+        this.listenerGroup.signal(listener -> listener.onMasterRegistrationFailure(serviceServer));
     }
 
     /**
@@ -180,12 +170,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      */
     public final void onMasterUnregistrationSuccess() {
         final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-            @Override
-            public final void run(ServiceServerListener<T, S> listener) {
-                listener.onMasterUnregistrationSuccess(serviceServer);
-            }
-        });
+        this.listenerGroup.signal(listener -> listener.onMasterUnregistrationSuccess(serviceServer));
     }
 
     /**
@@ -197,12 +182,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      */
     public final void onMasterUnregistrationFailure() {
         final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
-            @Override
-            public final void run(ServiceServerListener<T, S> listener) {
-                listener.onMasterUnregistrationFailure(serviceServer);
-            }
-        });
+        this.listenerGroup.signal(listener -> listener.onMasterUnregistrationFailure(serviceServer));
     }
 
     @Override

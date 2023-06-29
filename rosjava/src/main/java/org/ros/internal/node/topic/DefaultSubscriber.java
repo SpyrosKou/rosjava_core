@@ -189,12 +189,7 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
   @Override
   public void signalOnMasterRegistrationSuccess() {
     final Subscriber<T> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
-      public void run(SubscriberListener<T> listener) {
-        listener.onMasterRegistrationSuccess(subscriber);
-      }
-    });
+    subscriberListeners.signal(listener -> listener.onMasterRegistrationSuccess(subscriber));
   }
 
   /**

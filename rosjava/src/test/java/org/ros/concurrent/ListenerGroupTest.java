@@ -52,12 +52,7 @@ public class ListenerGroupTest {
       }
     });
     for (int i = 0; i < numberOfSignals; i++) {
-      listenerGroup.signal(new SignalRunnable<Runnable>() {
-        @Override
-        public void run(Runnable listener) {
-          listener.run();
-        }
-      });
+      listenerGroup.signal(listener -> listener.run());
     }
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
@@ -80,12 +75,7 @@ public class ListenerGroupTest {
       }
     });
     for (int i = 0; i < numberOfSignals; i++) {
-      listenerGroup.signal(new SignalRunnable<Runnable>() {
-        @Override
-        public void run(Runnable listener) {
-          listener.run();
-        }
-      });
+      listenerGroup.signal(listener -> listener.run());
     }
     assertTrue(latch1.await(1, TimeUnit.SECONDS));
     assertTrue(latch2.await(1, TimeUnit.SECONDS));
@@ -121,12 +111,7 @@ public class ListenerGroupTest {
 
     for (int i = 0; i < numberOfSignals; i++) {
       final int count = i;
-      listenerGroup.signal(new SignalRunnable<CountingListener>() {
-        @Override
-        public void run(CountingListener listener) {
-          listener.run(count);
-        }
-      });
+      listenerGroup.signal(listener -> listener.run(count));
     }
 
     assertTrue(latch.await(1, TimeUnit.SECONDS));

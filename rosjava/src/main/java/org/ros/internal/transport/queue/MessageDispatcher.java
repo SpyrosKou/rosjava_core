@@ -119,13 +119,8 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    *          the {@link LazyMessage} to signal {@link MessageListener}s with
    * @return the newly allocated {@link SignalRunnable}
    */
-  private SignalRunnable<MessageListener<T>> newSignalRunnable(final LazyMessage<T> lazyMessage) {
-    return new SignalRunnable<MessageListener<T>>() {
-      @Override
-      public void run(MessageListener<T> messageListener) {
-        messageListener.onNewMessage(lazyMessage.get());
-      }
-    };
+  private final SignalRunnable<MessageListener<T>> newSignalRunnable(final LazyMessage<T> lazyMessage) {
+    return messageListener -> messageListener.onNewMessage(lazyMessage.get());
   }
 
   /**

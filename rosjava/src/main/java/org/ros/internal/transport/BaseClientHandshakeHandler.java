@@ -79,22 +79,12 @@ public abstract class BaseClientHandshakeHandler extends AbstractNamedChannelHan
       ChannelHandlerContext ctx, MessageEvent e);
 
   private void signalOnSuccess(final ConnectionHeader incommingConnectionHeader) {
-    clientHandshakeListeners.signal(new SignalRunnable<ClientHandshakeListener>() {
-      @Override
-      public void run(ClientHandshakeListener listener) {
-        listener.onSuccess(clientHandshake.getOutgoingConnectionHeader(), incommingConnectionHeader);
-      }
-    });
+    clientHandshakeListeners.signal(listener -> listener.onSuccess(clientHandshake.getOutgoingConnectionHeader(), incommingConnectionHeader));
   }
 
   protected abstract void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e);
 
   private void signalOnFailure(final String errorMessage) {
-    clientHandshakeListeners.signal(new SignalRunnable<ClientHandshakeListener>() {
-      @Override
-      public void run(ClientHandshakeListener listener) {
-        listener.onFailure(clientHandshake.getOutgoingConnectionHeader(), errorMessage);
-      }
-    });
+    clientHandshakeListeners.signal(listener -> listener.onFailure(clientHandshake.getOutgoingConnectionHeader(), errorMessage));
   }
 }

@@ -505,12 +505,7 @@ public final class DefaultNode implements ConnectedNode {
      */
     private void signalOnError(final Throwable throwable) {
         final Node node = this;
-        nodeListeners.signal(new SignalRunnable<NodeListener>() {
-            @Override
-            public void run(NodeListener listener) {
-                listener.onError(node, throwable);
-            }
-        });
+        nodeListeners.signal(listener -> listener.onError(node, throwable));
     }
 
     @Override
@@ -525,12 +520,7 @@ public final class DefaultNode implements ConnectedNode {
      */
     private void signalOnStart() {
         final ConnectedNode connectedNode = this;
-        nodeListeners.signal(new SignalRunnable<NodeListener>() {
-            @Override
-            public void run(NodeListener listener) {
-                listener.onStart(connectedNode);
-            }
-        });
+        nodeListeners.signal(listener -> listener.onStart(connectedNode));
     }
 
     /**
@@ -542,12 +532,7 @@ public final class DefaultNode implements ConnectedNode {
     private void signalOnShutdown() {
         final Node node = this;
         try {
-            nodeListeners.signal(new SignalRunnable<NodeListener>() {
-                @Override
-                public void run(NodeListener listener) {
-                    listener.onShutdown(node);
-                }
-            }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+            nodeListeners.signal(listener -> listener.onShutdown(node), MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
         } catch (InterruptedException e) {
             // Ignored since we do not guarantee that all listeners will finish
             // before
@@ -563,14 +548,11 @@ public final class DefaultNode implements ConnectedNode {
      */
     private void signalOnShutdownComplete() {
         final Node node = this;
-        nodeListeners.signal(new SignalRunnable<NodeListener>() {
-            @Override
-            public void run(NodeListener listener) {
-                try {
-                    listener.onShutdownComplete(node);
-                } catch (Throwable e) {
-                    System.out.println(listener);
-                }
+        nodeListeners.signal(listener -> {
+            try {
+                listener.onShutdownComplete(node);
+            } catch (Throwable e) {
+                System.out.println(listener);
             }
         });
     }
