@@ -38,7 +38,6 @@ import java.nio.channels.Channels;
  */
 public class ConnectionTrackingHandler extends SimpleChannelHandler {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
@@ -52,7 +51,7 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
 
   @Override
   public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Channel opened: " + e.getChannel());
     }
     channelGroup.add(e.getChannel());
@@ -61,7 +60,7 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
 
   @Override
   public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Channel closed: " + e.getChannel());
     }
     super.channelClosed(ctx, e);
@@ -75,10 +74,8 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
       // (e.g. network failure, connection reset by peer, shutting down, etc.)
       // and should not be fatal. However, in all cases the channel should be
       // closed.
-      if (DEBUG) {
+      if (LOGGER.isErrorEnabled()) {
         LOGGER.error("Channel exception: " + ctx.getChannel(), e.getCause());
-      } else {
-        LOGGER.error("Channel exception: " + e.getCause());
       }
     } else {
       throw new RosRuntimeException(e.getCause());

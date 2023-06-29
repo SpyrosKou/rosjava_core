@@ -44,7 +44,6 @@ import java.util.concurrent.TimeUnit;
  */
 public final class NtpTimeProvider implements TimeProvider {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private int sampleSize = 11;
@@ -93,14 +92,14 @@ public final class NtpTimeProvider implements TimeProvider {
   }
 
   private long computeOffset() throws IOException {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Updating time offset from NTP server: " + host.getHostName());
     }
     TimeInfo time;
     try {
       time = ntpClient.getTime(host);
-    } catch (IOException e) {
-      if (DEBUG) {
+    } catch (final IOException e) {
+      if (LOGGER.isErrorEnabled()) {
         LOGGER.error("Failed to read time from NTP server: " + host.getHostName(), e);
       }
       throw e;
@@ -131,7 +130,7 @@ public final class NtpTimeProvider implements TimeProvider {
           public void run() {
             try {
               updateTime();
-            } catch (IOException e) {
+            } catch (final IOException e) {
               LOGGER.error("Periodic NTP update failed.", e);
             }
           }

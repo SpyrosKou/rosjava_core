@@ -47,7 +47,6 @@ import java.util.Vector;
  */
 public final class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final SlaveServer slave;
@@ -70,7 +69,7 @@ public final class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
   @Override
   public List<Object> getMasterUri(String callerId) {
     URI uri = slave.getMasterUri();
-    return new Response<String>(StatusCode.SUCCESS, "", uri.toString()).toList();
+    return new Response<>(StatusCode.SUCCESS, "", uri.toString()).toList();
   }
 
   @Override
@@ -199,7 +198,7 @@ public final class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
       return Response.newError(e.getMessage(), null).toList();
     }
     List<Object> response = Response.newSuccess(protocol.toString(), protocol.toList()).toList();
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
           + response.toString());
     }

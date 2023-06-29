@@ -33,7 +33,6 @@ import java.lang.invoke.MethodHandles;
  */
 public final class ServiceClientHandshake extends BaseClientHandshake {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public ServiceClientHandshake(ConnectionHeader outgoingConnectionHeader) {
@@ -42,7 +41,7 @@ public final class ServiceClientHandshake extends BaseClientHandshake {
 
   @Override
   public boolean handshake(ConnectionHeader incommingConnectionHeader) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Outgoing service client connection header: " + outgoingConnectionHeader);
       LOGGER.info("Incoming service server connection header: " + incommingConnectionHeader);
     }

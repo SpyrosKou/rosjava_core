@@ -37,7 +37,6 @@ import java.util.concurrent.ExecutorService;
  */
 public final class MessageDispatcher<T> extends CancellableLoop {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
@@ -55,7 +54,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
   public MessageDispatcher(CircularBlockingDeque<LazyMessage<T>> lazyMessages,
       ExecutorService executorService) {
     this.lazyMessages = lazyMessages;
-    messageListeners = new ListenerGroup<MessageListener<T>>(executorService);
+    messageListeners = new ListenerGroup<>(executorService);
     mutex = new Object();
     latchMode = false;
   }
@@ -69,7 +68,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    * @see ListenerGroup#add(Object, int)
    */
   public void addListener(MessageListener<T> messageListener, int limit) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Adding listener.");
     }
     synchronized (mutex) {
@@ -90,7 +89,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    * @see ListenerGroup#remove(Object)
    */
   public boolean removeListener(MessageListener<T> messageListener) {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Removing listener.");
     }
     synchronized (mutex) {
@@ -104,7 +103,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    * @see ListenerGroup#shutdown()
    */
   public void removeAllListeners() {
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Removing all listeners.");
     }
     synchronized (mutex) {
@@ -150,7 +149,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
     LazyMessage<T> lazyMessage = lazyMessages.takeFirst();
     synchronized (mutex) {
       latchedMessage = lazyMessage;
-      if (DEBUG) {
+      if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Dispatching message: " + latchedMessage.get());
       }
       messageListeners.signal(newSignalRunnable(latchedMessage));

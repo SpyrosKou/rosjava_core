@@ -38,7 +38,6 @@ import java.util.concurrent.Callable;
  */
 public class RemoteUptimeClock {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final LocalUptimeProvider localUptimeProvider;
@@ -296,7 +295,7 @@ public class RemoteUptimeClock {
     double remoteUptimeDelta = newRemoteUptime - measuredRemoteUptime;
     Preconditions.checkState(localUptimeDelta > 1e-9);
     Preconditions.checkState(remoteUptimeDelta > 1e-9);
-    if (DEBUG) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info(String.format("localUptimeDelta: %.4g, remoteUptimeDelta: %.4g", localUptimeDelta,
           remoteUptimeDelta));
     }

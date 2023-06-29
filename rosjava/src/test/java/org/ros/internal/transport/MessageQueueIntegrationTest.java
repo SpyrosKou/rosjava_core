@@ -61,7 +61,6 @@ import static junit.framework.Assert.assertTrue;
  */
 public class MessageQueueIntegrationTest {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int QUEUE_CAPACITY = 128;
@@ -77,7 +76,7 @@ public class MessageQueueIntegrationTest {
   private class ServerHandler extends SimpleChannelHandler {
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-      if (DEBUG) {
+      if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Channel connected: " + e.getChannel().toString());
       }
       Channel channel = e.getChannel();
@@ -88,7 +87,7 @@ public class MessageQueueIntegrationTest {
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e)
         throws Exception {
-      if (DEBUG) {
+      if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Channel disconnected: " + e.getChannel().toString());
       }
       super.channelDisconnected(ctx, e);
@@ -96,7 +95,7 @@ public class MessageQueueIntegrationTest {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-      if (DEBUG) {
+      if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Channel exception: " + e.getChannel().toString());
       }
       e.getChannel().close();

@@ -36,7 +36,6 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public final class RepeatingPublisher<T extends Message> {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final Publisher<T> publisher;
@@ -53,7 +52,7 @@ public final class RepeatingPublisher<T extends Message> {
     @Override
     public void loop() throws InterruptedException {
       publisher.publish(message);
-      if (DEBUG) {
+      if (LOGGER.isInfoEnabled()) {
         LOGGER.info(String.format("Published message %s to publisher %s ", message, publisher));
       }
       Thread.sleep((long) (1000.0d / frequency));
