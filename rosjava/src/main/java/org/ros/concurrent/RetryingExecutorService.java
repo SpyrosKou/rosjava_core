@@ -45,7 +45,6 @@ import java.util.concurrent.TimeUnit;
  */
 public final class RetryingExecutorService {
 
-  private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final long DEFAULT_RETRY_DELAY = 5;
@@ -83,16 +82,11 @@ public final class RetryingExecutorService {
         throw new RosRuntimeException(e.getCause());
       }
       if (retry) {
-        if (DEBUG) {
+        if (LOGGER.isInfoEnabled()) {
           LOGGER.info("Retry requested.");
         }
         final Callable<Boolean> finalCallable = callable;
-        scheduledExecutorService.schedule(new Runnable() {
-          @Override
-          public void run() {
-            submit(finalCallable);
-          }
-        }, retryDelay, retryTimeUnit);
+        scheduledExecutorService.schedule(() -> submit(finalCallable), retryDelay, retryTimeUnit);
       } else {
         latch.countDown();
       }
@@ -107,7 +101,7 @@ public final class RetryingExecutorService {
     this.scheduledExecutorService = scheduledExecutorService;
 
 
-    completionService = new ExecutorCompletionService<Boolean>(scheduledExecutorService);
+    completionService = new ExecutorCompletionService<>(scheduledExecutorService);
 
     running = true;
     // TODO(damonkohler): Unify this with the passed in ExecutorService.
