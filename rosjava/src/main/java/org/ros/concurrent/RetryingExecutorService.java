@@ -26,16 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Wraps an {@link ScheduledExecutorService} to execute {@link Callable}s with
@@ -51,9 +42,9 @@ public final class RetryingExecutorService {
   private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
 
   private final ScheduledExecutorService scheduledExecutorService;
-  private final RetryLoop retryLoop=new RetryLoop();;
-  private final Map<Callable<Boolean>, CountDownLatch> latches=Maps.newConcurrentMap();;
-  private final Map<Future<Boolean>, Callable<Boolean>> callables=Maps.newConcurrentMap();;
+  private final RetryLoop retryLoop=new RetryLoop();
+  private final Map<Callable<Boolean>, CountDownLatch> latches=new ConcurrentHashMap<>();
+  private final Map<Future<Boolean>, Callable<Boolean>> callables=new ConcurrentHashMap<>();
   private final CompletionService<Boolean> completionService;
   private final Object mutex= new Object();
 
@@ -64,18 +55,18 @@ public final class RetryingExecutorService {
   private TimeUnit retryTimeUnit= DEFAULT_RETRY_TIME_UNIT;
   private boolean running;
 
-  private class RetryLoop extends CancellableLoop {
+  private final class RetryLoop extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
-      Future<Boolean> future = completionService.take();
-      Callable<Boolean> callable;
-      CountDownLatch latch;
+      final Future<Boolean> future = completionService.take();
+      final Callable<Boolean> callable;
+      final CountDownLatch latch;
       // Grab the mutex to make sure submit() of the future that we took is finished.
       synchronized (mutex) {
         callable = callables.remove(future);
         latch = latches.get(callable);
       }
-      boolean retry;
+      final boolean retry;
       try {
         retry = future.get();
       } catch (ExecutionException e) {
@@ -99,11 +90,8 @@ public final class RetryingExecutorService {
    */
   public RetryingExecutorService(ScheduledExecutorService scheduledExecutorService) {
     this.scheduledExecutorService = scheduledExecutorService;
-
-
-    completionService = new ExecutorCompletionService<>(scheduledExecutorService);
-
-    running = true;
+    this.completionService = new ExecutorCompletionService<>(scheduledExecutorService);
+    this.running = true;
     // TODO(damonkohler): Unify this with the passed in ExecutorService.
     scheduledExecutorService.execute(retryLoop);
   }
