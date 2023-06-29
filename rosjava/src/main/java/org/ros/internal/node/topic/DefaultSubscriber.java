@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -30,10 +30,7 @@ import org.ros.internal.transport.queue.IncomingMessageQueue;
 import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
-import org.ros.node.topic.DefaultSubscriberListener;
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-import org.ros.node.topic.SubscriberListener;
+import org.ros.node.topic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Default implementation of a {@link Subscriber}.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class DefaultSubscriber<T extends Message> extends DefaultTopicParticipant implements Subscriber<T> {
@@ -64,9 +61,9 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
   private final NodeIdentifier nodeIdentifier;
   private final ScheduledExecutorService executorService;
   private final IncomingMessageQueue<T> incomingMessageQueue;
-  private final Set<PublisherIdentifier> knownPublishers;
+  private final Set<PublisherIdentifier> knownPublishers = Sets.newHashSet();
   private final TcpClientManager tcpClientManager;
-  private final Object mutex;
+  private final Object mutex = new Object();;
 
   /**
    * Manages the {@link SubscriberListener}s for this {@link Subscriber}.
@@ -79,41 +76,22 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
     return new DefaultSubscriber<S>(nodeIdentifier, description, deserializer, executorService);
   }
 
-  private DefaultSubscriber(NodeIdentifier nodeIdentifier, TopicDeclaration topicDeclaration,
-      MessageDeserializer<T> deserializer, ScheduledExecutorService executorService) {
+  private DefaultSubscriber(final NodeIdentifier nodeIdentifier,final  TopicDeclaration topicDeclaration,
+                            final MessageDeserializer<T> deserializer, final ScheduledExecutorService executorService) {
     super(topicDeclaration);
     this.nodeIdentifier = nodeIdentifier;
     this.executorService = executorService;
-    incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
-    knownPublishers = Sets.newHashSet();
-    tcpClientManager = new TcpClientManager(executorService);
-    mutex = new Object();
-    SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
+    this.incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
+
+    this.tcpClientManager = new TcpClientManager(executorService);
+
+    final SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
         new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
             incomingMessageQueue, executorService);
-    tcpClientManager.addNamedChannelHandler(subscriberHandshakeHandler);
-    subscriberListeners = new ListenerGroup<SubscriberListener<T>>(executorService);
-    subscriberListeners.add(new DefaultSubscriberListener<T>() {
-      @Override
-      public void onMasterRegistrationSuccess(Subscriber<T> registrant) {
-        LOGGER.info("Subscriber registered: " + DefaultSubscriber.this);
-      }
-
-      @Override
-      public void onMasterRegistrationFailure(Subscriber<T> registrant) {
-        LOGGER.info("Subscriber registration failed: " + DefaultSubscriber.this);
-      }
-
-      @Override
-      public void onMasterUnregistrationSuccess(Subscriber<T> registrant) {
-        LOGGER.info("Subscriber unregistered: " + DefaultSubscriber.this);
-      }
-
-      @Override
-      public void onMasterUnregistrationFailure(Subscriber<T> registrant) {
-        LOGGER.info("Subscriber unregistration failed: " + DefaultSubscriber.this);
-      }
-    });
+    this.tcpClientManager.addNamedChannelHandler(subscriberHandshakeHandler);
+    this.subscriberListeners = new ListenerGroup<>(executorService);
+    final LoggingSubscriberListener<T> loggingSubscriberListener=new LoggingSubscriberListener();
+    this.subscriberListeners.add(loggingSubscriberListener);
   }
 
   public SubscriberIdentifier toIdentifier() {
@@ -158,21 +136,21 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
     synchronized (mutex) {
       // TODO(damonkohler): If the connection is dropped, knownPublishers should
       // be updated.
-      if (knownPublishers.contains(publisherIdentifier)) {
+      if (this.knownPublishers.contains(publisherIdentifier)) {
         return;
       }
-      tcpClientManager.connect(toString(), address);
+      this.tcpClientManager.connect(toString(), address);
       // TODO(damonkohler): knownPublishers is duplicate information that is
       // already available to the TopicParticipantManager.
-      knownPublishers.add(publisherIdentifier);
-      signalOnNewPublisher(publisherIdentifier);
+      this.knownPublishers.add(publisherIdentifier);
+      this.signalOnNewPublisher(publisherIdentifier);
     }
   }
 
   /**
    * Updates the list of {@link Publisher}s for the topic that this
    * {@link Subscriber} is interested in.
-   * 
+   *
    * @param publisherIdentifiers
    *          {@link Collection} of {@link PublisherIdentifier}s for the
    *          subscribed topic
@@ -222,19 +200,14 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
   /**
    * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
    * failed to register with the master.
-   * 
+   *
    * <p>
    * Each listener is called in a separate thread.
    */
   @Override
   public void signalOnMasterRegistrationFailure() {
     final Subscriber<T> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
-      public void run(SubscriberListener<T> listener) {
-        listener.onMasterRegistrationFailure(subscriber);
-      }
-    });
+    subscriberListeners.signal(listener -> listener.onMasterRegistrationFailure(subscriber));
   }
 
   /**
@@ -246,12 +219,7 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
   @Override
   public void signalOnMasterUnregistrationSuccess() {
     final Subscriber<T> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
-      public void run(SubscriberListener<T> listener) {
-        listener.onMasterUnregistrationSuccess(subscriber);
-      }
-    });
+    subscriberListeners.signal(listener -> listener.onMasterUnregistrationSuccess(subscriber));
   }
 
   /**
@@ -263,12 +231,7 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
   @Override
   public void signalOnMasterUnregistrationFailure() {
     final Subscriber<T> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
-      public void run(SubscriberListener<T> listener) {
-        listener.onMasterUnregistrationFailure(subscriber);
-      }
-    });
+    this.subscriberListeners.signal(listener -> listener.onMasterUnregistrationFailure(subscriber));
   }
 
   /**
@@ -277,14 +240,9 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
    * <p>
    * Each listener is called in a separate thread.
    */
-  public void signalOnNewPublisher(final PublisherIdentifier publisherIdentifier) {
+  private final void signalOnNewPublisher(final PublisherIdentifier publisherIdentifier) {
     final Subscriber<T> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-      @Override
-      public void run(SubscriberListener<T> listener) {
-        listener.onNewPublisher(subscriber, publisherIdentifier);
-      }
-    });
+    this.subscriberListeners.signal(listener -> listener.onNewPublisher(subscriber, publisherIdentifier));
   }
 
   /**
@@ -293,15 +251,10 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
    * <p>
    * Each listener is called in a separate thread.
    */
-  private void signalOnShutdown(long timeout, TimeUnit unit) {
+  private final void signalOnShutdown(long timeout, TimeUnit unit) {
     final Subscriber<T> subscriber = this;
     try {
-      subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
-        @Override
-        public void run(SubscriberListener<T> listener) {
-          listener.onShutdown(subscriber);
-        }
-      }, timeout, unit);
+      this.subscriberListeners.signal(listener -> listener.onShutdown(subscriber), timeout, unit);
     } catch (InterruptedException e) {
       // Ignored since we do not guarantee that all listeners will finish before
       // shutdown begins.
@@ -309,7 +262,7 @@ public final class DefaultSubscriber<T extends Message> extends DefaultTopicPart
   }
 
   @Override
-  public String toString() {
-    return "Subscriber<" + getTopicDeclaration() + ">";
+  public final String toString() {
+    return "Subscriber<" + this.getTopicDeclaration() + ">";
   }
 }

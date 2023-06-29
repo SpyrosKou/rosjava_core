@@ -29,10 +29,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.queue.OutgoingMessageQueue;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
-import org.ros.node.topic.DefaultPublisherListener;
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.PublisherListener;
-import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class DefaultPublisher<T extends Message> extends DefaultTopicParticipant implements Publisher<T> {
 
-  private static final boolean DEBUG = false;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
@@ -74,38 +71,19 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
     super(topicDeclaration);
     this.nodeIdentifier = nodeIdentifier;
     this.messageFactory = messageFactory;
-    outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
+    this.outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
     listenerGroup = new ListenerGroup<>(executorService);
-    listenerGroup.add(new DefaultPublisherListener<T>() {
-      @Override
-      public void onMasterRegistrationSuccess(Publisher<T> registrant) {
-        LOGGER.info("Publisher registered: " + DefaultPublisher.this);
-      }
-
-      @Override
-      public void onMasterRegistrationFailure(Publisher<T> registrant) {
-        LOGGER.info("Publisher registration failed: " + DefaultPublisher.this);
-      }
-
-      @Override
-      public void onMasterUnregistrationSuccess(Publisher<T> registrant) {
-        LOGGER.info("Publisher unregistered: " + DefaultPublisher.this);
-      }
-
-      @Override
-      public void onMasterUnregistrationFailure(Publisher<T> registrant) {
-        LOGGER.info("Publisher unregistration failed: " + DefaultPublisher.this);
-      }
-    });
+    final LoggingPublisherListener<T> loggingPublisherListener=new LoggingPublisherListener<>();
+    listenerGroup.add(loggingPublisherListener);
   }
 
   @Override
-  public void setLatchMode(boolean enabled) {
+  public final void setLatchMode(boolean enabled) {
     outgoingMessageQueue.setLatchMode(enabled);
   }
 
   @Override
-  public boolean getLatchMode() {
+  public final boolean getLatchMode() {
     return outgoingMessageQueue.getLatchMode();
   }
 
@@ -115,52 +93,52 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * {@link DefaultPublisher#signalOnMasterUnregistrationFailure()} before continuing shutdown
    */
   @Override
-  public void shutdown(long timeout, TimeUnit unit) {
-    shutdownLatch = new CountDownLatch(listenerGroup.size());
-    signalOnShutdown(timeout, unit);
+  public final void shutdown(long timeout, TimeUnit unit) {
+    this.shutdownLatch = new CountDownLatch(listenerGroup.size());
+    this.signalOnShutdown(timeout, unit);
     try {
-      shutdownLatch.await(timeout, unit);
-    } catch (InterruptedException e) {
+      this.shutdownLatch.await(timeout, unit);
+    } catch (final InterruptedException e) {
       LOGGER.error(e.getMessage(), e);
     }
-    outgoingMessageQueue.shutdown();
-    listenerGroup.shutdown();
+    this.outgoingMessageQueue.shutdown();
+    this.listenerGroup.shutdown();
   }
 
   @Override
-  public void shutdown() {
+  public final void shutdown() {
     shutdown(DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
   }
 
-  public PublisherIdentifier getIdentifier() {
+  public final PublisherIdentifier getIdentifier() {
     return new PublisherIdentifier(nodeIdentifier, getTopicDeclaration().getIdentifier());
   }
 
-  public PublisherDeclaration toDeclaration() {
+  public final PublisherDeclaration toDeclaration() {
     return PublisherDeclaration.newFromNodeIdentifier(nodeIdentifier, getTopicDeclaration());
   }
 
   @Override
-  public boolean hasSubscribers() {
+  public final boolean hasSubscribers() {
     return outgoingMessageQueue.getNumberOfChannels() > 0;
   }
 
   @Override
-  public int getNumberOfSubscribers() {
+  public final int getNumberOfSubscribers() {
     return outgoingMessageQueue.getNumberOfChannels();
   }
 
   @Override
-  public T newMessage() {
+  public final T newMessage() {
     return messageFactory.newFromType(getTopicDeclaration().getMessageType());
   }
 
   @Override
-  public void publish(T message) {
-    if (DEBUG) {
+  public final void publish(T message) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info(String.format("Publishing message %s on topic %s.", message, getTopicName()));
     }
-    outgoingMessageQueue.add(message);
+    this.outgoingMessageQueue.add(message);
   }
 
   /**
@@ -170,28 +148,27 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * 
    * @return encoded connection header from subscriber
    */
-  public ChannelBuffer finishHandshake(ConnectionHeader incomingHeader) {
-    ConnectionHeader topicDefinitionHeader = getTopicDeclarationHeader();
-    if (DEBUG) {
-      LOGGER.info("Subscriber handshake header: " + incomingHeader);
-      LOGGER.info("Publisher handshake header: " + topicDefinitionHeader);
+  public final ChannelBuffer finishHandshake(final ConnectionHeader incomingHeader) {
+    final ConnectionHeader topicDefinitionHeader = getTopicDeclarationHeader();
+    if (LOGGER.isInfoEnabled()) {
+      LOGGER.info("Subscriber handshake header: " + incomingHeader+"\n"+"Publisher handshake header: " + topicDefinitionHeader);
     }
     // TODO(damonkohler): Return errors to the subscriber over the wire.
-    String incomingType = incomingHeader.getField(ConnectionHeaderFields.TYPE);
-    String expectedType = topicDefinitionHeader.getField(ConnectionHeaderFields.TYPE);
-    boolean messageTypeMatches =
+    final String incomingType = incomingHeader.getField(ConnectionHeaderFields.TYPE);
+    final String expectedType = topicDefinitionHeader.getField(ConnectionHeaderFields.TYPE);
+    final boolean messageTypeMatches =
         incomingType.equals(expectedType)
             || incomingType.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(messageTypeMatches, "Unexpected message type " + incomingType + " != "
         + expectedType);
-    String incomingChecksum = incomingHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
-    String expectedChecksum = topicDefinitionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
-    boolean checksumMatches =
+    final String incomingChecksum = incomingHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
+    final String expectedChecksum = topicDefinitionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
+    final boolean checksumMatches =
         incomingChecksum.equals(expectedChecksum)
             || incomingChecksum.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(checksumMatches, "Unexpected message MD5 " + incomingChecksum + " != "
         + expectedChecksum);
-    ConnectionHeader outgoingConnectionHeader = toDeclaration().toConnectionHeader();
+    final ConnectionHeader outgoingConnectionHeader = toDeclaration().toConnectionHeader();
     // TODO(damonkohler): Force latch mode to be consistent throughout the life
     // of the publisher.
     outgoingConnectionHeader.addField(ConnectionHeaderFields.LATCHING, getLatchMode() ? "1" : "0");
@@ -206,17 +183,17 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * @param channel
    *          the communication {@link Channel} to the {@link Subscriber}
    */
-  public void addSubscriber(SubscriberIdentifier subscriberIdentifer, Channel channel) {
-    if (DEBUG) {
+  public final void addSubscriber(SubscriberIdentifier subscriberIdentifer, Channel channel) {
+    if (LOGGER.isInfoEnabled()) {
       LOGGER.info(String.format("Adding subscriber %s channel %s to publisher %s.",
           subscriberIdentifer, channel, this));
     }
-    outgoingMessageQueue.addChannel(channel);
+    this.outgoingMessageQueue.addChannel(channel);
     signalOnNewSubscriber(subscriberIdentifer);
   }
 
   @Override
-  public void addListener(PublisherListener<T> listener) {
+  public final void addListener(PublisherListener<T> listener) {
     listenerGroup.add(listener);
   }
 
@@ -227,14 +204,9 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * Each listener is called in a separate thread.
    */
   @Override
-  public void signalOnMasterRegistrationSuccess() {
+  public final void signalOnMasterRegistrationSuccess() {
     final Publisher<T> publisher = this;
-    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
-      public void run(PublisherListener<T> listener) {
-        listener.onMasterRegistrationSuccess(publisher);
-      }
-    });
+    listenerGroup.signal(listener -> listener.onMasterRegistrationSuccess(publisher));
   }
 
   /**
@@ -244,14 +216,9 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * Each listener is called in a separate thread.
    */
   @Override
-  public void signalOnMasterRegistrationFailure() {
+  public final void signalOnMasterRegistrationFailure() {
     final Publisher<T> publisher = this;
-    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
-      public void run(PublisherListener<T> listener) {
-        listener.onMasterRegistrationFailure(publisher);
-      }
-    });
+    listenerGroup.signal(listener -> listener.onMasterRegistrationFailure(publisher));
   }
 
   /**
@@ -261,14 +228,11 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * Each listener is called in a separate thread.
    */
   @Override
-  public void signalOnMasterUnregistrationSuccess() {
+  public final void signalOnMasterUnregistrationSuccess() {
     final Publisher<T> publisher = this;
-    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
-      public void run(PublisherListener<T> listener) {
-        listener.onMasterUnregistrationSuccess(publisher);
-        shutdownLatch.countDown();
-      }
+    listenerGroup.signal(listener -> {
+      listener.onMasterUnregistrationSuccess(publisher);
+      shutdownLatch.countDown();
     });
   }
 
@@ -279,14 +243,11 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * Each listener is called in a separate thread.
    */
   @Override
-  public void signalOnMasterUnregistrationFailure() {
+  public final void signalOnMasterUnregistrationFailure() {
     final Publisher<T> publisher = this;
-    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
-      public void run(PublisherListener<T> listener) {
-        listener.onMasterUnregistrationFailure(publisher);
-        shutdownLatch.countDown();
-      }
+    listenerGroup.signal(listener -> {
+      listener.onMasterUnregistrationFailure(publisher);
+      shutdownLatch.countDown();
     });
   }
 
@@ -299,14 +260,9 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * @param subscriberIdentifier
    *          the {@link SubscriberIdentifier} of the new {@link Subscriber}
    */
-  private void signalOnNewSubscriber(final SubscriberIdentifier subscriberIdentifier) {
+  private final void signalOnNewSubscriber(final SubscriberIdentifier subscriberIdentifier) {
     final Publisher<T> publisher = this;
-    listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
-      @Override
-      public void run(PublisherListener<T> listener) {
-        listener.onNewSubscriber(publisher, subscriberIdentifier);
-      }
-    });
+    listenerGroup.signal(listener -> listener.onNewSubscriber(publisher, subscriberIdentifier));
   }
 
   /**
@@ -318,15 +274,10 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
    * @param timeout
    * @param unit
    */
-  private void signalOnShutdown(long timeout, TimeUnit unit) {
+  private final void signalOnShutdown(long timeout, TimeUnit unit) {
     final Publisher<T> publisher = this;
     try {
-      listenerGroup.signal(new SignalRunnable<PublisherListener<T>>() {
-        @Override
-        public void run(PublisherListener<T> listener) {
-          listener.onShutdown(publisher);
-        }
-      }, timeout, unit);
+      listenerGroup.signal(listener -> listener.onShutdown(publisher), timeout, unit);
     } catch (InterruptedException e) {
       // Ignored since we do not guarantee that all listeners will finish before
       // shutdown begins.
@@ -334,7 +285,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "Publisher<" + toDeclaration() + ">";
   }
 }
