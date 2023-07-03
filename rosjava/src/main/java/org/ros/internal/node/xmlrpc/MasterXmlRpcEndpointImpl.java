@@ -137,7 +137,7 @@ public final class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint, Par
     }
 
     @Override
-    public final List<Object> unregisterService(String callerId, String serviceName, String serviceUri) {
+    public final List<Object> unregisterService(final String callerId,final String serviceName,final String serviceUri) {
         try {
             final boolean result = master.unregisterService(GraphName.of(callerId), GraphName.of(serviceName), new URI(serviceUri));
             return Response.newSuccess("Success", result ? 1 : 0).toList();
