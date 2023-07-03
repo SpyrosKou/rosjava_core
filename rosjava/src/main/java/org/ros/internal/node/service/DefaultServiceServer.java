@@ -56,10 +56,14 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
     private final ScheduledExecutorService scheduledExecutorService;
     private final ListenerGroup<ServiceServerListener<T, S>> listenerGroup;
 
-    public DefaultServiceServer(ServiceDeclaration serviceDeclaration,
-                                ServiceResponseBuilder<T, S> serviceResponseBuilder, AdvertiseAddress advertiseAddress,
-                                MessageDeserializer<T> messageDeserializer, MessageSerializer<S> messageSerializer,
-                                MessageFactory messageFactory, ScheduledExecutorService scheduledExecutorService) {
+    public DefaultServiceServer(
+            final ServiceDeclaration serviceDeclaration
+            ,final ServiceResponseBuilder<T, S> serviceResponseBuilder
+            ,final AdvertiseAddress advertiseAddress
+            ,final MessageDeserializer<T> messageDeserializer
+            ,final MessageSerializer<S> messageSerializer
+            ,final MessageFactory messageFactory
+            ,final ScheduledExecutorService scheduledExecutorService) {
         this.serviceDeclaration = serviceDeclaration;
         this.serviceResponseBuilder = serviceResponseBuilder;
         this.advertiseAddress = advertiseAddress;
@@ -68,33 +72,10 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
         this.messageFactory = messageFactory;
         this.scheduledExecutorService = scheduledExecutorService;
         this.listenerGroup = new ListenerGroup<>(scheduledExecutorService);
-        this.listenerGroup.add(new LoggerServiceListener());
+        this.listenerGroup.add(new LoggingServiceServerListener<>());
     }
 
-    private final class LoggerServiceListener extends DefaultServiceServerListener<T, S> {
-        private LoggerServiceListener() {
-        }
 
-        @Override
-        public final void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
-            LOGGER.info("Service registered: " + DefaultServiceServer.this);
-        }
-
-        @Override
-        public final void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
-            LOGGER.info("Service registration failed: " + DefaultServiceServer.this);
-        }
-
-        @Override
-        public final void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
-            LOGGER.info("Service unregistered: " + DefaultServiceServer.this);
-        }
-
-        @Override
-        public final void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
-            LOGGER.info("Service unregistration failed: " + DefaultServiceServer.this);
-        }
-    }
 
     public final ChannelBuffer finishHandshake(final ConnectionHeader incomingConnectionHeader) {
         if (LOGGER.isInfoEnabled()) {
@@ -113,7 +94,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
 
     @Override
     public final URI getUri() {
-        return advertiseAddress.toUri(ROSRPC);
+        return this.advertiseAddress.toUri(ROSRPC);
     }
 
     @Override
@@ -144,8 +125,8 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * Each listener is called in a separate thread.
      */
     public final void onMasterRegistrationSuccess() {
-        final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(listener -> listener.onMasterRegistrationSuccess(serviceServer));
+
+        this.listenerGroup.signal(listener -> listener.onMasterRegistrationSuccess(this));
     }
 
     /**
@@ -156,8 +137,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * Each listener is called in a separate thread.
      */
     public final void onMasterRegistrationFailure() {
-        final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(listener -> listener.onMasterRegistrationFailure(serviceServer));
+        this.listenerGroup.signal(listener -> listener.onMasterRegistrationFailure(this));
     }
 
     /**
@@ -168,8 +148,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * Each listener is called in a separate thread.
      */
     public final void onMasterUnregistrationSuccess() {
-        final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(listener -> listener.onMasterUnregistrationSuccess(serviceServer));
+        this.listenerGroup.signal(listener -> listener.onMasterUnregistrationSuccess(this));
     }
 
     /**
@@ -180,8 +159,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * Each listener is called in a separate thread.
      */
     public final void onMasterUnregistrationFailure() {
-        final ServiceServer<T, S> serviceServer = this;
-        this.listenerGroup.signal(listener -> listener.onMasterUnregistrationFailure(serviceServer));
+        this.listenerGroup.signal(listener -> listener.onMasterUnregistrationFailure(this));
     }
 
     @Override
@@ -190,7 +168,7 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
     }
 
     @Override
-    public final void addListener(ServiceServerListener<T, S> listener) {
+    public final void addListener(final ServiceServerListener<T, S> listener) {
         this.listenerGroup.add(listener);
     }
 
