@@ -46,6 +46,8 @@ public interface ServiceClient<T extends Message, S extends Message> {
    */
   boolean isConnected();
 
+  public void connectIfUnconnected(final URI uri);
+
   /**
    * Calls a method on the {@link ServiceServer}.
    * 
