@@ -18,6 +18,7 @@ package org.ros.internal.node.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.ros.exception.DuplicateServiceException;
 import org.ros.internal.message.Message;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ChannelBufferServiceServer;
@@ -28,6 +29,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 /**
  * Manages a collection of {@link org.ros.node.service.ChannelBufferServiceServer}s and {@link ServiceClient}s.
@@ -39,39 +43,51 @@ public final class ServiceManager {
     /**
      * A mapping from service name to the server for the service.
      */
-    private final Map<GraphName, ChannelBufferServiceServer<? extends Message, ? extends Message>> serviceServers;
+    private final ConcurrentHashMap<GraphName, ChannelBufferServiceServer<? extends Message, ? extends Message>> serviceServers = new ConcurrentHashMap<>();
 
     /**
      * A mapping from service name to a client for the service.
      */
-    private final Map<GraphName, ServiceClient<? extends Message, ? extends Message>> serviceClients;
+    private final ConcurrentHashMap<GraphName, ServiceClient<? extends Message, ? extends Message>> serviceClients = new ConcurrentHashMap<>();
 
     // TODO(damonkohler): Change to ListenerGroup.
     private ServiceManagerListener listener;
-
-    public ServiceManager() {
-        serviceServers = Maps.newConcurrentMap();
-        serviceClients = Maps.newConcurrentMap();
-    }
 
     public void setListener(final ServiceManagerListener listener) {
         this.listener = listener;
     }
 
-    public boolean hasServer(GraphName name) {
+    public final boolean hasServer(GraphName name) {
         return this.serviceServers.containsKey(name);
     }
 
-    public void addServer(final ChannelBufferServiceServer<? extends Message, ? extends Message> serviceServer) {
-        serviceServers.put(serviceServer.getName(), serviceServer);
-        if (listener != null) {
-            listener.onServiceServerAdded(serviceServer);
+    /**
+     * Will throw a {@link DuplicateServiceException} if a service with the same name already exists on this {@link ServiceServer}
+     *
+     * @param serviceServer
+     */
+    public final void addServer(final ChannelBufferServiceServer<? extends Message, ? extends Message> serviceServer) {
+
+        final ChannelBufferServiceServer<? extends Message, ? extends Message> result = this.serviceServers.putIfAbsent(serviceServer.getName(), serviceServer);
+        final boolean added = (result == null);
+        if (added && (this.listener != null)) {
+            this.listener.onServiceServerAdded(serviceServer);
         }
+        if (!added) {
+            final GraphName graphName = serviceServer.getName();
+            throw new DuplicateServiceException(String.format("ServiceServer %s already exists.", graphName));
+        }
+
     }
 
-    public void removeServer(ServiceServer<? extends Message, ? extends Message> serviceServer) {
-        this.serviceServers.remove(serviceServer.getName());
-        if (this.listener != null) {
+    /**
+     * Nothing happens if the server does not exist
+     * @param serviceServer
+     */
+    public void removeServer(final ServiceServer<? extends Message, ? extends Message> serviceServer) {
+        final ServiceServer<? extends Message, ? extends Message> server = this.serviceServers.remove(serviceServer.getName());
+
+        if (server != null && this.listener != null) {
             this.listener.onServiceServerRemoved(serviceServer);
         }
     }
@@ -84,8 +100,8 @@ public final class ServiceManager {
         return this.serviceClients.containsKey(name);
     }
 
-    public final void addClient(ServiceClient<? extends Message, ? extends Message> serviceClient) {
-        this.serviceClients.put(serviceClient.getName(), serviceClient);
+    public final ServiceClient<?, ?> getOrCreateClient(final GraphName graphName, final Supplier<ServiceClient<? extends Message, ? extends Message>> serviceClientSupplier) {
+        return this.serviceClients.computeIfAbsent(graphName, x -> serviceClientSupplier.get());
     }
 
     public void removeClient(ServiceClient<?, ?> serviceClient) {
@@ -105,10 +121,10 @@ public final class ServiceManager {
     }
 
     public final Set<GraphName> getServerNames() {
-        return Collections.unmodifiableSet(serviceServers.keySet());
+        return Collections.unmodifiableSet(this.serviceServers.keySet());
     }
 
     public final Set<GraphName> getClientNames() {
-        return Collections.unmodifiableSet(serviceClients.keySet());
+        return Collections.unmodifiableSet(this.serviceClients.keySet());
     }
 }
