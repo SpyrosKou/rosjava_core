@@ -23,7 +23,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
-import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
 import org.ros.internal.message.service.ServiceDescription;
@@ -44,7 +43,6 @@ import org.ros.internal.node.topic.PublisherFactory;
 import org.ros.internal.node.topic.SubscriberFactory;
 import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.internal.node.topic.TopicParticipantManager;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.message.*;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -78,7 +76,7 @@ import java.util.function.Consumer;
  * @author damonkohler@google.com (Damon Kohler)
  * @author Spyros Koukas
  */
-public final class DefaultNode implements ConnectedNode {
+final class DefaultNode implements ConnectedNode {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     /**
      * The maximum delay before shutdown will begin even if all
