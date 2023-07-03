@@ -112,9 +112,9 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             }
             success = response.isSuccess();
         } catch (final Exception exception) {
-
-            LOGGER.error("Exception caught while communicating with master." + ExceptionUtils.getStackTrace(exception));
-
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("Exception caught while communicating with master." + ExceptionUtils.getStackTrace(exception));
+            }
             success = false;
         }
         return success;
@@ -220,22 +220,30 @@ public final class Registrar implements TopicParticipantManagerListener, Service
         }
     }
 
+    /**
+     * Calls master and raises events.
+     *
+     * @param serviceServer
+     * @return
+     */
+    private final boolean unregisterService(final ServiceServer<?, ?> serviceServer) {
+        final boolean success = callMaster(() -> this.masterClient.unregisterService(this.nodeIdentifier, serviceServer));
+        if (success) {
+            serviceServer.onMasterUnregistrationSuccess();
+        } else {
+            serviceServer.onMasterUnregistrationFailure();
+        }
+        return !success;
+    }
+
     @Override
     public final void onServiceServerRemoved(final ServiceServer<?, ?> serviceServer) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Unregistering service: " + serviceServer);
         }
-        final boolean submitted = submit(() -> {
-            final boolean success = callMaster(() -> masterClient.unregisterService(nodeIdentifier, serviceServer));
-            if (success) {
-                serviceServer.onMasterUnregistrationSuccess();
-            } else {
-                serviceServer.onMasterUnregistrationFailure();
-            }
-            return !success;
-        });
+        final boolean submitted = this.submit(() -> unregisterService(serviceServer));
         if (!submitted) {
-            executorService.execute(() -> serviceServer.onMasterUnregistrationFailure());
+            this.executorService.execute(() -> serviceServer.onMasterUnregistrationFailure());
         }
     }
 
