@@ -25,10 +25,7 @@ import org.ros.node.service.ChannelBufferServiceServer;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
@@ -81,14 +78,26 @@ public final class ServiceManager {
     }
 
     /**
-     * Nothing happens if the server does not exist
-     * @param serviceServer
+     *
      */
-    public void removeServer(final ServiceServer<? extends Message, ? extends Message> serviceServer) {
-        final ServiceServer<? extends Message, ? extends Message> server = this.serviceServers.remove(serviceServer.getName());
+    public void removeAllServiceServers() {
+        final List<GraphName> allServers = this.serviceServers.values().stream().map(ServiceServer::getName).toList();
+        for(final GraphName graphName:allServers){
+            this.removeServer(graphName);
+        }
+        allServers.clear();
+    }
+
+    /**
+     * Nothing happens if the server does not exist
+     *
+     * @param graphName
+     */
+    public void removeServer(final GraphName graphName) {
+        final ServiceServer<? extends Message, ? extends Message> server = this.serviceServers.remove(graphName);
 
         if (server != null && this.listener != null) {
-            this.listener.onServiceServerRemoved(serviceServer);
+            this.listener.onServiceServerRemoved(server);
         }
     }
 
