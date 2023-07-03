@@ -77,16 +77,6 @@ public final class ServiceManager {
 
     }
 
-    /**
-     *
-     */
-    public void removeAllServiceServers() {
-        final List<GraphName> allServers = this.serviceServers.values().stream().map(ServiceServer::getName).toList();
-        for(final GraphName graphName:allServers){
-            this.removeServer(graphName);
-        }
-        allServers.clear();
-    }
 
     /**
      * Nothing happens if the server does not exist
