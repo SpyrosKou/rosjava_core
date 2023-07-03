@@ -93,8 +93,10 @@ public final class DefaultNode implements ConnectedNode {
     private final ScheduledExecutorService scheduledExecutorService;
     private final URI masterUri;
     private final MasterClient masterClient;
-    private final TopicParticipantManager topicParticipantManager;
-    private final ServiceManager serviceManager;
+    private final TopicParticipantManager topicParticipantManager = new TopicParticipantManager();
+    ;
+    private final ServiceManager serviceManager = new ServiceManager();
+    ;
     private final ParameterManager parameterManager;
     private final GraphName nodeName;
     private final NodeNameResolver resolver;
@@ -126,8 +128,8 @@ public final class DefaultNode implements ConnectedNode {
         this.scheduledExecutorService = scheduledExecutorService;
         this.masterUri = nodeConfiguration.getMasterUri();
         this.masterClient = new MasterClient(this.masterUri);
-        this.topicParticipantManager = new TopicParticipantManager();
-        this.serviceManager = new ServiceManager();
+
+
         this.parameterManager = new ParameterManager(scheduledExecutorService);
 
         final GraphName basename = nodeConfiguration.getNodeName();
@@ -433,22 +435,60 @@ public final class DefaultNode implements ConnectedNode {
                         LOGGER.debug(msg);
                     }
                 }
-            } catch (final XmlRpcTimeoutException e) {
+            } catch (final Exception e) {
                 if (LOGGER.isErrorEnabled()) {
                     LOGGER.error(ExceptionUtils.getStackTrace(e));
                 }
                 this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
-            } catch (final RemoteException e) {
-                this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
             }
         }
         for (final ServiceClient<?, ?> serviceClient : this.serviceManager.getClients()) {
-            serviceClient.shutdown();
+            try {
+                serviceClient.shutdown();
+            } catch (final Exception e) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(ExceptionUtils.getStackTrace(e));
+                }
+                this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
+            }
         }
-        this.slaveServer.shutdown();
-        this.topicParticipantManager.shutdown();
-        this.registrar.shutdown();
-        this.signalOnShutdownComplete();
+
+        try {
+            this.slaveServer.shutdown();
+        } catch (final Exception e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            }
+            this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
+        }
+
+        try {
+            this.topicParticipantManager.shutdown();
+        } catch (final Exception e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            }
+            this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
+        }
+
+        try {
+            this.registrar.shutdown();
+        } catch (final Exception e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            }
+            this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
+        }
+
+        try {
+            this.signalOnShutdownComplete();
+        } catch (final Exception e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
+            }
+            this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
+        }
+
     }
 
     @Override
