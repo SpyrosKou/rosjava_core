@@ -144,31 +144,27 @@ public class MessageQueueIntegrationTest {
     });
   }
 
+  private final void removeHandShakeReceivedAddServerHandler(final ChannelPipeline channelPipeline){
+    channelPipeline.remove(TcpServerPipelineFactory.HANDSHAKE_HANDLER);
+    channelPipeline.addLast("ServerHandler", new ServerHandler());
+  }
   private Channel buildServerChannel() {
-    TopicParticipantManager topicParticipantManager = new TopicParticipantManager();
-    ServiceManager serviceManager = new ServiceManager();
-    NioServerSocketChannelFactory channelFactory =
+    final TopicParticipantManager topicParticipantManager = new TopicParticipantManager();
+    final ServiceManager serviceManager = new ServiceManager();
+    final NioServerSocketChannelFactory channelFactory =
         new NioServerSocketChannelFactory(executorService, executorService);
-    ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
+    final ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     bootstrap.setOption("child.keepAlive", true);
-    ChannelGroup serverChannelGroup = new DefaultChannelGroup();
-    TcpServerPipelineFactory serverPipelineFactory =
-        new TcpServerPipelineFactory(serverChannelGroup, topicParticipantManager, serviceManager) {
-          @Override
-          public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = super.getPipeline();
-            // We're not interested firstIncomingMessageQueue testing the
-            // handshake here. Removing it means connections are established
-            // immediately.
-            pipeline.remove(TcpServerPipelineFactory.HANDSHAKE_HANDLER);
-            pipeline.addLast("ServerHandler", new ServerHandler());
-            return pipeline;
-          }
-        };
+    final ChannelGroup serverChannelGroup = new DefaultChannelGroup();
+    final TcpServerPipelineFactory serverPipelineFactory
+            = new TcpServerPipelineFactory(serverChannelGroup
+            , topicParticipantManager
+            , serviceManager,this::removeHandShakeReceivedAddServerHandler);
+
     bootstrap.setPipelineFactory(serverPipelineFactory);
-    Channel serverChannel = bootstrap.bind(new InetSocketAddress(0));
+    final Channel serverChannel = bootstrap.bind(new InetSocketAddress(0));
     return serverChannel;
   }
 
