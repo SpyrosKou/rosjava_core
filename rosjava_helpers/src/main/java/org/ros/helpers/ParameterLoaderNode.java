@@ -39,10 +39,10 @@ import java.util.Map;
  * @author lucas@ekumenlabs.com (Lucas Chiesa).
  * Modified by jubeira@ekumenlabs.com (Juan I. Ubeira)
  */
-public class ParameterLoaderNode extends AbstractNodeMain {
+public final class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
-    private final List<LoadedResource> params = new ArrayList<LoadedResource>();
+    private final ArrayList<LoadedResource> params = new ArrayList<>();
     private RosLog rosLog = null;
 
     /**
@@ -50,24 +50,24 @@ public class ParameterLoaderNode extends AbstractNodeMain {
      *
      * @param resources Array of resources with their respective namespace to load.
      */
-    public ParameterLoaderNode(List<Resource> resources) {
+    public ParameterLoaderNode(final List<Resource> resources) {
         Preconditions.checkNotNull(resources);
         for (final Resource resource : resources) {
             Preconditions.checkNotNull(resource.inputStream);
-            addSingleYmlInput(resource.inputStream, resource.namespace == null ? "" : resource.namespace);
+            this.addSingleYmlInput(resource.inputStream, resource.namespace == null ? "" : resource.namespace);
         }
     }
 
-    private final void addSingleYmlInput(InputStream ymlInputStream, String namespace) {
-        Object loadedYaml = new Yaml().load(ymlInputStream);
+    private final void addSingleYmlInput(final InputStream ymlInputStream, final String namespace) {
+        final Object loadedYaml = new Yaml().load(ymlInputStream);
         if (loadedYaml != null && loadedYaml instanceof Map<?, ?>) {
             this.params.add(new LoadedResource(Map.class.cast(loadedYaml), namespace));
         }
     }
 
-    private final void addParams(final ParameterTree parameterTree, String namespace, Map<?, ?> params) {
+    private final void addParams(final ParameterTree parameterTree, final String namespace, final Map<?, ?> params) {
         for (final Map.Entry<?, ?> e : params.entrySet()) {
-            String fullKeyName = namespace + "/" + e.getKey().toString();
+            final String fullKeyName = namespace + "/" + e.getKey().toString();
             if (this.rosLog != null && this.rosLog.isDebugEnabled()) {
                 this.rosLog.debug("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
             }
@@ -83,7 +83,7 @@ public class ParameterLoaderNode extends AbstractNodeMain {
                 parameterTree.set(fullKeyName, Boolean.class.cast(e.getValue()));
             } else if (e.getValue() instanceof List) {
                 parameterTree.set(fullKeyName, List.class.cast(e.getValue()));
-            } else if (this.rosLog !=null && this.rosLog.isDebugEnabled()) {
+            } else if (this.rosLog != null && this.rosLog.isDebugEnabled()) {
                 this.rosLog.debug("Unknown type parameter " + fullKeyName + " is. Value = " + e.getValue());
                 this.rosLog.debug("Class name is: " + e.getValue().getClass().getName());
             }
@@ -95,48 +95,21 @@ public class ParameterLoaderNode extends AbstractNodeMain {
      * specified in the Node's associated NodeConfiguration.
      */
     @Override
-    public GraphName getDefaultNodeName() {
+    public final GraphName getDefaultNodeName() {
         return GraphName.of(NODE_NAME);
     }
 
     @Override
-    public void onStart(final ConnectedNode connectedNode) {
-        ParameterTree parameterTree = connectedNode.getParameterTree();
+    public final void onStart(final ConnectedNode connectedNode) {
+        final ParameterTree parameterTree = connectedNode.getParameterTree();
         this.rosLog = connectedNode.getLog();
 
         // TODO: For some reason, setting the / param when using a rosjava master doesn't work
         // It does work fine with an external master, and also setting other params of any type
         for (final LoadedResource loadedResource : this.params) {
-            this.addParams(parameterTree, loadedResource.namespace, loadedResource.resource);
+            this.addParams(parameterTree, loadedResource.getNamespace(), loadedResource.getResource());
         }
         connectedNode.shutdown();
     }
 
-    /**
-     * Resource to load to Parameter Server, consisting of an InputStream and its corresponding namespace.
-     */
-    public static class Resource {
-        public InputStream inputStream;
-        public String namespace;
-
-        public Resource(InputStream inputStream, String namespace) {
-            this.inputStream = inputStream;
-            this.namespace = namespace;
-        }
-    }
-
-    /**
-     * Thin wrapper for the object returned by Yaml.load().
-     * The object returned by Yaml.load() is a LinkedHashMap<String, Object>; this class is to
-     * keep the code simple.
-     */
-    private class LoadedResource {
-        private Map<?, ?> resource;
-        private String namespace;
-
-        LoadedResource(Map resource, String namespace) {
-            this.resource = resource;
-            this.namespace = namespace;
-        }
-    }
 }

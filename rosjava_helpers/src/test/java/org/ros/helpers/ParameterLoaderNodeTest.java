@@ -64,9 +64,9 @@ public class ParameterLoaderNodeTest extends RosTest {
     @Test
     public void testParameterLoad() throws InterruptedException {
         final String namespace = "foo";
-        List<ParameterLoaderNode.Resource> resourceList = new ArrayList<ParameterLoaderNode.Resource>() {{
-           add(new ParameterLoaderNode.Resource(getClass().getResourceAsStream("/parameters.yaml"), ""));
-           add(new ParameterLoaderNode.Resource(getClass().getResourceAsStream("/parameters.yaml"), namespace));
+        List<Resource> resourceList = new ArrayList<Resource>() {{
+           add(new Resource(getClass().getResourceAsStream("/parameters.yaml"), ""));
+           add(new Resource(getClass().getResourceAsStream("/parameters.yaml"), namespace));
         }};
         ParameterLoaderNode parameterLoaderNode = new ParameterLoaderNode(resourceList);
 
@@ -112,8 +112,8 @@ public class ParameterLoaderNodeTest extends RosTest {
 
     @Test
     public void testEmptyYaml() throws InterruptedException {
-        List<ParameterLoaderNode.Resource> resourceList = new ArrayList<ParameterLoaderNode.Resource>() {{
-            add(new ParameterLoaderNode.Resource(getClass().getResourceAsStream("/empty.yaml"), ""));
+        List<Resource> resourceList = new ArrayList<Resource>() {{
+            add(new Resource(getClass().getResourceAsStream("/empty.yaml"), ""));
         }};
         ParameterLoaderNode parameterLoaderNode = new ParameterLoaderNode(resourceList);
 
