@@ -26,7 +26,7 @@ import org.ros.internal.transport.ConnectionTrackingHandler;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ConnectionTrackingChannelPipelineFactory implements ChannelPipelineFactory {
+abstract class ConnectionTrackingChannelPipelineFactory implements ChannelPipelineFactory {
 
   public static final String CONNECTION_TRACKING_HANDLER = "ConnectionTrackingHandler";
 
