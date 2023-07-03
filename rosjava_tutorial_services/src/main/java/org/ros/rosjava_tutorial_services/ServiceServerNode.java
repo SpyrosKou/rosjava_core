@@ -20,7 +20,6 @@ import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeMain;
-import org.ros.node.service.*;
 import org.ros.node.service.ServiceServer;
 
 /**
@@ -28,7 +27,7 @@ import org.ros.node.service.ServiceServer;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Server extends AbstractNodeMain {
+public class ServiceServerNode extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {

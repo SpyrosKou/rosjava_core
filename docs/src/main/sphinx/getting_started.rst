@@ -191,7 +191,7 @@ to ROS executables.
 Services
 --------
 
-The following class (:javadoc:`org.ros.rosjava_tutorial_services.Server`) is
+The following class (:javadoc:`org.ros.rosjava_tutorial_services.ServiceServerNode`) is
 available from the rosjava_tutorial_services package. In this example, we
 create a :javadoc:`org.ros.node.service.ServiceServer` for the
 ``rosjava_test_msgs.AddTwoInts`` service. This should feel relatively familiar if you're
@@ -237,7 +237,7 @@ Building and executing these nodes works in the same manner as described above:
   roscd rosjava_core/rosjava_tutorial_pubsub
   ../gradlew installDist
   roscore &
-  ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Server &
+  ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.ServiceServerNode &
   ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Client
 
 At this point, you should see the log message "2 + 2 = 4" appear in your
