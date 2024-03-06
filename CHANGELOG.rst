@@ -18,7 +18,9 @@ latest
     - Use Junit 5
     - Use Mockito 5
     - Pin specific dependencies, replacing ranges (for ros messages)
+* Remove eclipse settings from source
 * Contributors: Spyros Koukas
+
 
 
 
