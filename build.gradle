@@ -31,7 +31,7 @@ subprojects {
     repositories{
       mavenLocal()
       mavenCentral()
-      jcenter()
+
       maven {
         url "https://github.com/SpyrosKou/rosjava_mvn_repo/raw/noetic"
         name "GithubSpyrosKouRepository"
