@@ -25,6 +25,8 @@ task javadoc(type: Javadoc) {
   destinationDir = new File("${buildDir}/html", 'javadoc')
 }
 
+
+
 task copySphinxConf(type: Copy) {
   from('src/main/sphinx/conf.py.in') {
     filter(ReplaceTokens, tokens: ['version': rootProject.version])
@@ -38,6 +40,7 @@ task docs(type: Exec, dependsOn: [copySphinxConf, javadoc]) {
 }
 
 task clean {
+  group "build"
   doLast {
     ant.delete dir: 'build'
     ant.delete file: 'src/main/sphinx/conf.py'
