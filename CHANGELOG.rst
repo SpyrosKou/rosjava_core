@@ -34,7 +34,7 @@ latest
 * Reduced the public API elements (Interfaces, Classes Methods)
 * Reduced inheritance potential by declaring methods and classes final.
 * Has only been tested in JRE (not android)
-* Stricter, more programmer friendly generics
+* Stricter generics, reduce the possibility of error
 * Contributors: Spyros Koukas
 
 0.3.7 (2019-01-22)
