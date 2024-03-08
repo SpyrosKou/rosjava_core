@@ -21,6 +21,7 @@ package org.ros.internal.node.topic;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.MessageEvent;
+import org.ros.internal.message.Message;
 import org.ros.internal.transport.BaseClientHandshakeHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -43,7 +44,7 @@ import java.util.concurrent.ExecutorService;
  * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-final class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
+final class SubscriberHandshakeHandler<T extends Message> extends BaseClientHandshakeHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

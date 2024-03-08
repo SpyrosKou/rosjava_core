@@ -21,6 +21,7 @@ import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.concurrent.EventDispatcher;
 import org.ros.concurrent.ListenerGroup;
+import org.ros.internal.message.Message;
 import org.ros.message.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ import java.util.function.Consumer;
  * @param <T>
  *          the message type
  */
-public final class MessageDispatcher<T> extends CancellableLoop {
+public final class MessageDispatcher<T extends Message> extends CancellableLoop {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -66,7 +67,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    * 
    * @see ListenerGroup#add(Object, int)
    */
-  public void addListener(MessageListener<T> messageListener, int limit) {
+  public  void addListener(MessageListener<T> messageListener, int limit) {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info("Adding listener.");
     }

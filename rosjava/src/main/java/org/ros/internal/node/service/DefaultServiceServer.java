@@ -23,6 +23,7 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.internal.message.Message;
 import org.ros.internal.message.service.ServiceDescription;
+import org.ros.internal.message.service.ServiceDescriptionFactory;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.MessageDeserializer;
@@ -108,7 +109,8 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      */
     final ServiceDeclaration toDeclaration() {
         final ServiceIdentifier identifier = new ServiceIdentifier(serviceDeclaration.getName(), getUri());
-        return new ServiceDeclaration(identifier, new ServiceDescription(serviceDeclaration.getType(),
+
+        return new ServiceDeclaration(identifier, ServiceDescriptionFactory.newCreate(serviceDeclaration.getType(),
                 serviceDeclaration.getDefinition(), serviceDeclaration.getMd5Checksum()));
     }
 

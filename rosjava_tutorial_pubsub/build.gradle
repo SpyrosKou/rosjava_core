@@ -20,6 +20,7 @@ mainClassName = 'org.ros.RosRun'
 
 dependencies {
   implementation project(':rosjava')
+  implementation 'org.ros.rosjava_messages:std_msgs:0.5.13'
 }
 
 defaultTasks 'publish', 'installDist'

@@ -39,7 +39,7 @@ import org.ros.internal.transport.tcp.TcpClient;
 import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.MessageDefinitionProvider;
-import org.ros.message.MessageIdentifier;
+import org.ros.message.MessageIdentifierImpl;
 import org.ros.message.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,23 +105,23 @@ public class MessageQueueIntegrationTest {
 
   @BeforeEach
   public void setup() {
-    executorService = Executors.newCachedThreadPool();
+    this.executorService = Executors.newCachedThreadPool();
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
     final DefaultMessageFactory defaultMessageFactory = new DefaultMessageFactory(messageDefinitionProvider);
-    expectedMessage = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
-    expectedMessage.setData("Would you like to play a game?");
-    outgoingMessageQueue =
+    this.expectedMessage = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
+    this.expectedMessage.setData("Would you like to play a game?");
+    this.outgoingMessageQueue =
         new OutgoingMessageQueue<Message>(new DefaultMessageSerializer(), executorService);
-    firstIncomingMessageQueue =
+    this.firstIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.of(std_msgs.String._TYPE), defaultMessageFactory), executorService);
-    secondIncomingMessageQueue =
+            MessageIdentifierImpl.of(std_msgs.String._TYPE), defaultMessageFactory), executorService);
+    this.secondIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.of(std_msgs.String._TYPE), defaultMessageFactory), executorService);
-    firstTcpClientManager = new TcpClientManager(executorService);
-    firstTcpClientManager.addNamedChannelHandler(firstIncomingMessageQueue.getMessageReceiver());
-    secondTcpClientManager = new TcpClientManager(executorService);
-    secondTcpClientManager.addNamedChannelHandler(secondIncomingMessageQueue.getMessageReceiver());
+            MessageIdentifierImpl.of(std_msgs.String._TYPE), defaultMessageFactory), executorService);
+    this.firstTcpClientManager = new TcpClientManager(executorService);
+    this.firstTcpClientManager.addNamedChannelHandler(firstIncomingMessageQueue.getMessageReceiver());
+    this.secondTcpClientManager = new TcpClientManager(executorService);
+    this.secondTcpClientManager.addNamedChannelHandler(secondIncomingMessageQueue.getMessageReceiver());
   }
 
   @AfterEach
@@ -130,12 +130,12 @@ public class MessageQueueIntegrationTest {
       this.outgoingMessageQueue.shutdown();
     }
     if(this.executorService!=null) {
-      executorService.shutdown();
+      this.executorService.shutdown();
     }
   }
 
   private void startRepeatingPublisher() {
-    executorService.execute(new CancellableLoop() {
+    this.executorService.execute(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
         outgoingMessageQueue.add(expectedMessage);
@@ -186,8 +186,8 @@ public class MessageQueueIntegrationTest {
   }
 
   private void expectMessages() throws InterruptedException {
-    CountDownLatch firstLatch = expectMessage(firstIncomingMessageQueue);
-    CountDownLatch secondLatch = expectMessage(secondIncomingMessageQueue);
+    final CountDownLatch firstLatch = expectMessage(firstIncomingMessageQueue);
+    final CountDownLatch secondLatch = expectMessage(secondIncomingMessageQueue);
     assertTrue(firstLatch.await(3, TimeUnit.SECONDS));
     assertTrue(secondLatch.await(3, TimeUnit.SECONDS));
   }
