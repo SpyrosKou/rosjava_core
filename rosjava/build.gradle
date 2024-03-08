@@ -23,7 +23,8 @@ dependencies {
         exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
     }
 
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.guava:guava:33.0.0-jre'
+//    implementation 'io.netty:netty-bom:4.1.107.Final'
     implementation 'io.netty:netty:3.10.6.Final'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
