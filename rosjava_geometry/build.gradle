@@ -15,6 +15,7 @@
  */
 plugins{
   id 'java-library'
+  id 'maven-publish'
 }
 dependencies {
   compileOnly 'org.ros.rosjava_messages:geometry_msgs:1.13.0'
@@ -24,6 +25,29 @@ dependencies {
   testImplementation 'org.ros.rosjava_messages:geometry_msgs:1.13.0'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
+
+publishing {
+  final repositoryDirectory = "ROS_MAVEN_DEPLOYMENT_REPOSITORY"
+  final mavenDeploymentRepositoryProvider = providers.gradleProperty(repositoryDirectory)
+  final mavenDeploymentRepository  = mavenDeploymentRepositoryProvider.getOrElse(null)
+//    println(repositoryDirectory + " = " + mavenDeploymentRepository);
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+    }
+  }
+  if (mavenDeploymentRepository!=null) {
+    repositories {
+      maven {
+        name "GithubRepositoryLocation"
+        url 'file:////' + mavenDeploymentRepository
+      }
+    }
+  } else {
+    logger.debug(repositoryDirectory + "not found")
+  }
+}
+
 test {
   useJUnitPlatform()
 }
