@@ -16,33 +16,33 @@
 
 
 allprojects {
-  group 'org.ros.rosjava_core'
-  version = 'noetic-0.1'
+    group 'org.ros.rosjava_core'
+    version = '0.3.8'
 }
 
 subprojects {
-  if (name != 'docs') {
-    apply plugin:  'java'
-    apply plugin: "idea"
-//    apply plugin: "eclipse"
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    if (name != 'docs') {
+        apply plugin: 'java'
+        apply plugin: "idea"
 
-    repositories{
-      mavenLocal()
-      mavenCentral()
 
-      maven {
-        url "https://github.com/SpyrosKou/rosjava_mvn_repo/raw/noetic"
-        name "GithubSpyrosKouRepository"
-      }
-      maven {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
 
-        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
-        name "GithubRosjavaRepository"
-      }
+
+        repositories {
+            mavenLocal()
+            mavenCentral()
+
+            maven {
+                url "https://github.com/SpyrosKou/rosjava_mvn_repo/raw/noetic"
+                name "GithubSpyrosKouRepository"
+            }
+
+
+        }
+
     }
-  }
-}
 
-defaultTasks 'publish', 'installDist'
+    defaultTasks 'publish', 'installDist'
+}

@@ -15,10 +15,12 @@
  */
 plugins {
     id 'java-library'
-    id 'application'
+
+    id 'maven-publish'
 }
+
 dependencies {
-    api 'org.ros.rosjava_bootstrap:message_generation:noetic-0.1'
+    api 'org.ros.rosjava_bootstrap:message_generation:0.3.8'
     api 'org.ros.rosjava_messages:std_msgs:0.5.11', {
         exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
     }
@@ -42,7 +44,7 @@ dependencies {
         exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
     }
 
-    implementation 'dnsjava:dnsjava:3.5.2'
+    implementation 'dnsjava:dnsjava:3.5.3'
 
     implementation 'commons-net:commons-net:3.9.0'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
@@ -71,9 +73,32 @@ jar {
     }
 }
 
-repositories {
-    mavenCentral()
+
+
+
+
+publishing {
+    final repositoryDirectory = "ROS_MAVEN_DEPLOYMENT_REPOSITORY"
+    final mavenDeploymentRepositoryProvider = providers.gradleProperty(repositoryDirectory)
+    final mavenDeploymentRepository  = mavenDeploymentRepositoryProvider.getOrElse(null)
+//    println(repositoryDirectory + " = " + mavenDeploymentRepository);
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    if (mavenDeploymentRepository!=null) {
+        repositories {
+            maven {
+                name "GithubRepositoryLocation"
+                url 'file:////' + mavenDeploymentRepository
+            }
+        }
+    } else {
+        logger.debug(repositoryDirectory + "not found")
+    }
 }
+
 
 test {
     useJUnitPlatform()
