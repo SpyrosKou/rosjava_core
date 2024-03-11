@@ -37,6 +37,7 @@ import org.ros.node.service.ServiceResponseListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
@@ -140,7 +141,9 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
     }
 
     /**
-     * @param uri the {@link URI} of the {@link ServiceServer} to connect to
+     * Will throw a {@link RosRuntimeException} if it is invoked while connected
+     *
+     * @param uri the {@link URI} of the {@link org.ros.node.service.ServiceServer} to connect to
      */
     @Override
     public final synchronized void connect(final URI uri) {
@@ -188,8 +191,14 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
         return this.messageFactory.newFromType(this.serviceDeclaration.getType());
     }
 
+    /**
+     * Returns true if this client is connected, false otherwise.
+     * @return
+     */
     @Override
     public final boolean isConnected() {
-        return this.tcpClient.getChannel().isConnected();
+        return Objects.nonNull(this.tcpClient)
+                && Objects.nonNull(this.tcpClient.getChannel())
+                && this.tcpClient.getChannel().isConnected();
     }
 }
