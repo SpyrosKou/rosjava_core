@@ -11,6 +11,15 @@ dependencies {
     testImplementation project(':rosjava').sourceSets.test.output
 }
 
+jar {
+    manifest {
+        version = project.version
+//    attributes 'symbolicName' : 'org.ros.rosjava'
+//    instruction 'Export-Package', '!org.ros.internal.*, org.ros.*'
+//    instruction 'Private-Package', 'org.ros.internal.*'
+    }
+}
+
 publishing {
     final repositoryDirectory = "ROS_MAVEN_DEPLOYMENT_REPOSITORY"
     final mavenDeploymentRepositoryProvider = providers.gradleProperty(repositoryDirectory)
