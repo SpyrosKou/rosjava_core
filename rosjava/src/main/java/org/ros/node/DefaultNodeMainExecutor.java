@@ -18,6 +18,7 @@ package org.ros.node;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.namespace.GraphName;
@@ -28,6 +29,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -47,21 +49,21 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
     private final class RegistrationListener implements NodeListener {
         @Override
-        public void onStart(ConnectedNode connectedNode) {
+        public final void onStart(ConnectedNode connectedNode) {
             registerNode(connectedNode);
         }
 
         @Override
-        public void onShutdown(Node node) {
+        public final void onShutdown(Node node) {
         }
 
         @Override
-        public void onShutdownComplete(Node node) {
+        public final void onShutdownComplete(Node node) {
             unregisterNode(node);
         }
 
         @Override
-        public void onError(Node node, Throwable throwable) {
+        public final void onError(Node node, Throwable throwable) {
             LOGGER.error("Node error.", throwable);
             unregisterNode(node);
         }
@@ -86,7 +88,6 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
     public static NodeMainExecutor newDefault(ScheduledExecutorService executorService) {
         return new DefaultNodeMainExecutor(new DefaultNodeFactory(executorService), executorService);
     }
-
 
 
     /**
@@ -140,7 +141,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
     }
 
     @Override
-    public void shutdownNodeMain(NodeMain nodeMain) {
+    public final void shutdownNodeMain(NodeMain nodeMain) {
         final Node node = this.nodeMains.inverse().get(nodeMain);
         if (node != null) {
             this.safelyShutdownNode(node);
@@ -149,7 +150,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
 
     @Override
-    public void shutdown() {
+    public final void shutdown() {
         synchronized (this.connectedNodes) {
             final List<ConnectedNode> connectedNodesList = new ArrayList<>(this.connectedNodes.values());
             for (final ConnectedNode connectedNode : connectedNodesList) {
@@ -163,21 +164,30 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      *
      * @param node the {@link Node} to shut down
      */
-    private void safelyShutdownNode(Node node) {
-        boolean success = true;
-        try {
-            node.shutdown();
-        } catch (Exception e) {
-            // Ignore spurious errors during shutdown.
-            LOGGER.error("Exception thrown while shutting down node.", e);
-            // We don't expect any more callbacks from a node that throws an exception
-            // while shutting down. So, we unregister it immediately.
-            this.unregisterNode(node);
-            success = false;
+    private final void safelyShutdownNode(final Node node) {
+
+        if (Objects.nonNull(node)) {
+            try {
+                node.shutdown();
+
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Shutdown successful:");
+                }
+            } catch (Exception exception) {
+                // Ignore spurious errors during shutdown.
+                LOGGER.error("Exception thrown while shutting down node :", ExceptionUtils.getStackTrace(exception));
+                // We don't expect any more callbacks from a node that throws an exception
+                // while shutting down. So, we unregister it immediately.
+                this.unregisterNode(node);
+            }
+
+        } else {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Attempt to shutdown null node.");
+            }
         }
-        if (success) {
-            LOGGER.info("Shutdown successful.");
-        }
+
+
     }
 
     /**
@@ -203,7 +213,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      *
      * @param node the {@link Node} to unregister
      */
-    private void unregisterNode(final Node node) {
+    private final void unregisterNode(final Node node) {
         node.removeListeners();
         synchronized (this.connectedNodes) {
             this.connectedNodes.get(node.getName()).remove(node);

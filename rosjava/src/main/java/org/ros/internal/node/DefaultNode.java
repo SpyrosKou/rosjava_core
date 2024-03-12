@@ -77,6 +77,7 @@ import java.util.function.Consumer;
  * @author Spyros Koukas
  */
 final class DefaultNode implements ConnectedNode {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     /**
      * The maximum delay before shutdown will begin even if all
@@ -116,7 +117,7 @@ final class DefaultNode implements ConnectedNode {
      * @param nodeListeners     a {@link Collection} of {@link NodeListener}s that will be added
      *                          to this {@link Node} before it starts
      */
-    public DefaultNode(
+    DefaultNode(
             final NodeConfiguration nodeConfiguration
             , final Collection<NodeListener> nodeListeners
             , final ScheduledExecutorService scheduledExecutorService) {
@@ -566,11 +567,11 @@ final class DefaultNode implements ConnectedNode {
      * <p>
      * Each listener is called in a separate thread.
      */
-    private void signalOnShutdown() {
+    private final void signalOnShutdown() {
         final Node node = this;
         try {
-            nodeListenerListenerGroup.signal(listener -> listener.onShutdown(node), MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
-        } catch (InterruptedException e) {
+            this.nodeListenerListenerGroup.signal(listener -> listener.onShutdown(node), MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+        } catch (final InterruptedException e) {
             // Ignored since we do not guarantee that all listeners will finish
             // before
             // shutdown begins.
@@ -583,13 +584,19 @@ final class DefaultNode implements ConnectedNode {
      * <p>
      * Each listener is called in a separate thread.
      */
-    private void signalOnShutdownComplete() {
+    private final void signalOnShutdownComplete() {
         final Node node = this;
-        nodeListenerListenerGroup.signal(listener -> {
+        this.nodeListenerListenerGroup.signal(listener -> {
             try {
                 listener.onShutdownComplete(node);
-            } catch (Throwable e) {
-                System.out.println(listener);
+            } catch (final Throwable throwable) {
+                if (LOGGER.isDebugEnabled()) {
+                    try {
+                        LOGGER.debug("Listener" + listener);
+                    }catch (final Exception exceptionNested){
+                        LOGGER.debug(ExceptionUtils.getStackTrace(throwable));
+                    }
+                }
             }
         });
     }
