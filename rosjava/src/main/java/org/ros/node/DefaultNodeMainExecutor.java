@@ -17,7 +17,10 @@
 package org.ros.node;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.internal.node.DefaultNodeFactory;
@@ -30,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -38,34 +42,36 @@ import java.util.concurrent.ScheduledExecutorService;
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNodeMainExecutor implements NodeMainExecutor {
+public final class DefaultNodeMainExecutor implements NodeMainExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final NodeFactory nodeFactory;
     private final ScheduledExecutorService scheduledExecutorService;
-    private final Multimap<GraphName, ConnectedNode> connectedNodes;
+    private final ConcurrentHashMap<GraphName, ConnectedNode> connectedNodes;
     private final BiMap<Node, NodeMain> nodeMains;
 
     private final class RegistrationListener implements NodeListener {
         @Override
-        public final void onStart(ConnectedNode connectedNode) {
-            registerNode(connectedNode);
+        public final void onStart(final ConnectedNode connectedNode) {
+            DefaultNodeMainExecutor.this.registerNode(connectedNode);
         }
 
         @Override
-        public final void onShutdown(Node node) {
+        public final void onShutdown(final Node node) {
         }
 
         @Override
-        public final void onShutdownComplete(Node node) {
-            unregisterNode(node);
+        public final void onShutdownComplete(final Node node) {
+            DefaultNodeMainExecutor.this.unregisterNode(node);
         }
 
         @Override
-        public final void onError(Node node, Throwable throwable) {
-            LOGGER.error("Node error.", throwable);
-            unregisterNode(node);
+        public final void onError(final Node node, final Throwable throwable) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("Node error.:" + ExceptionUtils.getStackTrace(throwable));
+            }
+            DefaultNodeMainExecutor.this.unregisterNode(node);
         }
     }
 
@@ -85,7 +91,8 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      * @return an instance of {@link DefaultNodeMainExecutor} that uses the
      * supplied {@link ExecutorService}
      */
-    public static NodeMainExecutor newDefault(ScheduledExecutorService executorService) {
+    public static final NodeMainExecutor newDefault(final ScheduledExecutorService executorService) {
+        Objects.requireNonNull(executorService);
         return new DefaultNodeMainExecutor(new DefaultNodeFactory(executorService), executorService);
     }
 
@@ -94,54 +101,50 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      * @param nodeFactory              {@link NodeFactory} to use for node creation.
      * @param scheduledExecutorService {@link NodeMain}s will be executed using this
      */
-    DefaultNodeMainExecutor(NodeFactory nodeFactory,
-                            ScheduledExecutorService scheduledExecutorService) {
+    DefaultNodeMainExecutor(final NodeFactory nodeFactory,
+                            final ScheduledExecutorService scheduledExecutorService) {
         this.nodeFactory = nodeFactory;
         this.scheduledExecutorService = scheduledExecutorService;
-        this.connectedNodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, ConnectedNode>create());
+        this.connectedNodes = new ConcurrentHashMap<>();
         this.nodeMains = Maps.synchronizedBiMap(HashBiMap.<Node, NodeMain>create());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> DefaultNodeMainExecutor.this.shutdown()));
     }
 
     @Override
-    public ScheduledExecutorService getScheduledExecutorService() {
-        return scheduledExecutorService;
+    public final ScheduledExecutorService getScheduledExecutorService() {
+        return this.scheduledExecutorService;
     }
 
     @Override
-    public void execute(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
-                        final Collection<NodeListener> nodeListeners) {
+    public final void execute(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
+                              final Collection<NodeListener> nodeListeners) {
         // NOTE(damonkohler): To avoid a race condition, we have to make our copy
         // of the NodeConfiguration in the current thread.
         final NodeConfiguration nodeConfigurationCopy = NodeConfiguration.copyOf(nodeConfiguration);
         nodeConfigurationCopy.setDefaultNodeName(nodeMain.getDefaultNodeName());
         Preconditions.checkNotNull(nodeConfigurationCopy.getNodeName(), "Node name not specified.");
-
-        LOGGER.debug("Starting node: " + nodeConfigurationCopy.getNodeName());
-
-        scheduledExecutorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                final List<NodeListener> nodeListenersCopy = Lists.newArrayList();
-                nodeListenersCopy.add(new RegistrationListener());
-                nodeListenersCopy.add(nodeMain);
-                if (nodeListeners != null) {
-                    nodeListenersCopy.addAll(nodeListeners);
-                }
-                // The new Node will call onStart().
-                Node node = nodeFactory.newNode(nodeConfigurationCopy, nodeListenersCopy);
-                nodeMains.put(node, nodeMain);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Starting node: " + nodeConfigurationCopy.getNodeName());
+        }
+        this.scheduledExecutorService.execute(() -> {
+            final List<NodeListener> nodeListenersCopy = Lists.newArrayList();
+            nodeListenersCopy.add(new RegistrationListener());
+            nodeListenersCopy.add(nodeMain);
+            if (nodeListeners != null) {
+                nodeListenersCopy.addAll(nodeListeners);
             }
+            // The new Node will call onStart().
+            final Node node = nodeFactory.newNode(nodeConfigurationCopy, nodeListenersCopy);
+            this.nodeMains.put(node, nodeMain);
         });
     }
 
     @Override
-    public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
-        execute(nodeMain, nodeConfiguration, null);
+    public final void execute(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
     }
 
     @Override
-    public final void shutdownNodeMain(NodeMain nodeMain) {
+    public final void shutdownNodeMain(final NodeMain nodeMain) {
         final Node node = this.nodeMains.inverse().get(nodeMain);
         if (node != null) {
             this.safelyShutdownNode(node);
@@ -173,9 +176,14 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Shutdown successful:");
                 }
-            } catch (Exception exception) {
+            } catch (final Exception exception) {
                 // Ignore spurious errors during shutdown.
-                LOGGER.error("Exception thrown while shutting down node :", ExceptionUtils.getStackTrace(exception));
+                if (LOGGER.isErrorEnabled()) {
+                    try {
+                        LOGGER.error(String.format("Exception thrown while shutting down node : %s (%s) : Exception: %s", node.getName(), node.getUri(), ExceptionUtils.getStackTrace(exception)));
+                    } catch (final Exception exceptionNested) {
+                    }
+                }
                 // We don't expect any more callbacks from a node that throws an exception
                 // while shutting down. So, we unregister it immediately.
                 this.unregisterNode(node);
@@ -192,19 +200,29 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
     /**
      * Register a {@link ConnectedNode} with the {@link NodeMainExecutor}.
+     * If a {@link ConnectedNode} with the same {@link GraphName} exists it will be shutdown and unregistered.
      *
      * @param connectedNode the {@link ConnectedNode} to register
      */
-    private void registerNode(ConnectedNode connectedNode) {
+    private final void registerNode(final ConnectedNode connectedNode) {
         final GraphName nodeName = connectedNode.getName();
+
         synchronized (this.connectedNodes) {
-            for (final ConnectedNode illegalConnectedNode : this.connectedNodes.get(nodeName)) {
-                System.err.println(String.format(
-                        "Node name collision. Existing node %s (%s) will be shutdown.", nodeName,
-                        illegalConnectedNode.getUri()));
-                illegalConnectedNode.shutdown();
+            final ConnectedNode existingConnectedNode = connectedNodes.put(nodeName, connectedNode);
+
+            if (Objects.nonNull(existingConnectedNode)) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(String.format("Node name collision. Existing node %s (%s) will be shutdown.", nodeName, existingConnectedNode.getUri()));
+                }
+                try {
+                    existingConnectedNode.shutdown();
+
+                } catch (final Exception exception) {
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error(String.format("Exception while shutting down node with  name collision. Existing node %s (%s).", nodeName, existingConnectedNode.getUri()));
+                    }
+                }
             }
-            this.connectedNodes.put(nodeName, connectedNode);
         }
     }
 
@@ -214,10 +232,10 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      * @param node the {@link Node} to unregister
      */
     private final void unregisterNode(final Node node) {
-        node.removeListeners();
-        synchronized (this.connectedNodes) {
-            this.connectedNodes.get(node.getName()).remove(node);
+        if (node != null) {
+            node.removeListeners();
+            this.connectedNodes.remove(node.getName());
+            this.nodeMains.remove(node);
         }
-        this.nodeMains.remove(node);
     }
 }
