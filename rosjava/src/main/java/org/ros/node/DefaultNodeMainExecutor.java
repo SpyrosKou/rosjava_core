@@ -141,6 +141,7 @@ public final class DefaultNodeMainExecutor implements NodeMainExecutor {
 
     @Override
     public final void execute(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
+        this.execute(nodeMain, nodeConfiguration, null);
     }
 
     @Override
