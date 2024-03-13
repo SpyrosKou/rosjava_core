@@ -14,7 +14,11 @@
  * the License.
  */
 
-apply plugin: 'application'
+plugins{
+  id 'application'
+}
+
+mainClassName = 'org.ros.RosRun'
 
 mainClassName = 'org.ros.RosRun'
 
