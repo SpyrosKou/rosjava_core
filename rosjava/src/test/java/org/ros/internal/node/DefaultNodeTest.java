@@ -142,7 +142,7 @@ public class DefaultNodeTest extends RosTest {
         assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
         // There are now two registered publishers /rosout and /foo.
-        List<Object> systemState = rosCore.getMasterServer().getSystemState();
+        List<List<Object>> systemState = rosCore.getMasterServer().getSystemState();
         assertEquals(2, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_PUBLISHERS)).size());
         assertEquals(1, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_SUBSCRIBERS)).size());
 

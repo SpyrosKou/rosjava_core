@@ -74,7 +74,7 @@ public final class RosCore {
     }
 
     private RosCore(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
-        masterServer = new MasterServer(bindAddress, advertiseAddress);
+        this.masterServer = new MasterServer(bindAddress, advertiseAddress);
     }
 
     public void start() {
@@ -85,24 +85,24 @@ public final class RosCore {
         return masterServer.getUri();
     }
 
-    public void awaitStart() throws InterruptedException {
-        masterServer.awaitStart();
+    public final void awaitStart() throws InterruptedException {
+        this.masterServer.awaitStart();
     }
 
-    public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
-        return masterServer.awaitStart(timeout, unit);
+    public final boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
+        return this.masterServer.awaitStart(timeout, unit);
     }
 
-    public void shutdown() {
-        masterServer.shutdown();
+    public final void shutdown() {
+        this.masterServer.shutdown();
     }
 
-    public boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {
-        return masterServer.awaitShutdown(timeout, unit);
+    public final boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {
+        return this.masterServer.awaitShutdown(timeout, unit);
     }
 
     @VisibleForTesting
     public MasterServer getMasterServer() {
-        return masterServer;
+        return this.masterServer;
     }
 }
