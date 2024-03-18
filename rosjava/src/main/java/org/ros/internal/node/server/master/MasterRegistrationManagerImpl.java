@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.*;
 
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author khughes@google.com (Keith M. Hughes)
  */
-public final class MasterRegistrationManagerImpl {
+final class MasterRegistrationManagerImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -66,9 +67,9 @@ public final class MasterRegistrationManagerImpl {
 
     public MasterRegistrationManagerImpl(MasterRegistrationListener listener) {
         this.listener = listener;
-        nodes = Maps.newHashMap();
-        services = Maps.newConcurrentMap();
-        topics = Maps.newHashMap();
+        this.nodes = Maps.newHashMap();
+        this.services = Maps.newHashMap();
+        this.topics = Maps.newHashMap();
     }
 
     /**
@@ -80,7 +81,7 @@ public final class MasterRegistrationManagerImpl {
      * @param topicMessageType message type of the topic
      * @return The registration information for the topic.
      */
-    public TopicRegistrationInfo registerPublisher(GraphName nodeName, URI nodeSlaveUri,
+    public final TopicRegistrationInfo registerPublisher(GraphName nodeName, URI nodeSlaveUri,
                                                    GraphName topicName, String topicMessageType) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format(
@@ -88,8 +89,8 @@ public final class MasterRegistrationManagerImpl {
                     topicName, topicMessageType, nodeName, nodeSlaveUri));
         }
 
-        TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, true);
-        NodeRegistrationInfo node = obtainNodeRegistrationInfo(nodeName, nodeSlaveUri);
+        final TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, true);
+        final NodeRegistrationInfo node = obtainNodeRegistrationInfo(nodeName, nodeSlaveUri);
         topic.addPublisher(node, topicMessageType);
         node.addPublisher(topic);
 
@@ -104,13 +105,13 @@ public final class MasterRegistrationManagerImpl {
      * @return {@code true} if the publisher was actually registered before the
      * call.
      */
-    public boolean unregisterPublisher(GraphName nodeName, GraphName topicName) {
+    public final boolean unregisterPublisher(GraphName nodeName, GraphName topicName) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("Unregistering publisher of topic %s from node %s",
                     topicName, nodeName));
         }
 
-        TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, false);
+        final TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, false);
         if (topic != null) {
             NodeRegistrationInfo node = nodes.get(nodeName);
             if (node != null) {
@@ -149,7 +150,7 @@ public final class MasterRegistrationManagerImpl {
      * @param topicMessageType message type of the topic
      * @return The registration information for the topic.
      */
-    public TopicRegistrationInfo registerSubscriber(GraphName nodeName, URI nodeSlaveUri,
+    public final TopicRegistrationInfo registerSubscriber(GraphName nodeName, URI nodeSlaveUri,
                                                     GraphName topicName, String topicMessageType) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format(
@@ -157,8 +158,8 @@ public final class MasterRegistrationManagerImpl {
                     topicName, topicMessageType, nodeName, nodeSlaveUri));
         }
 
-        TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, true);
-        NodeRegistrationInfo node = obtainNodeRegistrationInfo(nodeName, nodeSlaveUri);
+        final TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, true);
+        final NodeRegistrationInfo node = obtainNodeRegistrationInfo(nodeName, nodeSlaveUri);
         topic.addSubscriber(node, topicMessageType);
         node.addSubscriber(topic);
 
@@ -173,15 +174,15 @@ public final class MasterRegistrationManagerImpl {
      * @return {@code true} if the subscriber was actually registered before the
      * call.
      */
-    public boolean unregisterSubscriber(GraphName nodeName, GraphName topicName) {
+    public final boolean unregisterSubscriber(GraphName nodeName, GraphName topicName) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("Unregistering subscriber of topic %s from node %s",
                     topicName, nodeName));
         }
 
-        TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, false);
+        final TopicRegistrationInfo topic = obtainTopicRegistrationInfo(topicName, false);
         if (topic != null) {
-            NodeRegistrationInfo node = nodes.get(nodeName);
+            final NodeRegistrationInfo node = nodes.get(nodeName);
             if (node != null) {
                 node.removeSubscriber(topic);
                 topic.removeSubscriber(node);
@@ -214,7 +215,7 @@ public final class MasterRegistrationManagerImpl {
      * @param serviceUri   URI of the service server on the node
      * @return The registration information for the service.
      */
-    public ServiceRegistrationInfo registerService(GraphName nodeName, URI nodeSlaveUri,
+    public final ServiceRegistrationInfo registerService(GraphName nodeName, URI nodeSlaveUri,
                                                    GraphName serviceName, URI serviceUri) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format(
@@ -224,7 +225,7 @@ public final class MasterRegistrationManagerImpl {
 
         final NodeRegistrationInfo node = obtainNodeRegistrationInfo(nodeName, nodeSlaveUri);
 
-        ServiceRegistrationInfo service = services.get(serviceName);
+        ServiceRegistrationInfo service = this.services.get(serviceName);
         if (service != null) {
             final NodeRegistrationInfo previousServiceNode = service.getNode();
             if (previousServiceNode == node) {
@@ -247,7 +248,7 @@ public final class MasterRegistrationManagerImpl {
         service = new ServiceRegistrationInfo(serviceName, serviceUri, node);
         node.addService(service);
 
-        services.put(serviceName, service);
+        this.services.put(serviceName, service);
 
         return service;
     }
@@ -266,12 +267,12 @@ public final class MasterRegistrationManagerImpl {
             LOGGER.debug(String.format("Unregistering service %s from node %s", serviceName, nodeName));
         }
 
-        ServiceRegistrationInfo service = services.get(serviceName);
+        ServiceRegistrationInfo service = this.services.get(serviceName);
         if (service != null) {
-            NodeRegistrationInfo node = nodes.get(nodeName);
+            final NodeRegistrationInfo node = this.nodes.get(nodeName);
             if (node != null) {
                 // No need to keep service around.
-                services.remove(serviceName);
+                this.services.remove(serviceName);
 
                 node.removeService(service);
                 potentiallyDeleteNode(node);
@@ -306,7 +307,7 @@ public final class MasterRegistrationManagerImpl {
      * @return An immutable collection of topics.
      */
     public final Set<TopicRegistrationInfo> getAllTopics() {
-        return Set.copyOf(topics.values());
+        return Collections.unmodifiableSet(new HashSet<>(topics.values()));
     }
 
     /**
@@ -316,7 +317,7 @@ public final class MasterRegistrationManagerImpl {
      * @return The information about the topic. Can be {@code null} if the topic
      * was never registered.
      */
-    public TopicRegistrationInfo getTopicRegistrationInfo(GraphName topicName) {
+    public final TopicRegistrationInfo getTopicRegistrationInfo(GraphName topicName) {
         return topics.get(topicName);
     }
 
@@ -327,7 +328,7 @@ public final class MasterRegistrationManagerImpl {
      * @return The information about the node. Can be {@code null} if no topic was
      * ever registered for the node.
      */
-    public NodeRegistrationInfo getNodeRegistrationInfo(GraphName nodeName) {
+    public final NodeRegistrationInfo getNodeRegistrationInfo(GraphName nodeName) {
         return nodes.get(nodeName);
     }
 
@@ -336,8 +337,8 @@ public final class MasterRegistrationManagerImpl {
      *
      * @return An immutable collection of services.
      */
-    public Set<ServiceRegistrationInfo> getAllServices() {
-        return Collections.unmodifiableSet(new HashSet<>(services.values()));
+    public final Set<ServiceRegistrationInfo> getAllServices() {
+        return Set.copyOf(services.values());
     }
 
     /**
@@ -347,7 +348,7 @@ public final class MasterRegistrationManagerImpl {
      * @return The information about the service. Can be {@code null} if there is
      * no service registered with the given name.
      */
-    public ServiceRegistrationInfo getServiceRegistrationInfo(GraphName serviceName) {
+    public final ServiceRegistrationInfo getServiceRegistrationInfo(GraphName serviceName) {
         return services.get(serviceName);
     }
 
@@ -359,12 +360,12 @@ public final class MasterRegistrationManagerImpl {
      * @return The registration info for the topic. A new one will be created if
      * none exists and on.
      */
-    private TopicRegistrationInfo obtainTopicRegistrationInfo(GraphName topicName,
-                                                              boolean shouldCreate) {
-        TopicRegistrationInfo info = topics.get(topicName);
+    private final TopicRegistrationInfo obtainTopicRegistrationInfo(final GraphName topicName,
+                                                                    final boolean shouldCreate) {
+         TopicRegistrationInfo info = this.topics.get(topicName);
         if (info == null && shouldCreate) {
             info = new TopicRegistrationInfo(topicName);
-            topics.put(topicName, info);
+            this.topics.put(topicName, info);
         }
 
         return info;
@@ -378,40 +379,41 @@ public final class MasterRegistrationManagerImpl {
      * @return The registration info for the node. A new one will be created if
      * none exists.
      */
-    private NodeRegistrationInfo obtainNodeRegistrationInfo(GraphName nodeName, URI nodeSlaveUri) {
-        NodeRegistrationInfo node = nodes.get(nodeName);
-        if (node != null) {
-            // The node exists. Any need to shut it down?
-            if (node.getNodeSlaveUri().equals(nodeSlaveUri)) {
-                // OK, same URI so can just return it.
-                return node;
-            }
+    private final NodeRegistrationInfo obtainNodeRegistrationInfo(final GraphName nodeName, final URI nodeSlaveUri) {
+        {
+            final NodeRegistrationInfo oldNode = nodes.get(nodeName);
+            if (oldNode != null) {
+                // The node exists. Any need to shut it down?
+                if (oldNode.getNodeSlaveUri().equals(nodeSlaveUri)) {
+                    // OK, same URI so can just return it.
+                    return oldNode;
+                }
 
-            // The node is switching slave URIs, so we need a new one.
-            potentiallyDeleteNode(node);
-            cleanupNode(node);
-            try {
-                listener.onNodeReplacement(node);
-            } catch (Exception e) {
-                // No matter what, we want to keep going
-                LOGGER.error("Error during onNodeReplacement call", e);
+                // The node is switching slave URIs, so we need a new one.
+                this.potentiallyDeleteNode(oldNode);
+                this.cleanupNode(oldNode);
+                try {
+                    this.listener.onNodeReplacement(oldNode);
+                } catch (Exception exception) {
+                    // No matter what, we want to keep going
+                    LOGGER.error("Error during onNodeReplacement call."+ ExceptionUtils.getStackTrace(exception));
+                }
             }
         }
-
         // Either no existing node, or the old node needs to go away
-        node = new NodeRegistrationInfo(nodeName, nodeSlaveUri);
-        nodes.put(nodeName, node);
+        final NodeRegistrationInfo newNode = new NodeRegistrationInfo(nodeName, nodeSlaveUri);
+        nodes.put(nodeName, newNode);
 
-        return node;
+        return newNode;
     }
 
     /**
      * A node is being replaced. Clean it up. This includes unregistering from
-     * topic objects.
+     * topic objects and services
      *
      * @param node the node being replaced
      */
-    private void cleanupNode(NodeRegistrationInfo node) {
+    private final void cleanupNode(NodeRegistrationInfo node) {
         for (final TopicRegistrationInfo topic : node.getPublishers()) {
             topic.removePublisher(node);
         }
@@ -421,7 +423,7 @@ public final class MasterRegistrationManagerImpl {
         }
 
         for (final ServiceRegistrationInfo service : node.getServices()) {
-            services.remove(service.getServiceName());
+            this.services.remove(service.getServiceName());
         }
     }
 
@@ -430,9 +432,9 @@ public final class MasterRegistrationManagerImpl {
      *
      * @param node the node to possibly remove
      */
-    private void potentiallyDeleteNode(NodeRegistrationInfo node) {
+    private final void potentiallyDeleteNode(final NodeRegistrationInfo node) {
         if (!node.hasRegistrations()) {
-            nodes.remove(node.getNodeName());
+            this.nodes.remove(node.getNodeName());
         }
     }
 }
