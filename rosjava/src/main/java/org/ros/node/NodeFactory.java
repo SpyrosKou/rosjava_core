@@ -26,14 +26,6 @@ import java.util.Collection;
  */
 public interface NodeFactory {
 
-  /**
-   * Build a new {@link Node} with the given {@link NodeConfiguration}.
-   * 
-   * @param configuration
-   *          the {@link NodeConfiguration} for the new {@link Node}
-   * @return a new {@link Node}
-   */
-  Node newNode(NodeConfiguration configuration);
 
   /**
    * Build a new {@link Node} with the given {@link NodeConfiguration} and

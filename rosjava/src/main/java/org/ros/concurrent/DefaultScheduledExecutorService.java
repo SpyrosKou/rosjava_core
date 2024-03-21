@@ -45,153 +45,147 @@ import java.util.concurrent.TimeoutException;
  */
 public final class DefaultScheduledExecutorService implements ScheduledExecutorService {
 
-  private static final int CORE_POOL_SIZE = 11;
+    private static final int CORE_POOL_SIZE = 11;
+    private static final String DEFAULT_EXECUTOR_SERVICE_NAME = "ROS1";
+    private static final String DEFAULT_SCHEDULED_EXECUTOR_SERVICE_NAME = "ROS1-Scheduled";
 
-  private final ExecutorService executorService;
-  private final ScheduledExecutorService scheduledExecutorService;
+    private final ExecutorService executorService;
+    private final ScheduledExecutorService scheduledExecutorService;
+    private final String executorServiceName;
+    private final String scheduledExecutorServiceName;
 
-  public DefaultScheduledExecutorService() {
-    this(Executors.newCachedThreadPool());
-  }
+    public DefaultScheduledExecutorService(final String executorServiceName, final String scheduledExecutorServiceName) {
 
-  /**
-   * This instance will take over the lifecycle of the services.
-   *
-   * @param executorService
-   */
-  public DefaultScheduledExecutorService(ExecutorService executorService) {
-    this(executorService, Executors.newScheduledThreadPool(CORE_POOL_SIZE));
-  }
+        this.executorServiceName = executorServiceName == null ? DEFAULT_EXECUTOR_SERVICE_NAME : executorServiceName;
+        this.scheduledExecutorServiceName = scheduledExecutorServiceName == null ? DEFAULT_SCHEDULED_EXECUTOR_SERVICE_NAME : scheduledExecutorServiceName;
+        this.executorService = Executors.newCachedThreadPool(new NamedThreadFactory(this.executorServiceName));
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory(this.scheduledExecutorServiceName));
+    }
 
-  /**
-   * This instance will take over the lifecycle of the services.
-   *
-   * @param executorService
-   * @param scheduledExecutorService
-   */
-  public DefaultScheduledExecutorService(ExecutorService executorService,
-      ScheduledExecutorService scheduledExecutorService) {
-    this.executorService = executorService;
-    this.scheduledExecutorService = scheduledExecutorService;
-  }
+    public DefaultScheduledExecutorService() {
+        this(DEFAULT_EXECUTOR_SERVICE_NAME, DEFAULT_SCHEDULED_EXECUTOR_SERVICE_NAME);
+    }
 
-  @Override
-  public void shutdown() {
-    executorService.shutdown();
-    scheduledExecutorService.shutdown();
-  }
 
-  @Override
-  @Nonnull
-  public List<Runnable> shutdownNow() {
-    final List<Runnable> combined = Lists.newArrayList();
-    combined.addAll(executorService.shutdownNow());
-    combined.addAll(scheduledExecutorService.shutdownNow());
-    return combined;
-  }
 
-  @Override
-  public boolean isShutdown() {
-    return executorService.isShutdown() && scheduledExecutorService.isShutdown();
-  }
 
-  @Override
-  public boolean isTerminated() {
-    return executorService.isTerminated() && scheduledExecutorService.isTerminated();
-  }
+    @Override
+    public void shutdown() {
+        this.executorService.shutdown();
+        this.scheduledExecutorService.shutdown();
+    }
 
-  /**
-   * First calls {@link #awaitTermination(long, TimeUnit)} on the wrapped
-   * {@link ExecutorService} and then {@link #awaitTermination(long, TimeUnit)}
-   * on the wrapped {@link ScheduledExecutorService}.
-   *
-   * @return {@code true} if both {@link Executor}s terminated, {@code false}
-   *         otherwise
-   */
-  @Override
-  public boolean awaitTermination(long timeout,@Nonnull TimeUnit unit) throws InterruptedException {
-    final boolean executorServiceResult = executorService.awaitTermination(timeout, unit);
-    final boolean scheduledExecutorServiceResult =
-        scheduledExecutorService.awaitTermination(timeout, unit);
-    return executorServiceResult && scheduledExecutorServiceResult;
-  }
+    @Override
+    @Nonnull
+    public List<Runnable> shutdownNow() {
+        final List<Runnable> combined = Lists.newArrayList();
+        combined.addAll(executorService.shutdownNow());
+        combined.addAll(scheduledExecutorService.shutdownNow());
+        return combined;
+    }
 
-  @Override
-  @Nonnull
-  public <T> Future<T> submit(@Nonnull final Callable<T> task) {
-    return executorService.submit(task);
-  }
+    @Override
+    public boolean isShutdown() {
+        return executorService.isShutdown() && scheduledExecutorService.isShutdown();
+    }
 
-  @Override
-  @Nonnull
-  public <T> Future<T> submit(final @Nonnull Runnable task,final @Nonnull T result) {
-    return executorService.submit(task, result);
-  }
+    @Override
+    public boolean isTerminated() {
+        return executorService.isTerminated() && scheduledExecutorService.isTerminated();
+    }
 
-  @Override
-  @Nonnull
-  public Future<?> submit(final @Nonnull Runnable task) {
-    return executorService.submit(task);
-  }
+    /**
+     * First calls {@link #awaitTermination(long, TimeUnit)} on the wrapped
+     * {@link ExecutorService} and then {@link #awaitTermination(long, TimeUnit)}
+     * on the wrapped {@link ScheduledExecutorService}.
+     *
+     * @return {@code true} if both {@link Executor}s terminated, {@code false}
+     * otherwise
+     */
+    @Override
+    public boolean awaitTermination(long timeout, @Nonnull TimeUnit unit) throws InterruptedException {
+        final boolean executorServiceResult = executorService.awaitTermination(timeout, unit);
+        final boolean scheduledExecutorServiceResult =
+                scheduledExecutorService.awaitTermination(timeout, unit);
+        return executorServiceResult && scheduledExecutorServiceResult;
+    }
 
-  @Override
-  @Nonnull
-  public <T> List<Future<T>> invokeAll(@Nonnull final Collection<? extends Callable<T>> tasks)
-      throws InterruptedException {
-    return executorService.invokeAll(tasks);
-  }
+    @Override
+    @Nonnull
+    public <T> Future<T> submit(@Nonnull final Callable<T> task) {
+        return executorService.submit(task);
+    }
 
-  @Override
-  @Nonnull
-  public <T> List<Future<T>> invokeAll(@Nonnull final Collection<? extends Callable<T>> tasks
-          ,@Nonnull final  long timeout
-          ,@Nonnull final  TimeUnit unit) throws InterruptedException {
-    return executorService.invokeAll(tasks, timeout, unit);
-  }
+    @Override
+    @Nonnull
+    public <T> Future<T> submit(final @Nonnull Runnable task, final @Nonnull T result) {
+        return executorService.submit(task, result);
+    }
 
-  @Override
-  @Nonnull
-  public <T> T invokeAny(@Nonnull final Collection<? extends Callable<T>> tasks) throws InterruptedException,
-      ExecutionException {
-    return executorService.invokeAny(tasks);
-  }
+    @Override
+    @Nonnull
+    public Future<?> submit(final @Nonnull Runnable task) {
+        return executorService.submit(task);
+    }
 
-  @Override
-  @Nonnull
-  public <T> T invokeAny(@Nonnull final Collection<? extends Callable<T>> tasks
-          , long timeout,@Nonnull final TimeUnit unit)
-      throws InterruptedException, ExecutionException, TimeoutException {
-    return executorService.invokeAny(tasks, timeout, unit);
-  }
+    @Override
+    @Nonnull
+    public <T> List<Future<T>> invokeAll(@Nonnull final Collection<? extends Callable<T>> tasks)
+            throws InterruptedException {
+        return executorService.invokeAll(tasks);
+    }
 
-  @Override
-  public void execute(@Nonnull final Runnable command) {
-    executorService.execute(command);
-  }
+    @Override
+    @Nonnull
+    public <T> List<Future<T>> invokeAll(@Nonnull final Collection<? extends Callable<T>> tasks
+            , @Nonnull final long timeout
+            , @Nonnull final TimeUnit unit) throws InterruptedException {
+        return executorService.invokeAll(tasks, timeout, unit);
+    }
 
-  @Override
-  @Nonnull
-  public ScheduledFuture<?> schedule(@Nonnull final Runnable command, long delay,@Nonnull final TimeUnit unit) {
-    return scheduledExecutorService.schedule(command, delay, unit);
-  }
+    @Override
+    @Nonnull
+    public <T> T invokeAny(@Nonnull final Collection<? extends Callable<T>> tasks) throws InterruptedException,
+            ExecutionException {
+        return executorService.invokeAny(tasks);
+    }
 
-  @Override
-  @Nonnull
-  public <V> ScheduledFuture<V> schedule(@Nonnull final Callable<V> callable, long delay,@Nonnull final TimeUnit unit) {
-    return scheduledExecutorService.schedule(callable, delay, unit);
-  }
+    @Override
+    @Nonnull
+    public <T> T invokeAny(@Nonnull final Collection<? extends Callable<T>> tasks
+            , long timeout, @Nonnull final TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        return executorService.invokeAny(tasks, timeout, unit);
+    }
 
-  @Override
-  @Nonnull
-  public ScheduledFuture<?> scheduleAtFixedRate(@Nonnull final Runnable command, long initialDelay, long period,
-                                                @Nonnull final TimeUnit unit) {
-    return scheduledExecutorService.scheduleAtFixedRate(command, initialDelay, period, unit);
-  }
+    @Override
+    public void execute(@Nonnull final Runnable command) {
+        executorService.execute(command);
+    }
 
-  @Override
-  @Nonnull
-  public ScheduledFuture<?> scheduleWithFixedDelay(@Nonnull final Runnable command, long initialDelay, long delay,
-                                                   @Nonnull final TimeUnit unit) {
-    return scheduledExecutorService.scheduleWithFixedDelay(command, initialDelay, delay, unit);
-  }
+    @Override
+    @Nonnull
+    public ScheduledFuture<?> schedule(@Nonnull final Runnable command, long delay, @Nonnull final TimeUnit unit) {
+        return scheduledExecutorService.schedule(command, delay, unit);
+    }
+
+    @Override
+    @Nonnull
+    public <V> ScheduledFuture<V> schedule(@Nonnull final Callable<V> callable, long delay, @Nonnull final TimeUnit unit) {
+        return scheduledExecutorService.schedule(callable, delay, unit);
+    }
+
+    @Override
+    @Nonnull
+    public ScheduledFuture<?> scheduleAtFixedRate(@Nonnull final Runnable command, long initialDelay, long period,
+                                                  @Nonnull final TimeUnit unit) {
+        return scheduledExecutorService.scheduleAtFixedRate(command, initialDelay, period, unit);
+    }
+
+    @Override
+    @Nonnull
+    public ScheduledFuture<?> scheduleWithFixedDelay(@Nonnull final Runnable command, long initialDelay, long delay,
+                                                     @Nonnull final TimeUnit unit) {
+        return scheduledExecutorService.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+    }
 }

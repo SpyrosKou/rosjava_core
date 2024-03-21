@@ -30,7 +30,7 @@ public final class EventDispatcher<T> extends CancellableLoop {
   private final T listener;
   private final CircularBlockingDeque<Consumer<T>> events;
 
-  public EventDispatcher(T listener, int queueCapacity) {
+  public EventDispatcher(final T listener,final int queueCapacity) {
     this.listener = listener;
     this.events = new CircularBlockingDeque<>(queueCapacity);
   }

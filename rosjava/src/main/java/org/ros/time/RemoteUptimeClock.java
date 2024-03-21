@@ -219,13 +219,13 @@ public class RemoteUptimeClock {
    * @param samplingDelayMillis
    *          the delay in milliseconds between collecting each sample
    */
-  public void calibrate(int sampleSize, double samplingDelayMillis) {
+  public final void calibrate(int sampleSize, double samplingDelayMillis) {
     LOGGER.info("Starting calibration...");
     double remoteUptimeSum = 0;
     double localUptimeSum = 0;
     double driftSum = 0;
     for (int i = 0; i < sampleSize; i++) {
-      UptimeCalculationResult result = calculateNewUptime(callable);
+      final UptimeCalculationResult result = calculateNewUptime(callable);
       latencyOutlierFilter.add(result.latency);
       if (i > 0) {
         double localUptimeDelta = result.newLocalUptime - localUptime;

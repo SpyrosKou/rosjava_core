@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -22,30 +22,33 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeFactory;
 import org.ros.node.NodeListener;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Constructs {@link DefaultNode}s.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNodeFactory implements NodeFactory {
+public final class DefaultNodeFactory implements NodeFactory {
 
-  private final ScheduledExecutorService scheduledExecutorService;
+    private final ScheduledExecutorService scheduledExecutorService;
 
-  public DefaultNodeFactory(ScheduledExecutorService scheduledExecutorService) {
-    this.scheduledExecutorService = new SharedScheduledExecutorService(scheduledExecutorService);
-  }
+    public DefaultNodeFactory(ScheduledExecutorService scheduledExecutorService) {
+        this.scheduledExecutorService = new SharedScheduledExecutorService(scheduledExecutorService);
+    }
 
-  @Override
-  public Node newNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> listeners) {
-    return new DefaultNode(nodeConfiguration, listeners, scheduledExecutorService);
-  }
+    @Override
+    public final Node newNode(final NodeConfiguration nodeConfiguration, final Collection<NodeListener> listeners) {
+        final Collection<NodeListener> nodeListeners;
+        if (listeners == null) {
+            nodeListeners = new ArrayList<>(0);
+        } else {
+            nodeListeners = listeners;
+        }
+        return new DefaultNode(nodeConfiguration, nodeListeners, scheduledExecutorService);
+    }
 
-  @Override
-  public Node newNode(NodeConfiguration nodeConfiguration) {
-    return newNode(nodeConfiguration, new LinkedList<NodeListener>());
-  }
 }

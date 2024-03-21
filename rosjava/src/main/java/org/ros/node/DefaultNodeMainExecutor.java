@@ -86,6 +86,10 @@ public final class DefaultNodeMainExecutor implements NodeMainExecutor {
         return newDefault(new DefaultScheduledExecutorService());
     }
 
+    public static NodeMainExecutor newDefault(final String executorServiceName,final String scheduledExecutorServiceName) {
+        return newDefault(new DefaultScheduledExecutorService(executorServiceName,scheduledExecutorServiceName));
+    }
+
 
     /**
      * @return an instance of {@link DefaultNodeMainExecutor} that uses the
