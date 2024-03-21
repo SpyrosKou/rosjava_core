@@ -18,9 +18,9 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.collect.Lists;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.Channel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 
 import java.net.SocketAddress;
 import java.util.Collection;

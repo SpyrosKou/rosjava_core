@@ -17,8 +17,8 @@
 package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.*;
+import io.netty.buffer.ChannelBuffer;
+import io.netty.channel.*;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.Message;
 import org.ros.internal.node.server.NodeIdentifier;

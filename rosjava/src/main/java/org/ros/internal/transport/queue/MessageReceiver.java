@@ -16,9 +16,9 @@
 
 package org.ros.internal.transport.queue;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
+import io.netty.buffer.ChannelBuffer;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.MessageEvent;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 import org.ros.message.MessageDeserializer;
@@ -32,14 +32,14 @@ import java.lang.invoke.MethodHandles;
  *
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class MessageReceiver<T> extends AbstractNamedChannelHandler {
+public final class MessageReceiver<T> extends AbstractNamedChannelHandler<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
     private final MessageDeserializer<T> deserializer;
 
-    public MessageReceiver(CircularBlockingDeque<LazyMessage<T>> lazyMessages,
+    public MessageReceiver(final CircularBlockingDeque<LazyMessage<T>> lazyMessages,
                            MessageDeserializer<T> deserializer) {
         this.lazyMessages = lazyMessages;
         this.deserializer = deserializer;
@@ -50,15 +50,17 @@ public final class MessageReceiver<T> extends AbstractNamedChannelHandler {
         return "IncomingMessageQueueChannelHandler";
     }
 
+
+
     @Override
-    public final void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent) throws Exception {
-        final ChannelBuffer buffer = (ChannelBuffer) messageEvent.getMessage();
+    protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final T message) throws Exception {
+
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(String.format("Received %d byte message.", buffer.readableBytes()));
+            LOGGER.debug(String.format("Received %s message:", message));
         }
         // We have to make a defensive copy of the buffer here because Netty does
         // not guarantee that the returned ChannelBuffer will not be reused.
-        lazyMessages.addLast(new LazyMessage<T>(buffer.copy(), deserializer));
+        lazyMessages.addLast(new LazyMessage<T>(message, deserializer));
         super.messageReceived(ctx, messageEvent);
     }
 }

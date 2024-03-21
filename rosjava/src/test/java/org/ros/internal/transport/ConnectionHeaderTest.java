@@ -17,7 +17,7 @@
 package org.ros.internal.transport;
 
 import junit.framework.Assert;
-import org.jboss.netty.buffer.ChannelBuffer;
+import io.netty.buffer.ChannelBuffer;
 import org.junit.jupiter.api.Test;
 
 /**

@@ -16,8 +16,8 @@
 
 package org.ros.node.service;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandler;
+import io.netty.buffer.ChannelBuffer;
+import io.netty.channel.ChannelHandler;
 import org.ros.internal.message.Message;
 import org.ros.internal.transport.ConnectionHeader;
 

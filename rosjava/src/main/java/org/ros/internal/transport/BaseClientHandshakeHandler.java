@@ -16,10 +16,10 @@
 
 package org.ros.internal.transport;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
+import io.netty.buffer.ChannelBuffer;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelStateEvent;
+import io.netty.channel.MessageEvent;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 

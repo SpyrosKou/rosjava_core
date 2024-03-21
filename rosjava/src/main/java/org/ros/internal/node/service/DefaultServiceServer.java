@@ -17,8 +17,8 @@
 package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandler;
+import io.netty.buffer.ChannelBuffer;
+import io.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.internal.message.Message;

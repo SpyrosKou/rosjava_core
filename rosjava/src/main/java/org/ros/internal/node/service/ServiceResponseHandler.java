@@ -18,10 +18,10 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
+import io.netty.buffer.ChannelBuffer;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.MessageEvent;
+import io.netty.channel.SimpleChannelHandler;
 import org.ros.exception.RemoteException;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.message.MessageDeserializer;

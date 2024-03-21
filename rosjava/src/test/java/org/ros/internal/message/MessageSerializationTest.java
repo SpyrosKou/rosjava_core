@@ -17,7 +17,7 @@
 package org.ros.internal.message;
 
 import com.google.common.collect.Lists;
-import org.jboss.netty.buffer.ChannelBuffer;
+import io.netty.buffer.ChannelBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;

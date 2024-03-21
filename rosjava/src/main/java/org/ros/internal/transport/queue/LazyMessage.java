@@ -18,7 +18,7 @@ package org.ros.internal.transport.queue;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+import io.netty.buffer.ChannelBuffer;
 import org.ros.message.MessageDeserializer;
 
 /**
