@@ -66,7 +66,7 @@ public final class ListenerGroup<T> {
      * @return the {@link EventDispatcher} responsible for calling the specified
      * listener
      */
-    public EventDispatcher<T> add(T listener) {
+    public final EventDispatcher<T> add(T listener) {
         return add(listener, DEFAULT_QUEUE_CAPACITY);
     }
 
@@ -107,10 +107,10 @@ public final class ListenerGroup<T> {
     public final boolean remove(final T listener) {
         Preconditions.checkNotNull(listener);
         boolean result = false;
-        for (final EventDispatcher<T> eventDispatcher : eventDispatchers) {
+        for (final EventDispatcher<T> eventDispatcher : this.eventDispatchers) {
             if (listener.equals(eventDispatcher.getListener())) {
                 eventDispatcher.cancel();
-                eventDispatchers.remove(eventDispatcher);
+                this.eventDispatchers.remove(eventDispatcher);
                 result = true;
             }
         }

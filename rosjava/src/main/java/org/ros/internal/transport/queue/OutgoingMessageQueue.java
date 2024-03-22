@@ -19,7 +19,6 @@ package org.ros.internal.transport.queue;
 import com.google.common.annotations.VisibleForTesting;
 
 
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
@@ -44,108 +43,107 @@ import java.util.concurrent.ExecutorService;
 public final class OutgoingMessageQueue<T extends Message> {
 
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final int DEQUE_CAPACITY = 16;
-  private final MessageSerializer<T> serializer;
-  private final CircularBlockingDeque<T> deque= new CircularBlockingDeque<T>(DEQUE_CAPACITY);
-  private final ChannelGroup channelGroup = new DefaultChannelGroup();
-  private final Writer writer = new Writer();
-  private final MessageBufferPool messageBufferPool = new MessageBufferPool();
-  private final ChannelBuffer latchedBuffer = MessageBuffers.dynamicBuffer();
-  private final Object mutex = new Object();
-  //Can be changed
-  private boolean latchMode=false;
-  private T latchedMessage;
+    private static final int DEQUE_CAPACITY = 16;
+    private final MessageSerializer<T> serializer;
+    private final CircularBlockingDeque<T> deque = new CircularBlockingDeque<T>(DEQUE_CAPACITY);
+    private final ChannelGroup channelGroup = new DefaultChannelGroup();
+    private final Writer writer = new Writer();
+    private final MessageBufferPool messageBufferPool = new MessageBufferPool();
+    private final ChannelBuffer latchedBuffer = MessageBuffers.dynamicBuffer();
+    private final Object mutex = new Object();
+    //Can be changed
+    private boolean latchMode = false;
+    private T latchedMessage;
 
-  private final class Writer extends CancellableLoop {
-    @Override
-    public void loop() throws InterruptedException {
-      final T message = deque.takeFirst();
-      final ChannelBuffer buffer = messageBufferPool.acquire();
-      serializer.serialize(message, buffer);
-      if (LOGGER.isInfoEnabled()) {
-        LOGGER.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
-            channelGroup.size()));
-      }
-      // Note that the buffer is automatically "duplicated" by Netty to avoid
-      // race conditions. However, the duplicated buffer and the original buffer
-      // share the same backing array. So, we have to wait until the write
-      // operation is complete before returning the buffer to the pool.
-      channelGroup.write(buffer).addListener(future -> messageBufferPool.release(buffer));
+    private final class Writer extends CancellableLoop {
+        @Override
+        public void loop() throws InterruptedException {
+            final T message = deque.takeFirst();
+            final ChannelBuffer buffer = messageBufferPool.acquire();
+            serializer.serialize(message, buffer);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
+                        channelGroup.size()));
+            }
+            // Note that the buffer is automatically "duplicated" by Netty to avoid
+            // race conditions. However, the duplicated buffer and the original buffer
+            // share the same backing array. So, we have to wait until the write
+            // operation is complete before returning the buffer to the pool.
+            channelGroup.write(buffer).addListener(future -> messageBufferPool.release(buffer));
+        }
+    }//end inner class
+
+    public OutgoingMessageQueue(MessageSerializer<T> serializer, ExecutorService executorService) {
+        this.serializer = serializer;
+        executorService.execute(writer);
     }
-  }//end inner class
 
-  public OutgoingMessageQueue(MessageSerializer<T> serializer, ExecutorService executorService) {
-    this.serializer = serializer;
-    executorService.execute(writer);
-  }
-
-  public void setLatchMode(boolean enabled) {
-    latchMode = enabled;
-  }
-
-  public boolean getLatchMode() {
-    return latchMode;
-  }
-
-  /**
-   * @param message
-   *          the message to add to the queue
-   */
-  public void add(T message) {
-    deque.addLast(message);
-    setLatchedMessage(message);
-  }
-
-  private void setLatchedMessage(T message) {
-    synchronized (mutex) {
-      latchedMessage = message;
+    public void setLatchMode(boolean enabled) {
+        latchMode = enabled;
     }
-  }
 
-  /**
-   * Stop writing messages and close all outgoing connections.
-   */
-  public void shutdown() {
-    writer.cancel();
-    channelGroup.close().awaitUninterruptibly();
-  }
-
-  /**
-   * @param channel
-   *          added to this {@link OutgoingMessageQueue}'s {@link ChannelGroup}
-   */
-  public void addChannel(Channel channel) {
-    if (!writer.isRunning()) {
-      LOGGER.warn("Failed to add channel. Cannot add channels after shutdown.");
-      return;
+    public boolean getLatchMode() {
+        return latchMode;
     }
-    if (latchMode && latchedMessage != null) {
-      writeLatchedMessage(channel);
+
+    /**
+     * @param message the message to add to the queue
+     */
+    public void add(T message) {
+        deque.addLast(message);
+        setLatchedMessage(message);
     }
-    channelGroup.add(channel);
-  }
 
-  // TODO(damonkohler): Avoid re-serializing the latched message if it hasn't
-  // changed.
-  private void writeLatchedMessage(Channel channel) {
-    synchronized (mutex) {
-      latchedBuffer.clear();
-      serializer.serialize(latchedMessage, latchedBuffer);
-      channel.write(latchedBuffer);
+    private void setLatchedMessage(T message) {
+        synchronized (mutex) {
+            latchedMessage = message;
+        }
     }
-  }
 
-  /**
-   * @return the number of {@link Channel}s which have been added to this queue
-   */
-  public int getNumberOfChannels() {
-    return channelGroup.size();
-  }
+    /**
+     * Stop writing messages and close all outgoing connections.
+     */
+    public void shutdown() {
+        writer.cancel();
+        channelGroup.close().awaitUninterruptibly();
+    }
 
-  @VisibleForTesting
-  public ChannelGroup getChannelGroup() {
-    return channelGroup;
-  }
+    /**
+     * @param channel added to this {@link OutgoingMessageQueue}'s {@link ChannelGroup}
+     */
+    public void addChannel(final Channel channel) {
+        if (!writer.isRunning()) {
+            LOGGER.warn("Failed to add channel. Cannot add channels after shutdown.");
+            return;
+        } else {
+            if (this.latchMode && this.latchedMessage != null) {
+                writeLatchedMessage(channel);
+            }
+            this.channelGroup.add(channel);
+        }
+    }
+
+    // TODO(damonkohler): Avoid re-serializing the latched message if it hasn't
+    // changed.
+    private void writeLatchedMessage(Channel channel) {
+        synchronized (mutex) {
+            latchedBuffer.clear();
+            serializer.serialize(latchedMessage, latchedBuffer);
+            channel.write(latchedBuffer);
+        }
+    }
+
+    /**
+     * @return the number of {@link Channel}s which have been added to this queue
+     */
+    public int getNumberOfChannels() {
+        return channelGroup.size();
+    }
+
+    @VisibleForTesting
+    public ChannelGroup getChannelGroup() {
+        return channelGroup;
+    }
 }

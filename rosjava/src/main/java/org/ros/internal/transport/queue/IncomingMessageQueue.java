@@ -43,7 +43,7 @@ public final class IncomingMessageQueue<T extends Message> {
   private final MessageReceiver<T> messageReceiver;
   private final MessageDispatcher<T> messageDispatcher;
 
-  public IncomingMessageQueue(MessageDeserializer<T> deserializer, ExecutorService executorService) {
+  public IncomingMessageQueue(final MessageDeserializer<T> deserializer,final ExecutorService executorService) {
     final CircularBlockingDeque<LazyMessage<T>> lazyMessages = new CircularBlockingDeque<LazyMessage<T>>(DEQUE_CAPACITY);
     messageReceiver = new MessageReceiver<T>(lazyMessages, deserializer);
     messageDispatcher = new MessageDispatcher<T>(lazyMessages, executorService);

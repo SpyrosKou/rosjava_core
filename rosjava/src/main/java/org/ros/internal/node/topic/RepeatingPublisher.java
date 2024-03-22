@@ -41,12 +41,12 @@ public final class RepeatingPublisher<T extends Message> {
   private final Publisher<T> publisher;
   private final T message;
   private final int frequency;
-  private final RepeatingPublisherLoop runnable;
+  private final RepeatingPublisherLoop repeatingPublisherLoop;
 
   /**
    * Executor used to run the {@link RepeatingPublisherLoop}.
    */
-  private final ScheduledExecutorService executorService;
+  private final ScheduledExecutorService scheduledExecutorService;
 
   private final class RepeatingPublisherLoop extends CancellableLoop {
     @Override
@@ -65,22 +65,22 @@ public final class RepeatingPublisher<T extends Message> {
    * @param frequency
    *          the frequency of publication in Hz
    */
-  public RepeatingPublisher(Publisher<T> publisher, T message, int frequency,
-                            ScheduledExecutorService executorService) {
+  public RepeatingPublisher(final Publisher<T> publisher, T message,final int frequency,
+                            final ScheduledExecutorService scheduledExecutorService) {
     this.publisher = publisher;
     this.message = message;
     this.frequency = frequency;
-    this.executorService = executorService;
-    runnable = new RepeatingPublisherLoop();
+    this.scheduledExecutorService = scheduledExecutorService;
+    this.repeatingPublisherLoop = new RepeatingPublisherLoop();
   }
 
   public void start() {
-    Preconditions.checkState(!runnable.isRunning());
-    executorService.execute(runnable);
+    Preconditions.checkState(!this.repeatingPublisherLoop.isRunning());
+    this.scheduledExecutorService.execute(this.repeatingPublisherLoop);
   }
 
-  public void cancel() {
-    Preconditions.checkState(runnable.isRunning());
-    runnable.cancel();
+  public final void cancel() {
+    Preconditions.checkState(this.repeatingPublisherLoop.isRunning());
+    this.repeatingPublisherLoop.cancel();
   }
 }

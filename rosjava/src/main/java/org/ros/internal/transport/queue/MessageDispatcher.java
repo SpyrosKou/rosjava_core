@@ -66,7 +66,7 @@ public final class MessageDispatcher<T extends Message> extends CancellableLoop 
      *
      * @see ListenerGroup#add(Object, int)
      */
-    public void addListener(MessageListener<T> messageListener, int limit) {
+    public final void addListener(MessageListener<T> messageListener, int limit) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Adding listener.");
         }
@@ -87,11 +87,11 @@ public final class MessageDispatcher<T extends Message> extends CancellableLoop 
      * @return True if the listener was removed, false if it wasn't registered before.
      * @see ListenerGroup#remove(Object)
      */
-    public boolean removeListener(final MessageListener<T> messageListener) {
+    public final boolean removeListener(final MessageListener<T> messageListener) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Removing listener.");
         }
-        synchronized (mutex) {
+        synchronized (this.mutex) {
             return messageListeners.remove(messageListener);
         }
     }
@@ -105,7 +105,7 @@ public final class MessageDispatcher<T extends Message> extends CancellableLoop 
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Removing all listeners.");
         }
-        synchronized (mutex) {
+        synchronized (this.mutex) {
             this.messageListeners.shutdown();
         }
     }

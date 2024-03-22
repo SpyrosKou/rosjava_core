@@ -42,11 +42,11 @@ public final class EventDispatcher<T> extends CancellableLoop {
   @Override
   public final void loop() throws InterruptedException {
     final Consumer<T> consumer = this.events.takeFirst();
-    consumer.accept(listener);
+    consumer.accept(this.listener);
   }
 
   public final T getListener()
   {
-    return listener;
+    return this.listener;
   }
 }

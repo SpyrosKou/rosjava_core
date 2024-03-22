@@ -34,6 +34,7 @@ public abstract class CancellableLoop implements Runnable {
      * {@code true} if the code has been run once, {@code false} otherwise.
      */
     private boolean ranOnce = false;
+    private boolean cancelled = false;
 
     /**
      * The {@link Thread} the code will be running in.
@@ -51,7 +52,9 @@ public abstract class CancellableLoop implements Runnable {
         try {
             this.setup();
             while (!this.thread.isInterrupted()) {
-                this.loop();
+                if (!this.cancelled) {
+                    this.loop();
+                }
             }
         } catch (final InterruptedException interruptedException) {
             this.handleInterruptedException(interruptedException);
@@ -87,12 +90,13 @@ public abstract class CancellableLoop implements Runnable {
         if (this.thread != null) {
             this.thread.interrupt();
         }
+        this.cancelled = true;
     }
 
     /**
      * @return {@code true} if the loop is running
      */
-    public boolean isRunning() {
-        return this.thread != null && !this.thread.isInterrupted();
+    public final boolean isRunning() {
+        return this.thread != null && !this.thread.isInterrupted() && !this.cancelled;
     }
 }
