@@ -19,7 +19,7 @@ package org.ros.concurrent;
 import com.google.common.collect.Maps;
 
 
-
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.exception.RosRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,20 +57,23 @@ public final class RetryingExecutorService {
 
   private final class RetryLoop extends CancellableLoop {
     @Override
-    public void loop() throws InterruptedException {
-      final Future<Boolean> future = completionService.take();
+    public final void loop() throws InterruptedException {
+      final Future<Boolean> future = RetryingExecutorService.this.completionService.take();
       final Callable<Boolean> callable;
       final CountDownLatch latch;
       // Grab the mutex to make sure submit() of the future that we took is finished.
-      synchronized (mutex) {
-        callable = callables.remove(future);
-        latch = latches.get(callable);
+      synchronized (RetryingExecutorService.this.mutex) {
+        callable = RetryingExecutorService.this.callables.remove(future);
+        latch = RetryingExecutorService.this.latches.get(callable);
       }
       final boolean retry;
       try {
         retry = future.get();
-      } catch (ExecutionException e) {
-        throw new RosRuntimeException(e.getCause());
+      } catch (final ExecutionException executionException) {
+        if(LOGGER.isErrorEnabled()){
+          LOGGER.error("Error while retrying: "+ExceptionUtils.getStackTrace(executionException));
+        }
+        throw new RosRuntimeException(executionException.getCause());
       }
       if (retry) {
         if (LOGGER.isInfoEnabled()) {
@@ -88,7 +91,7 @@ public final class RetryingExecutorService {
    * @param scheduledExecutorService
    *          the {@link ExecutorService} to wrap
    */
-  public RetryingExecutorService(ScheduledExecutorService scheduledExecutorService) {
+  public RetryingExecutorService(final ScheduledExecutorService scheduledExecutorService) {
     this.scheduledExecutorService = scheduledExecutorService;
     this.completionService = new ExecutorCompletionService<>(scheduledExecutorService);
     this.running = true;
@@ -106,14 +109,17 @@ public final class RetryingExecutorService {
    * @throws RejectedExecutionException
    *           if the {@link RetryingExecutorService} is shutting down
    */
-  public void submit(final Callable<Boolean> callable) {
+  public final void submit(final Callable<Boolean> callable) {
     synchronized (mutex) {
-      if (running) {
+      if (this.running) {
         final Future<Boolean> future = completionService.submit(callable);
-        latches.put(callable, new CountDownLatch(1));
-        callables.put(future, callable);
+        this.latches.put(callable, new CountDownLatch(1));
+        this.callables.put(future, callable);
       } else {
-        throw new RejectedExecutionException();
+        if(LOGGER.isDebugEnabled()){
+          LOGGER.debug("Submission rejected as service is not running");
+        }
+        throw new RejectedExecutionException("Submission rejected as service is not running");
       }
     }
   }
@@ -125,8 +131,8 @@ public final class RetryingExecutorService {
    *          the {@link TimeUnit} of the delay
    */
   public final void setRetryDelay(final long delay,final TimeUnit unit) {
-    retryDelay = delay;
-    retryTimeUnit = unit;
+    this.retryDelay = delay;
+    this.retryTimeUnit = unit;
   }
 
   /**
@@ -139,11 +145,11 @@ public final class RetryingExecutorService {
    *          the {@link TimeUnit} of {@code timeout}
    * @throws InterruptedException
    */
-  public void shutdown(long timeout, TimeUnit unit) throws InterruptedException {
-    running = false;
+  public final void shutdown(long timeout, TimeUnit unit) throws InterruptedException {
+    this.running = false;
     for (final CountDownLatch latch : this.latches.values()) {
       latch.await(timeout, unit);
     }
-    retryLoop.cancel();
+    this.retryLoop.cancel();
   }
 }

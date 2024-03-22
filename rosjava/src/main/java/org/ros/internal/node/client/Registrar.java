@@ -55,7 +55,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     private static final int SHUTDOWN_TIMEOUT = 5;
     private static final TimeUnit SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
-    private final MasterClient masterClient;
+    private final MasterClient rosCoreClient;
     private final ScheduledExecutorService executorService;
     private final RetryingExecutorService retryingExecutorService;
 
@@ -63,18 +63,18 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     /**
-     * @param masterClient    a {@link MasterClient} for communicating with the ROS master
+     * @param rosCoreClient   a {@link MasterClient} for communicating with the ROS master
      * @param executorService a {@link ScheduledExecutorService} to be used for all asynchronous
      *                        operations
      */
-    public Registrar(MasterClient masterClient, ScheduledExecutorService executorService) {
-        this.masterClient = masterClient;
+    public Registrar(final MasterClient rosCoreClient, final ScheduledExecutorService executorService) {
+        this.rosCoreClient = rosCoreClient;
         this.executorService = executorService;
-        retryingExecutorService = new RetryingExecutorService(executorService);
-        nodeIdentifier = null;
+        this.retryingExecutorService = new RetryingExecutorService(executorService);
+        this.nodeIdentifier = null;
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
+            LOGGER.debug("MasterXmlRpcEndpoint URI: " + this.rosCoreClient.getRemoteUri());
         }
     }
 
@@ -103,17 +103,23 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     }
 
     private final <T> boolean callMaster(final Callable<Response<T>> callable) {
-        Preconditions.checkNotNull(nodeIdentifier, "Registrar not started.");
+        Preconditions.checkNotNull(this.nodeIdentifier, "Registrar not started.");
         boolean success;
         try {
             final Response<T> response = callable.call();
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Response:" + response);
+                LOGGER.info(this.nodeIdentifier+" got response:" + response);
             }
             success = response.isSuccess();
         } catch (final Exception exception) {
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("Exception caught while communicating with master." + ExceptionUtils.getStackTrace(exception));
+                try {
+                    final String remoteUri = this.rosCoreClient.getRemoteUri().toString();
+                    LOGGER.error("Exception caught while communicating with roscore @" + remoteUri + " from: " + this.nodeIdentifier + ":" + ExceptionUtils.getStackTrace(exception));
+
+                } catch (final Exception loggingException) {
+                    LOGGER.error("Exception caught while communicating with roscore." + ExceptionUtils.getStackTrace(exception));
+                }
             }
             success = false;
         }
@@ -126,7 +132,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             LOGGER.info("Registering publisher: " + publisher);
         }
         final boolean submitted = this.submit(() -> {
-            final boolean success = callMaster(() -> this.masterClient.registerPublisher(publisher.toDeclaration()));
+            final boolean success = this.callMaster(() -> this.rosCoreClient.registerPublisher(publisher.toDeclaration()));
             if (success) {
                 publisher.signalOnMasterRegistrationSuccess();
             } else {
@@ -145,7 +151,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             LOGGER.info("Unregistering publisher: " + publisher);
         }
         final boolean submitted = submit(() -> {
-            final boolean success = callMaster(() -> this.masterClient.unregisterPublisher(publisher.getIdentifier()));
+            final boolean success = this.callMaster(() -> this.rosCoreClient.unregisterPublisher(publisher.getIdentifier()));
             if (success) {
                 publisher.signalOnMasterUnregistrationSuccess();
             } else {
@@ -165,7 +171,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
         }
         final boolean submitted = submit(() -> {
             final Holder<Response<List<URI>>> holder = Holder.newEmpty();
-            final boolean success = callMaster(() -> holder.set(masterClient.registerSubscriber(nodeIdentifier, subscriber)));
+            final boolean success = this.callMaster(() -> holder.set(rosCoreClient.registerSubscriber(nodeIdentifier, subscriber)));
             if (success) {
                 final Set<PublisherIdentifier> publisherIdentifiers =
                         PublisherIdentifier.newCollectionFromUris(holder.get().getResult(), subscriber.getTopicDeclaration());
@@ -187,7 +193,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             LOGGER.info("Unregistering subscriber: " + subscriber);
         }
         final boolean submitted = submit(() -> {
-            final boolean success = callMaster(() -> masterClient.unregisterSubscriber(nodeIdentifier, subscriber));
+            final boolean success = this.callMaster(() -> rosCoreClient.unregisterSubscriber(nodeIdentifier, subscriber));
             if (success) {
                 subscriber.signalOnMasterUnregistrationSuccess();
             } else {
@@ -207,7 +213,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
             LOGGER.info("Registering service: " + serviceServer);
         }
         final boolean submitted = submit(() -> {
-            final boolean success = this.callMaster(() -> masterClient.registerService(nodeIdentifier, serviceServer));
+            final boolean success = this.callMaster(() -> rosCoreClient.registerService(nodeIdentifier, serviceServer));
             if (success) {
                 serviceServer.onMasterRegistrationSuccess();
             } else {
@@ -227,7 +233,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
      * @return
      */
     private final boolean unregisterService(final ServiceServer<?, ?> serviceServer) {
-        final boolean success = callMaster(() -> this.masterClient.unregisterService(this.nodeIdentifier, serviceServer));
+        final boolean success = this.callMaster(() -> this.rosCoreClient.unregisterService(this.nodeIdentifier, serviceServer));
         if (success) {
             serviceServer.onMasterUnregistrationSuccess();
         } else {

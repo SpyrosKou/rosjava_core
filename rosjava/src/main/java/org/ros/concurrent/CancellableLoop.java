@@ -43,18 +43,18 @@ public abstract class CancellableLoop implements Runnable {
 
     @Override
     public final void run() {
-        synchronized (mutex) {
+        synchronized (this.mutex) {
             Preconditions.checkState(!ranOnce, "CancellableLoops cannot be restarted.");
             this.ranOnce = true;
             this.thread = Thread.currentThread();
         }
         try {
-            setup();
-            while (!thread.isInterrupted()) {
-                loop();
+            this.setup();
+            while (!this.thread.isInterrupted()) {
+                this.loop();
             }
-        } catch (InterruptedException e) {
-            handleInterruptedException(e);
+        } catch (final InterruptedException interruptedException) {
+            this.handleInterruptedException(interruptedException);
         } finally {
             this.thread = null;
         }
@@ -83,9 +83,9 @@ public abstract class CancellableLoop implements Runnable {
     /**
      * Interrupts the loop.
      */
-    public void cancel() {
-        if (thread != null) {
-            thread.interrupt();
+    public final void cancel() {
+        if (this.thread != null) {
+            this.thread.interrupt();
         }
     }
 
@@ -93,6 +93,6 @@ public abstract class CancellableLoop implements Runnable {
      * @return {@code true} if the loop is running
      */
     public boolean isRunning() {
-        return thread != null && !thread.isInterrupted();
+        return this.thread != null && !this.thread.isInterrupted();
     }
 }

@@ -593,7 +593,7 @@ final class DefaultNode implements ConnectedNode {
                 if (LOGGER.isDebugEnabled()) {
                     try {
                         LOGGER.debug("Listener" + listener);
-                    }catch (final Exception exceptionNested){
+                    } catch (final Exception exceptionNested) {
                         LOGGER.debug(ExceptionUtils.getStackTrace(throwable));
                     }
                 }
@@ -612,24 +612,24 @@ final class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public void executeCancellableLoop(final CancellableLoop cancellableLoop) {
-        scheduledExecutorService.execute(cancellableLoop);
-        addListener(new NodeListener() {
+    public final void executeCancellableLoop(final CancellableLoop cancellableLoop) {
+        this.scheduledExecutorService.execute(cancellableLoop);
+        this.addListener(new NodeListener() {
             @Override
-            public void onStart(ConnectedNode connectedNode) {
+            public void onStart(final ConnectedNode connectedNode) {
             }
 
             @Override
-            public void onShutdown(Node node) {
+            public void onShutdown(final Node node) {
                 cancellableLoop.cancel();
             }
 
             @Override
-            public void onShutdownComplete(Node node) {
+            public void onShutdownComplete(final Node node) {
             }
 
             @Override
-            public void onError(Node node, Throwable throwable) {
+            public void onError(final Node node, final Throwable throwable) {
                 cancellableLoop.cancel();
             }
         });
