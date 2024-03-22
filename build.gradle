@@ -17,7 +17,7 @@
 
 allprojects {
     group 'org.ros.rosjava_core'
-    version = '0.3.9.2'
+    version = '0.3.9.5'
 }
 
 subprojects {
@@ -26,8 +26,8 @@ subprojects {
         apply plugin: "idea"
 
 
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
 
 
         repositories {
