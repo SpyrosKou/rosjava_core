@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Provides access to the XML-RPC API exposed by a {@link MasterServer}.
@@ -134,8 +135,34 @@ public final class MasterClient extends Client<MasterXmlRpcEndpoint> {
             final Response<List<URI>> response = Response.fromListChecked(publishers, UriListResultFactory::applyStatic);
             return response;
         } catch (final Exception exception) {
-            LOGGER.error(ExceptionUtils.getStackTrace(exception));
-            throw new RuntimeException(exception);
+            final StringJoiner stringJoiner = new StringJoiner(",");
+            try {
+                {
+                    final String slaveName = publisherDeclaration.getSlaveName().toString();
+                    stringJoiner.add("slaveName:" + slaveName);
+
+                }
+                {
+                    final String slaveUri = publisherDeclaration.getSlaveUri().toString();
+                    stringJoiner.add("slaveUri:" + slaveUri);
+
+                }
+                {
+                    final String topicName = publisherDeclaration.getTopicName().toString();
+                    stringJoiner.add("topicName:" + topicName);
+
+                }
+                {
+                    final String messageType = publisherDeclaration.getTopicMessageType();
+                    stringJoiner.add("messageType:" + messageType);
+
+                }
+            } catch (final Exception silentException) {
+
+            }
+            final RuntimeException runtimeException = new RuntimeException(stringJoiner.toString(),exception);
+            LOGGER.error(ExceptionUtils.getStackTrace(runtimeException));
+            throw runtimeException;
         }
 
     }
