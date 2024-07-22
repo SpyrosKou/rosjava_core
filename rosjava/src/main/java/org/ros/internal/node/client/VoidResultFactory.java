@@ -24,11 +24,11 @@ import java.util.function.Function;
 final class VoidResultFactory implements Function<Object,Void> {
 
     @Override
-    public final Void apply(Object value) {
+    public final Void apply(final Object value) {
         return applyStatic(value);
     }
 
-    public static final Void applyStatic(Object value) {
+    public static final Void applyStatic(final Object value) {
         return null;
     }
 }

@@ -63,16 +63,17 @@ final class UpdatePublisherRunnable<T extends Message> implements Runnable {
 
     @Override
     public void run() {
-        SlaveClient slaveClient;
+
         try {
-            slaveClient = new SlaveClient(nodeIdentifier.getName(), publisherIdentifier.getNodeUri());
-            Response<ProtocolDescription> response =
-                    slaveClient.requestTopic(subscriber.getTopicName(), ProtocolNames.SUPPORTED);
+            final SlaveClient slaveClient = new SlaveClient(nodeIdentifier.getName(), publisherIdentifier.getNodeUri());
+            final Response<ProtocolDescription> response =
+                    slaveClient.requestTopic(this.subscriber.getTopicName(), ProtocolNames.SUPPORTED);
             // TODO(kwc): all of this logic really belongs in a protocol handler
             // registry.
-            ProtocolDescription selected = response.getResult();
+            final ProtocolDescription selected = response.getResult();
+
             if (ProtocolNames.SUPPORTED.contains(selected.getName())) {
-                subscriber.addPublisher(publisherIdentifier, selected.getAddress());
+                this.subscriber.addPublisher(publisherIdentifier, selected.getAddress());
             } else {
                 LOGGER.error("Publisher returned unsupported protocol selection: " + response);
             }

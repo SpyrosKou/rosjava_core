@@ -78,15 +78,15 @@ public final class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint, Par
     }
 
     @Override
-    public final List<Object> registerPublisher(String callerId, String topicName, String topicMessageType, String callerSlaveUri) {
+    public final List<Object> registerPublisher(final String callerId,final  String topicName,final  String topicMessageType,final  String callerSlaveUri) {
         try {
-            List<URI> subscribers = master.registerPublisher(GraphName.of(callerId), new URI(callerSlaveUri), GraphName.of(topicName), topicMessageType);
-            List<String> urls = Lists.newArrayList();
-            for (URI uri : subscribers) {
+            final List<URI> subscribers = this.master.registerPublisher(GraphName.of(callerId), new URI(callerSlaveUri), GraphName.of(topicName), topicMessageType);
+            final List<String> urls = Lists.newArrayList();
+            for (final URI uri : subscribers) {
                 urls.add(uri.toString());
             }
             return Response.newSuccess("Success", urls).toList();
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new RosRuntimeException(String.format("Improperly formatted URI %s for publisher", callerSlaveUri), e);
         }
     }

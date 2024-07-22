@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -187,21 +187,22 @@ public final class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   @Override
   public List<Object> requestTopic(String callerId, String topic, Object[] protocols) {
-    Set<String> requestedProtocols = Sets.newHashSet();
+    final Set<String> requestedProtocols = Sets.newHashSet();
     for (int i = 0; i < protocols.length; i++) {
       requestedProtocols.add((String) ((Object[]) protocols[i])[0]);
     }
-    ProtocolDescription protocol;
+
     try {
-      protocol = slave.requestTopic(topic, requestedProtocols);
+      final ProtocolDescription protocol = slave.requestTopic(topic, requestedProtocols);
+      final List<Object> response = Response.newSuccess(protocol.toString(), protocol.toList()).toList();
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
+                + response.toString());
+      }
+      return response;
     } catch (ServerException e) {
       return Response.newError(e.getMessage(), null).toList();
     }
-    List<Object> response = Response.newSuccess(protocol.toString(), protocol.toList()).toList();
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
-          + response.toString());
-    }
-    return response;
+
   }
 }

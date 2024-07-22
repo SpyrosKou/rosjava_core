@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -94,29 +95,29 @@ public final class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
                 VoidResultFactory::applyStatic);
     }
 
-    public Response<Void> paramUpdate(GraphName name, List<?> value) {
+    public final Response<Void> paramUpdate(GraphName name, List<?> value) {
         return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
                 VoidResultFactory::applyStatic);
     }
 
-    public Response<Void> paramUpdate(GraphName name, Map<?, ?> value) {
+    public final Response<Void> paramUpdate(GraphName name, Map<?, ?> value) {
         return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
                 VoidResultFactory::applyStatic);
     }
 
-    public Response<Void> publisherUpdate(GraphName topic, Collection<URI> publisherUris) {
-        List<String> publishers = Lists.newArrayList();
-        for (URI uri : publisherUris) {
+    public final Response<Void> publisherUpdate(GraphName topic, Collection<URI> publisherUris) {
+        final List<String> publishers = Lists.newArrayList();
+        for (final URI uri : publisherUris) {
             publishers.add(uri.toString());
         }
         return Response.fromListChecked(
-                xmlRpcEndpoint.publisherUpdate(nodeName.toString(), topic.toString(), publishers.toArray()),
+                this.xmlRpcEndpoint.publisherUpdate(this.nodeName.toString(), topic.toString(), publishers.toArray()),
                 VoidResultFactory::applyStatic);
     }
 
-    public Response<ProtocolDescription> requestTopic(GraphName topic,
-                                                      Collection<String> requestedProtocols) {
-        return Response.fromListChecked(xmlRpcEndpoint.requestTopic(nodeName.toString(), topic.toString(),
+    public final Response<ProtocolDescription> requestTopic(final GraphName topic,
+                                                      final Set<String> requestedProtocols) {
+        return Response.fromListChecked(this.xmlRpcEndpoint.requestTopic(this.nodeName.toString(), topic.toString(),
                 new Object[][]{requestedProtocols.toArray()}), ProtocolDescriptionResultFactory::applyStatic);
     }
 }

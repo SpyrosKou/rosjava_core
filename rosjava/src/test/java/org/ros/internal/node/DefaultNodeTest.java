@@ -44,6 +44,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.*;
@@ -235,12 +236,12 @@ public class DefaultNodeTest extends RosTest {
         assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
         // Check the TCPROS server address via the XML-RPC API.
-        SlaveClient slaveClient = new SlaveClient(GraphName.of("test_addresses"), nodeUri);
-        Response<ProtocolDescription> response =
+        final SlaveClient slaveClient = new SlaveClient(GraphName.of("test_addresses"), nodeUri);
+        final Response<ProtocolDescription> response =
                 slaveClient.requestTopic(GraphName.of("test_addresses_pub"),
-                        Lists.newArrayList(ProtocolNames.TCPROS));
-        ProtocolDescription result = response.getResult();
-        InetSocketAddress tcpRosAddress = result.getAdvertiseAddress().toInetSocketAddress();
+                        Set.of(ProtocolNames.TCPROS));
+        final ProtocolDescription result = response.getResult();
+        final InetSocketAddress tcpRosAddress = result.getAdvertiseAddress().toInetSocketAddress();
         checkHostName(tcpRosAddress.getHostName());
     }
 }
