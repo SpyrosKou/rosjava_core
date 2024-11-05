@@ -42,28 +42,28 @@ abstract class LoggingRegistrantListener<T extends TopicParticipant> implements 
     @Override
     public final void onMasterRegistrationSuccess(final T topicParticipant) {
         if (logger.isInfoEnabled()) {
-            logger.info("MasterRegistrationSuccess for topic: " + topicParticipant.getTopicName() + " of type: " + topicParticipant.getTopicMessageType());
+            logger.info("MasterRegistrationSuccess for topic: {} of type: {}", topicParticipant.getTopicName(), topicParticipant.getTopicMessageType());
         }
     }
 
     @Override
     public final void onMasterRegistrationFailure(final T topicParticipant) {
         if (logger.isInfoEnabled()) {
-            logger.info("MasterRegistrationFailure for topic: " + topicParticipant.getTopicName() + " of type: " + topicParticipant.getTopicMessageType());
+            logger.info("MasterRegistrationFailure for topic: {} of type: {}", topicParticipant.getTopicName(), topicParticipant.getTopicMessageType());
         }
     }
 
     @Override
     public final void onMasterUnregistrationSuccess(final T topicParticipant) {
         if (logger.isInfoEnabled()) {
-            logger.info("MasterUnregistrationSuccess for topic: " + topicParticipant.getTopicName() + " of type: " + topicParticipant.getTopicMessageType());
+            logger.info("MasterUnregistrationSuccess for topic: {} of type: {}", topicParticipant.getTopicName(), topicParticipant.getTopicMessageType());
         }
     }
 
     @Override
     public final void onMasterUnregistrationFailure(final T topicParticipant) {
         if (logger.isInfoEnabled()) {
-            logger.info("MasterUnregistrationFailure for topic: " + topicParticipant.getTopicName() + " of type: " + topicParticipant.getTopicMessageType());
+            logger.info("MasterUnregistrationFailure for topic: {} of type: {}", topicParticipant.getTopicName(), topicParticipant.getTopicMessageType());
         }
     }
 
