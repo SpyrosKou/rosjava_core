@@ -26,6 +26,13 @@ dependencies {
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
 
+
+task sourcesJar(type: Jar) {
+  archiveClassifier.set("sources")
+  from sourceSets.main.allSource
+}
+
+
 publishing {
   final repositoryDirectory = "ROS_MAVEN_DEPLOYMENT_REPOSITORY"
   final mavenDeploymentRepositoryProvider = providers.gradleProperty(repositoryDirectory)
@@ -34,6 +41,8 @@ publishing {
   publications {
     mavenJava(MavenPublication) {
       from components.java
+
+      artifact sourcesJar
     }
   }
   if (mavenDeploymentRepository!=null) {

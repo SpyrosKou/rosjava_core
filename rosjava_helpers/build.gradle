@@ -20,6 +20,12 @@ jar {
     }
 }
 
+
+task sourcesJar(type: Jar) {
+    archiveClassifier.set("sources")
+    from sourceSets.main.allSource
+}
+
 publishing {
     final repositoryDirectory = "ROS_MAVEN_DEPLOYMENT_REPOSITORY"
     final mavenDeploymentRepositoryProvider = providers.gradleProperty(repositoryDirectory)
@@ -28,6 +34,8 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+
+            artifact sourcesJar
         }
     }
     if (mavenDeploymentRepository!=null) {
