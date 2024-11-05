@@ -278,7 +278,7 @@ public final class DefaultPublisher<T extends Message> extends DefaultTopicParti
   private final void signalOnShutdown(long timeout, TimeUnit unit) {
     final Publisher<T> publisher = this;
     try {
-      listenerGroup.signal(listener -> listener.onShutdown(publisher), timeout, unit);
+      this.listenerGroup.signal(listener -> listener.onShutdown(publisher), timeout, unit);
     } catch (InterruptedException e) {
       // Ignored since we do not guarantee that all listeners will finish before
       // shutdown begins.
