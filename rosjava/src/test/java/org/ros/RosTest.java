@@ -39,7 +39,7 @@ import static junit.framework.Assert.assertTrue;
  */
 @Disabled
 public abstract class RosTest {
-    private final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     protected RosCore rosCore;
     protected NodeConfiguration nodeConfiguration;
     protected NodeMainExecutor nodeMainExecutor;
@@ -62,7 +62,7 @@ public abstract class RosTest {
             this.rosCore.awaitShutdown(30, TimeUnit.SECONDS);
             this.logger.info("Shutdown roscore ok");
         } catch (final Exception exception) {
-            this.logger.info("Error while shutting down roscore: " + ExceptionUtils.getStackTrace(exception));
+            this.logger.info("Error while shutting down roscore: {}", ExceptionUtils.getStackTrace(exception));
         }
 
     }

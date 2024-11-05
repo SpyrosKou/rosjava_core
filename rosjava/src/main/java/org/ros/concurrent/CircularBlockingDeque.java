@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class CircularBlockingDeque<T> implements Iterable<T> {
-    private final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final T[] queue;
     private final Object mutex;
 

@@ -32,7 +32,7 @@ import java.lang.invoke.MethodHandles;
 public abstract class NativeNodeMain extends AbstractNodeMain {
 
   public static final int SUCCESS = 0;
-  private final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private String libName;
   private String masterUri = null;
   private String hostName = null;
