@@ -31,7 +31,7 @@ public final class LoggingServiceServerListener<T extends Message, S extends Mes
     private final Logger logger;
 
     public LoggingServiceServerListener() {
-        logger = LOGGER;
+        this.logger = LOGGER;
     }
 
     public LoggingServiceServerListener(final Logger logger) {
@@ -42,26 +42,26 @@ public final class LoggingServiceServerListener<T extends Message, S extends Mes
 
     @Override
     public final void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
-        logger.info("Service registered: " + registrant.getName() + " uri:" + registrant.getUri());
+        this.logger.info("Service registered: {} uri:{}", registrant.getName(), registrant.getUri());
     }
 
     @Override
     public final void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
-        logger.info("Service registration failed: " + registrant.getName() + " uri:" + registrant.getUri());
+        this.logger.info("Service registration failed: {} uri:{}", registrant.getName(), registrant.getUri());
     }
 
     @Override
     public final void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
-        logger.info("Service unregistered: " + registrant.getName() + " uri:" + registrant.getUri());
+        this.logger.info("Service unregistered: {} uri:{}", registrant.getName(), registrant.getUri());
     }
 
     @Override
     public final void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
-        logger.info("Service unregistration failed: " + registrant.getName() + " uri:" + registrant.getUri());
+        this.logger.info("Service unregistration failed: {} uri:{}", registrant.getName(), registrant.getUri());
     }
 
     @Override
     public final void onShutdown(ServiceServer<T, S> serviceServer) {
-        logger.info("Shutdown: " + serviceServer.getName() + " uri:" + serviceServer.getUri());
+        this.logger.info("Shutdown: {} uri:{}", serviceServer.getName(), serviceServer.getUri());
     }
 }
