@@ -34,7 +34,7 @@ public abstract class CancellableLoop implements Runnable {
      * {@code true} if the code has been run once, {@code false} otherwise.
      */
     private boolean ranOnce = false;
-    private boolean cancelled = false;
+    private volatile boolean cancelled = false;
 
     /**
      * The {@link Thread} the code will be running in.
