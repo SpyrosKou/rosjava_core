@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -80,41 +81,44 @@ public final class OutgoingMessageQueue<T extends Message> {
         executorService.execute(writer);
     }
 
-    public void setLatchMode(boolean enabled) {
-        latchMode = enabled;
+    public final void setLatchMode(final boolean enabled) {
+        this.latchMode = enabled;
     }
 
-    public boolean getLatchMode() {
-        return latchMode;
+    public final boolean getLatchMode() {
+        return this.latchMode;
     }
 
     /**
      * @param message the message to add to the queue
      */
-    public void add(T message) {
-        deque.addLast(message);
-        setLatchedMessage(message);
+    public final void add(T message) {
+        this.deque.addLast(message);
+        this.setLatchedMessage(message);
     }
 
-    private void setLatchedMessage(T message) {
-        synchronized (mutex) {
-            latchedMessage = message;
+    private final void setLatchedMessage(final T message) {
+        synchronized (this.mutex) {
+            this.latchedMessage = message;
         }
     }
 
     /**
-     * Stop writing messages and close all outgoing connections.
+     *
+     * @param timeout
+     * @param unit
+     * @throws InterruptedException
      */
-    public void shutdown() {
+    public final void shutdown(long timeout, TimeUnit unit) throws InterruptedException {
         writer.cancel();
-        channelGroup.close().awaitUninterruptibly();
+        channelGroup.close().await(timeout,unit);
     }
 
     /**
      * @param channel added to this {@link OutgoingMessageQueue}'s {@link ChannelGroup}
      */
-    public void addChannel(final Channel channel) {
-        if (!writer.isRunning()) {
+    public final void addChannel(final Channel channel) {
+        if (!this.writer.isRunning()) {
             LOGGER.warn("Failed to add channel. Cannot add channels after shutdown.");
             return;
         } else {
@@ -127,10 +131,10 @@ public final class OutgoingMessageQueue<T extends Message> {
 
     // TODO(damonkohler): Avoid re-serializing the latched message if it hasn't
     // changed.
-    private void writeLatchedMessage(Channel channel) {
-        synchronized (mutex) {
-            latchedBuffer.clear();
-            serializer.serialize(latchedMessage, latchedBuffer);
+    private final void writeLatchedMessage(final Channel channel) {
+        synchronized (this.mutex) {
+            this.latchedBuffer.clear();
+            this.serializer.serialize(latchedMessage, latchedBuffer);
             channel.write(latchedBuffer);
         }
     }
@@ -138,12 +142,12 @@ public final class OutgoingMessageQueue<T extends Message> {
     /**
      * @return the number of {@link Channel}s which have been added to this queue
      */
-    public int getNumberOfChannels() {
-        return channelGroup.size();
+    public final int getNumberOfChannels() {
+        return this.channelGroup.size();
     }
 
     @VisibleForTesting
-    public ChannelGroup getChannelGroup() {
-        return channelGroup;
+    public final ChannelGroup getChannelGroup() {
+        return this.channelGroup;
     }
 }

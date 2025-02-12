@@ -64,7 +64,7 @@ public class MessageQueueIntegrationTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final int QUEUE_CAPACITY = 128;
-
+  private static final long SHUTDOWN_TIMEOUT_MS = 1000;
   private ExecutorService executorService;
   private TcpClientManager firstTcpClientManager;
   private TcpClientManager secondTcpClientManager;
@@ -127,7 +127,11 @@ public class MessageQueueIntegrationTest {
   @AfterEach
   public void tearDown() {
     if(this.outgoingMessageQueue!=null){
-      this.outgoingMessageQueue.shutdown();
+      try {
+        this.outgoingMessageQueue.shutdown(SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+      }catch (InterruptedException ignore) {
+        LOGGER.error("Interrupted", ignore);
+      }
     }
     if(this.executorService!=null) {
       this.executorService.shutdown();
@@ -242,10 +246,14 @@ public class MessageQueueIntegrationTest {
 
   @Test
   public void testSendAfterOutgoingQueueShutdown() throws InterruptedException {
-    startRepeatingPublisher();
-    Channel serverChannel = buildServerChannel();
-    connect(firstTcpClientManager, serverChannel);
-    outgoingMessageQueue.shutdown();
-    outgoingMessageQueue.add(expectedMessage);
+    this.startRepeatingPublisher();
+    final Channel serverChannel = this.buildServerChannel();
+    this.connect(firstTcpClientManager, serverChannel);
+    try {
+      this.outgoingMessageQueue.shutdown(SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+    }catch (InterruptedException ignore) {
+      LOGGER.error("Interrupted", ignore);
+    }
+    this.outgoingMessageQueue.add(expectedMessage);
   }
 }
