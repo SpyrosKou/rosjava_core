@@ -1,6 +1,7 @@
 .pydevproject
 *.pyc
 .gradle
+.gradle-user
 build
 bin
 .classpath
