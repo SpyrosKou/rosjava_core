@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,6 +40,7 @@ import org.ros.node.service.ServiceServer;
  *
  * @author damonkohler@google.com (Damon Kohler)
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author Spyros Koukas
  */
 final class TcpServerHandshakeHandler extends SimpleChannelHandler {
 
