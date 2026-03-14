@@ -18,12 +18,12 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.collect.Lists;
 
-import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
 import java.net.SocketAddress;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -35,13 +35,13 @@ public final class TcpClientManager {
   private final ChannelGroup channelGroup;
   private final List<TcpClient> tcpClients;
   private final List<NamedChannelHandler> namedChannelHandlers;
-  private final Executor executor;
+  private final ChannelFactory channelFactory;
 
   public TcpClientManager(Executor executor) {
-    this.executor = executor;
     this.channelGroup = new DefaultChannelGroup();
     this.tcpClients = Lists.newArrayList();
     this.namedChannelHandlers = Lists.newArrayList();
+    this.channelFactory = new NioClientSocketChannelFactory(executor, executor);
   }
 
   public void addNamedChannelHandler(final NamedChannelHandler namedChannelHandler) {
@@ -64,7 +64,7 @@ public final class TcpClientManager {
    * @return a new {@link TcpClient}
    */
   public final TcpClient connect(final String connectionName,final SocketAddress socketAddress) {
-    final TcpClient tcpClient = new TcpClient(this.channelGroup, this.executor);
+    final TcpClient tcpClient = TcpClient.newSharedFactoryClient(this.channelGroup, this.channelFactory);
     tcpClient.addAllNamedChannelHandlers(this.namedChannelHandlers);
     tcpClient.connect(connectionName, socketAddress);
     this.tcpClients.add(tcpClient);
@@ -78,9 +78,6 @@ public final class TcpClientManager {
   public final void shutdown() {
     this.channelGroup.close().awaitUninterruptibly();
     this.tcpClients.clear();
-    // We don't call channelFactory.releaseExternalResources() or
-    // bootstrap.releaseExternalResources() since the only external resource is
-    // the ExecutorService which must remain in the control of the overall
-    // application.
+    this.channelFactory.shutdown();
   }
 }

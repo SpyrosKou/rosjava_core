@@ -18,6 +18,7 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.annotations.VisibleForTesting;
 
 
 
@@ -30,7 +31,6 @@ import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.exception.RosRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,6 @@ import java.lang.invoke.MethodHandles;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -61,9 +60,14 @@ public final class TcpClient {
 
   private Channel channel;
 
-  public TcpClient(final ChannelGroup channelGroup, final Executor executor) {
+  static TcpClient newSharedFactoryClient(final ChannelGroup channelGroup,
+      final ChannelFactory channelFactory) {
+    return new TcpClient(channelGroup, channelFactory);
+  }
+
+  private TcpClient(final ChannelGroup channelGroup, final ChannelFactory channelFactory) {
     this.channelGroup = channelGroup;
-    channelFactory = new NioClientSocketChannelFactory(executor, executor);
+    this.channelFactory = channelFactory;
     channelBufferFactory = new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN);
     bootstrap = new ClientBootstrap(channelFactory);
     bootstrap.setOption("bufferFactory", channelBufferFactory);
@@ -114,6 +118,11 @@ public final class TcpClient {
 
   public Channel getChannel() {
     return channel;
+  }
+
+  @VisibleForTesting
+  ChannelFactory getChannelFactory() {
+    return channelFactory;
   }
 
   public ChannelFuture write(final ChannelBuffer buffer) {

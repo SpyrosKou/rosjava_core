@@ -105,4 +105,18 @@ public class TcpRosServerTest {
     }
     tcpRosServer.shutdown();
   }
+
+  @Test
+  public void testCanRestartAfterShutdown() {
+    TcpRosServer tcpRosServer =
+        new TcpRosServer(BindAddress.newPublic(), publicAdvertiseAddressFactory.newDefault(), null, null,
+            executorService);
+    tcpRosServer.start();
+    tcpRosServer.shutdown();
+
+    tcpRosServer.start();
+    InetSocketAddress restartedAddress = tcpRosServer.getAddress();
+    assertTrue(restartedAddress.getPort() > 0);
+    tcpRosServer.shutdown();
+  }
 }

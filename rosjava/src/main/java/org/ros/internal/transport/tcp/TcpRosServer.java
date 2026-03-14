@@ -121,11 +121,11 @@ public final class TcpRosServer {
         if (this.incomingChannelGroup != null) {
             this.incomingChannelGroup.close().awaitUninterruptibly();
         }
-        // NOTE(damonkohler): We are purposely not calling
-        // channelFactory.releaseExternalResources() or
-        // bootstrap.releaseExternalResources() since only external resources are
-        // the ExecutorService and control of that must remain with the overall
-        // application.
+        if (this.channelFactory != null) {
+            this.channelFactory.shutdown();
+        }
+        this.channelFactory = null;
+        this.bootstrap = null;
         this.outgoingChannel = null;
         this.incomingChannelGroup = null;
     }
