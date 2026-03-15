@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,6 +40,7 @@ import org.ros.node.service.ServiceServer;
  *
  * @author damonkohler@google.com (Damon Kohler)
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author Spyros Koukas
  */
 final class TcpServerHandshakeHandler extends SimpleChannelHandler {
 
@@ -60,7 +62,7 @@ final class TcpServerHandshakeHandler extends SimpleChannelHandler {
         if (incomingHeader.hasField(ConnectionHeaderFields.SERVICE)) {
             handleServiceHandshake(e, pipeline, incomingHeader);
         } else {
-            handleSubscriberHandshake(ctx, e, pipeline, incomingHeader);
+            handleSubscriberHandshake(ctx, pipeline, incomingHeader);
         }
     }
 
@@ -83,10 +85,8 @@ final class TcpServerHandshakeHandler extends SimpleChannelHandler {
 
     private final void handleSubscriberHandshake(
             final ChannelHandlerContext channelHandlerContext
-            ,final MessageEvent messageEvent
             ,final ChannelPipeline pipeline
-            ,final ConnectionHeader incomingConnectionHeader)
-            throws InterruptedException {
+            ,final ConnectionHeader incomingConnectionHeader) {
         Preconditions.checkState(incomingConnectionHeader.hasField(ConnectionHeaderFields.TOPIC),
                 "Handshake header missing field: " + ConnectionHeaderFields.TOPIC);
         final GraphName topicName =
@@ -100,16 +100,21 @@ final class TcpServerHandshakeHandler extends SimpleChannelHandler {
             final boolean tcpNoDelay = "1".equals(incomingConnectionHeader.getField(ConnectionHeaderFields.TCP_NODELAY));
             channel.getConfig().setOption("tcpNoDelay", tcpNoDelay);
         }
-        final ChannelFuture future = channel.write(outgoingBuffer).await();
-        if (!future.isSuccess()) {
-            throw new RosRuntimeException(future.getCause());
-        }
         final String nodeName = incomingConnectionHeader.getField(ConnectionHeaderFields.CALLER_ID);
-        publisher.addSubscriber(new SubscriberIdentifier(NodeIdentifier.forName(nodeName),new TopicIdentifier(topicName)), channel);
+        final SubscriberIdentifier subscriberIdentifier =
+                new SubscriberIdentifier(NodeIdentifier.forName(nodeName), new TopicIdentifier(topicName));
+        channel.write(outgoingBuffer).addListener((ChannelFuture future) -> {
+            if (!future.isSuccess()) {
+                Channels.fireExceptionCaught(channelHandlerContext,
+                        new RosRuntimeException(future.getCause()));
+                return;
+            }
+            publisher.addSubscriber(subscriberIdentifier, channel);
 
-        // Once the handshake is complete, there will be nothing incoming on the
-        // channel. So, we replace the handshake handler with a handler which will
-        // drop everything.
-        pipeline.replace(this, "DiscardHandler", new SimpleChannelHandler());
+            // Once the handshake is complete, there will be nothing incoming on the
+            // channel. So, we replace the handshake handler with a handler which will
+            // drop everything.
+            pipeline.replace(TcpServerHandshakeHandler.this, "DiscardHandler", new SimpleChannelHandler());
+        });
     }
 }

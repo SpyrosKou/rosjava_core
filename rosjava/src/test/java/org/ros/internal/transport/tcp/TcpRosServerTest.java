@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +31,7 @@ import static junit.framework.Assert.*;
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 public class TcpRosServerTest {
   private final PublicAdvertiseAddressFactory publicAdvertiseAddressFactory = new PublicAdvertiseAddressFactory();
@@ -103,6 +105,20 @@ public class TcpRosServerTest {
     } catch (RuntimeException e) {
       // Starting the server twice must fail.
     }
+    tcpRosServer.shutdown();
+  }
+
+  @Test
+  public void testCanRestartAfterShutdown() {
+    TcpRosServer tcpRosServer =
+        new TcpRosServer(BindAddress.newPublic(), publicAdvertiseAddressFactory.newDefault(), null, null,
+            executorService);
+    tcpRosServer.start();
+    tcpRosServer.shutdown();
+
+    tcpRosServer.start();
+    InetSocketAddress restartedAddress = tcpRosServer.getAddress();
+    assertTrue(restartedAddress.getPort() > 0);
     tcpRosServer.shutdown();
   }
 }

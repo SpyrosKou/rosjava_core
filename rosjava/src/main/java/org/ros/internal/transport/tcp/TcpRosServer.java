@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -49,6 +50,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * clients have been told about each other by the master.
  *
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 public final class TcpRosServer {
 
@@ -98,7 +100,8 @@ public final class TcpRosServer {
                 topicParticipantManager, serviceManager));
 
         this.outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());
-        this.advertiseAddress.setPortSupplier(() -> ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort());
+        final int boundPort = ((InetSocketAddress) this.outgoingChannel.getLocalAddress()).getPort();
+        this.advertiseAddress.setPortSupplier(() -> boundPort);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Bound to: " + bindAddress + " Advertising: " + advertiseAddress);
         }
@@ -121,11 +124,11 @@ public final class TcpRosServer {
         if (this.incomingChannelGroup != null) {
             this.incomingChannelGroup.close().awaitUninterruptibly();
         }
-        // NOTE(damonkohler): We are purposely not calling
-        // channelFactory.releaseExternalResources() or
-        // bootstrap.releaseExternalResources() since only external resources are
-        // the ExecutorService and control of that must remain with the overall
-        // application.
+        if (this.channelFactory != null) {
+            this.channelFactory.shutdown();
+        }
+        this.channelFactory = null;
+        this.bootstrap = null;
         this.outgoingChannel = null;
         this.incomingChannelGroup = null;
     }
@@ -135,6 +138,7 @@ public final class TcpRosServer {
      * {@link TcpRosServer}
      */
     public InetSocketAddress getAddress() {
+        Preconditions.checkState(this.outgoingChannel != null, "TCP ROS server is not running.");
         return advertiseAddress.toInetSocketAddress();
     }
 
