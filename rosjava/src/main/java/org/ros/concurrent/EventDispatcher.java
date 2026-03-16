@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,32 +18,112 @@
 package org.ros.concurrent;
 
 
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  *
  * @param <T>
  *          the listener type
  */
-public final class EventDispatcher<T> extends CancellableLoop {
+public final class EventDispatcher<T> {
 
   private final T listener;
   private final CircularBlockingDeque<Consumer<T>> events;
+  private final ExecutorService executorService;
+  private final Object mutex = new Object();
 
-  public EventDispatcher(final T listener,final int queueCapacity) {
+  private boolean cancelled;
+  private boolean dispatching;
+  private Thread dispatchThread;
+
+  public EventDispatcher(final T listener, final int queueCapacity,
+      final ExecutorService executorService) {
     this.listener = listener;
     this.events = new CircularBlockingDeque<>(queueCapacity);
+    this.executorService = executorService;
   }
 
+  /**
+   * Submits a task to be processed by the dispatcher if the dispatcher is not cancelled.
+   * Tasks are executed asynchronously in the order they are submitted.
+   *
+   * @param signalConsumer a consumer that will process the event, which operates on the listener of type {@code T}
+   */
   public final void signal(final Consumer<T> signalConsumer) {
-    this.events.addLast(signalConsumer);
+    synchronized (mutex) {
+      if (this.cancelled) {
+        return;
+      }
+      this.events.addLast(signalConsumer);
+      if (this.dispatching) {
+        return;
+      }
+      this.dispatching = true;
+    }
+    this.executorService.execute(this::dispatch);
   }
 
-  @Override
-  public final void loop() throws InterruptedException {
-    final Consumer<T> consumer = this.events.takeFirst();
-    consumer.accept(this.listener);
+  /**
+   * Executes and processes tasks submitted to the dispatcher in a sequential and thread-safe manner.
+   *
+   * This method is internally invoked to process tasks that were submitted via the signal method.
+   * It runs in a loop, retrieving and executing each task in the order they were submitted.
+   * If the dispatcher is marked as cancelled, the method terminates early, ensuring no additional tasks are executed.
+   *
+   * The method employs synchronization to manage access to shared resources such as the task queue,
+   * the dispatching state, and the current dispatch thread reference. For every iteration of the loop,
+   * it retrieves the next task from the queue (if available) and invokes it using the listener as the argument.
+   *
+   * Upon completion or cancellation, this method ensures proper cleanup by resetting
+   * the dispatch thread reference, allowing subsequent operations to proceed safely.
+   *
+   * Thread interruptions or unexpected errors will not prevent the final cleanup steps from executing.
+   */
+  private final void dispatch() {
+    synchronized (this.mutex) {
+      this.dispatchThread = Thread.currentThread();
+    }
+    try {
+      while (true) {
+        final Consumer<T> consumer;
+        synchronized (this.mutex) {
+          if (this.cancelled) {
+            this.dispatching = false;
+            return;
+          }
+          consumer = this.events.pollFirst();
+          if (consumer == null) {
+            this.dispatching = false;
+            return;
+          }
+        }
+        consumer.accept(this.listener);
+      }
+    } finally {
+      synchronized (this.mutex) {
+        this.dispatchThread = null;
+      }
+    }
+  }
+
+  /**
+   * Cancels the event dispatching process and ensures proper cleanup of resources.
+   *
+   * This method marks the dispatcher as*/
+  public final void cancel() {
+    final Thread activeDispatchThread;
+    synchronized (mutex) {
+      this.cancelled = true;
+      this.dispatching = false;
+      this.events.clear();
+      activeDispatchThread = this.dispatchThread;
+    }
+    if (activeDispatchThread != null) {
+      activeDispatchThread.interrupt();
+    }
   }
 
   public final T getListener()
