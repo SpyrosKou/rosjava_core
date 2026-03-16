@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,6 +30,7 @@ import java.util.NoSuchElementException;
  * there are no elements available.
  *
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 public final class CircularBlockingDeque<T> implements Iterable<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -70,7 +72,7 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      * @param entry the entry to add
      * @return {@code true}
      */
-    public boolean addLast(T entry) {
+    public final boolean addLast(T entry) {
         synchronized (this.mutex) {
             this.queue[(this.start + this.length) % this.limit] = entry;
             if (this.length == this.limit) {
@@ -95,7 +97,7 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      * @param entry the entry to add
      * @return {@code true}
      */
-    public boolean addFirst(T entry) {
+    public final boolean addFirst(T entry) {
         synchronized (this.mutex) {
             final int previousStart = this.start;
             if (this.start - 1 < 0) {
@@ -124,7 +126,7 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      * @return the head of the queue
      * @throws InterruptedException
      */
-    public T takeFirst() throws InterruptedException {
+    public final T takeFirst() throws InterruptedException {
 
         synchronized (this.mutex) {
             while (true) {
@@ -147,10 +149,29 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      *
      * @return the head of this queue, or {@code null} if this queue is empty
      */
-    public T peekFirst() {
+    public final T peekFirst() {
         synchronized (this.mutex) {
             if (this.length > 0) {
                 return this.queue[this.start];
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Retrieves and removes the head of this queue, returning {@code null} if this
+     * queue is empty.
+     *
+     * @return the head of this queue, or {@code null} if this queue is empty
+     */
+    public final T pollFirst() {
+        synchronized (this.mutex) {
+            if (this.length > 0) {
+                final T entry = this.queue[this.start];
+                this.start = (this.start + 1) % this.limit;
+                this.length--;
+                return entry;
             } else {
                 return null;
             }
@@ -164,7 +185,7 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      * @return the tail of the queue
      * @throws InterruptedException
      */
-    public T takeLast() throws InterruptedException {
+    public final T takeLast() throws InterruptedException {
 
         synchronized (this.mutex) {
             while (true) {
@@ -186,7 +207,7 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      *
      * @return the tail of this queue, or {@code null} if this queue is empty
      */
-    public T peekLast() {
+    public final T peekLast() {
         synchronized (mutex) {
             if (length > 0) {
                 return queue[(start + length - 1) % limit];
@@ -196,8 +217,15 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
         }
     }
 
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return this.length == 0;
+    }
+
+    public final void clear() {
+        synchronized (this.mutex) {
+            this.start = 0;
+            this.length = 0;
+        }
     }
 
     /**
@@ -209,7 +237,7 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      * @see java.lang.Iterable#iterator()
      */
     @Override
-    public Iterator<T> iterator() {
+    public final Iterator<T> iterator() {
         return new Iterator<T>() {
             int offset = 0;
 

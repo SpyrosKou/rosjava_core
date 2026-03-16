@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,6 +32,7 @@ import java.util.function.Consumer;
  * A group of listeners.
  *
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 public final class ListenerGroup<T> {
 
@@ -52,9 +54,8 @@ public final class ListenerGroup<T> {
      * listener
      */
     public final EventDispatcher<T> add(final T listener, final int queueCapacity) {
-        final EventDispatcher<T> eventDispatcher = new EventDispatcher<T>(listener, queueCapacity);
+        final EventDispatcher<T> eventDispatcher = new EventDispatcher<T>(listener, queueCapacity, this.executorService);
         this.eventDispatchers.add(eventDispatcher);
-        this.executorService.execute(eventDispatcher);
         return eventDispatcher;
     }
 
