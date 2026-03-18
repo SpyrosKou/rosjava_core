@@ -5,20 +5,42 @@ Changelog
 
 latest
 -----------------
-* Gradle update to 7.5
-* Import 'org.apache.xmlrpc:xmlrpc-client:3.1.3', 'org.apache.xmlrpc:xmlrpc-common:3.1.3', 'org.apache.xmlrpc:xmlrpc-server:3.1.3' instead of compiling a modified copy of the sources.
-* Changes in xmlrpc, needed for rosjava,  have been implemented with inheritance
-* Added methods that allow to code to wait for roscore to shutdown
-* Most classes are now final, excluding unwanted inheritance
-* Collection<T> has been replaced with List<T> or Set<T> in return parameters.
-* Some internal classes have been hidden (public access level has been restricted to package access level)
-* Less object instantiations, replace instantiation of FunctionalInterface implementing classes with method references.
-* Removed functional interface ResultFactory<T>, replaced with Function<Object,T>
-* Updated dependencies
-    - Use Junit 5
-    - Use Mockito 5
-    - Pin specific dependencies, replacing ranges (for ros messages)
-* Remove eclipse settings from source
+
+
+0.4.1.1 (2026-03-18)
+--------------------
+* Build and dependencies:
+    - Gradle updated through 8.10.2
+    - Use Java 21
+    - Use JUnit 5 and Mockito 5
+    - Update pinned dependencies, including ROS message dependencies
+    - Use `org.apache.xmlrpc` dependencies instead of compiling a modified source copy
+    - Publish `rosjava_geometry` and `rosjava_helpers`
+* API and internal structure:
+    - Added methods that allow code to wait for roscore shutdown
+    - Most classes are now final, excluding unwanted inheritance
+    - `Collection<T>` return types have been replaced with `List<T>` or `Set<T>` where appropriate
+    - Reduced visibility of internal classes and members
+    - Replaced `ResultFactory<T>` with `Function<Object, T>`
+    - Reduced allocations by replacing functional-interface implementation objects with method references where practical
+    - Added `TcpRosServer` advertise-state handling
+    - Updated dispatcher logic
+* Transport and queue fixes:
+    - Reused a shared TCP client Netty factory across connections
+    - Fixed Netty thread/timer shutdown leakage regression
+    - Made TCP subscriber handshake completion asynchronous
+    - Cleared removed `CircularBlockingDeque` slots to avoid stale reference retention
+    - Fixed overwritten-entry debug logging in `CircularBlockingDeque`
+    - Increased the default `OutgoingMessageQueue` capacity to 32
+    - Reduced shutdown log noise for expected `ClosedChannelException` cases
+    - Stabilized the message queue server-close integration test
+* Tests:
+    - Added regression coverage for Netty lifecycle usage
+    - Added regression tests for deque overwrite/clearing behavior
+    - Added regression tests for transport shutdown ownership
+    - Added regression coverage for asynchronous TCP subscriber handshake completion
+* Tooling and cleanup:
+    - Removed Eclipse settings from source
 * Contributors: Spyros Koukas
 
 
