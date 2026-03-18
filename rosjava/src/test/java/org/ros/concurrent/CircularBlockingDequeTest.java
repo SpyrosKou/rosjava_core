@@ -19,6 +19,7 @@ package org.ros.concurrent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
@@ -27,9 +28,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 public class CircularBlockingDequeTest {
 
@@ -73,6 +76,19 @@ public class CircularBlockingDequeTest {
     deque.addLast(expectedString);
     deque.addLast("foo");
     assertEquals(expectedString, deque.takeFirst());
+  }
+
+  @Test
+  public void testOverwriteRetainsNewestEntriesInOrder() throws InterruptedException {
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(2);
+
+    deque.addLast("first");
+    deque.addLast("second");
+    deque.addLast("third");
+
+    assertEquals("second", deque.takeFirst());
+    assertEquals("third", deque.takeFirst());
+    assertTrue(deque.isEmpty());
   }
 
   @Test
@@ -121,5 +137,46 @@ public class CircularBlockingDequeTest {
     Thread.sleep(5);
     deque.addLast(expectedString);
     assertTrue(latch.await(1, TimeUnit.SECONDS));
+  }
+
+  @Test
+  public void testTakeFirstClearsRemovedSlot() throws Exception {
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(2);
+
+    deque.addLast("first");
+    deque.addLast("second");
+
+    assertEquals("first", deque.takeFirst());
+    assertArrayEquals(new Object[] {null, "second"}, backingArray(deque));
+  }
+
+  @Test
+  public void testTakeLastClearsRemovedSlot() throws Exception {
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(2);
+
+    deque.addLast("first");
+    deque.addLast("second");
+
+    assertEquals("second", deque.takeLast());
+    assertArrayEquals(new Object[] {"first", null}, backingArray(deque));
+  }
+
+  @Test
+  public void testClearReleasesRetainedReferences() throws Exception {
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(3);
+
+    deque.addLast("first");
+    deque.addLast("second");
+    deque.addLast("third");
+    deque.clear();
+
+    assertArrayEquals(new Object[] {null, null, null}, backingArray(deque));
+    assertTrue(deque.isEmpty());
+  }
+
+  private static Object[] backingArray(CircularBlockingDeque<?> deque) throws Exception {
+    Field queueField = CircularBlockingDeque.class.getDeclaredField("queue");
+    queueField.setAccessible(true);
+    return (Object[]) queueField.get(deque);
   }
 }

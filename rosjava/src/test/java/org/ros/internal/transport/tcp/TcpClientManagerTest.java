@@ -31,9 +31,12 @@ import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
@@ -86,5 +89,18 @@ class TcpClientManagerTest {
     TcpClient secondClient = tcpClientManager.connect("second", serverChannel.getLocalAddress());
 
     assertSame(firstClient.getChannelFactory(), secondClient.getChannelFactory());
+  }
+
+  @Test
+  void shutdownClosesChannelsWithoutShuttingDownProvidedExecutor()
+      throws ExecutionException, InterruptedException {
+    TcpClient client = tcpClientManager.connect("first", serverChannel.getLocalAddress());
+
+    tcpClientManager.shutdown();
+    tcpClientManager = null;
+
+    assertFalse(client.getChannel().isOpen());
+    assertEquals("still-running", executorService.submit(() -> "still-running").get());
+    assertFalse(executorService.isShutdown());
   }
 }

@@ -40,13 +40,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 public final class OutgoingMessageQueue<T extends Message> {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private static final int DEQUE_CAPACITY = 16;
+    private static final int DEQUE_CAPACITY = 32;
     private final MessageSerializer<T> serializer;
     private final CircularBlockingDeque<T> deque = new CircularBlockingDeque<T>(DEQUE_CAPACITY);
     private final ChannelGroup channelGroup = new DefaultChannelGroup();

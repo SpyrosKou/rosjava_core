@@ -23,10 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.ros.address.*;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static junit.framework.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
@@ -120,5 +122,18 @@ public class TcpRosServerTest {
     InetSocketAddress restartedAddress = tcpRosServer.getAddress();
     assertTrue(restartedAddress.getPort() > 0);
     tcpRosServer.shutdown();
+  }
+
+  @Test
+  public void testShutdownDoesNotShutdownProvidedExecutor() throws ExecutionException, InterruptedException {
+    TcpRosServer tcpRosServer =
+        new TcpRosServer(BindAddress.newPublic(), publicAdvertiseAddressFactory.newDefault(), null, null,
+            executorService);
+
+    tcpRosServer.start();
+    tcpRosServer.shutdown();
+
+    assertEquals("still-running", executorService.submit(() -> "still-running").get());
+    assertFalse(executorService.isShutdown());
   }
 }

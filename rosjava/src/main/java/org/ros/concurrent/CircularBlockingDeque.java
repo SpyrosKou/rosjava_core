@@ -74,12 +74,13 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
      */
     public final boolean addLast(T entry) {
         synchronized (this.mutex) {
-            this.queue[(this.start + this.length) % this.limit] = entry;
+            final int entryIndex = (this.start + this.length) % this.limit;
+            final T deletedEntry = this.length == this.limit ? this.queue[entryIndex] : null;
+            this.queue[entryIndex] = entry;
             if (this.length == this.limit) {
                 this.start = (this.start + 1) % this.limit;
 
                 if (LOGGER.isDebugEnabled()) {
-                    final T deletedEntry = this.queue[start];
                     LOGGER.debug(CircularBlockingDeque.class.getSimpleName() + " was full, an entry was overridden: {" + deletedEntry + "}");
                 }
             } else {
@@ -131,7 +132,8 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
         synchronized (this.mutex) {
             while (true) {
                 if (this.length > 0) {
-                    final T entry = this.queue[start];
+                    final T entry = this.queue[this.start];
+                    this.queue[this.start] = null;
                     this.start = (this.start + 1) % this.limit;
                     this.length--;
                     return entry;
@@ -169,6 +171,7 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
         synchronized (this.mutex) {
             if (this.length > 0) {
                 final T entry = this.queue[this.start];
+                this.queue[this.start] = null;
                 this.start = (this.start + 1) % this.limit;
                 this.length--;
                 return entry;
@@ -190,7 +193,9 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
         synchronized (this.mutex) {
             while (true) {
                 if (this.length > 0) {
-                    final T entry = this.queue[(this.start + this.length - 1) % this.limit];
+                    final int entryIndex = (this.start + this.length - 1) % this.limit;
+                    final T entry = this.queue[entryIndex];
+                    this.queue[entryIndex] = null;
                     this.length--;
                     return entry;
                 } else {
@@ -223,6 +228,9 @@ public final class CircularBlockingDeque<T> implements Iterable<T> {
 
     public final void clear() {
         synchronized (this.mutex) {
+            for (int i = 0; i < this.limit; i++) {
+                this.queue[i] = null;
+            }
             this.start = 0;
             this.length = 0;
         }
