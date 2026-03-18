@@ -69,6 +69,7 @@ public class MessageQueueIntegrationTest {
   private TcpClientManager firstTcpClientManager;
   private TcpClientManager secondTcpClientManager;
   private OutgoingMessageQueue<Message> outgoingMessageQueue;
+  private CancellableLoop repeatingPublisher;
   private IncomingMessageQueue<std_msgs.String> firstIncomingMessageQueue;
   private IncomingMessageQueue<std_msgs.String> secondIncomingMessageQueue;
   private std_msgs.String expectedMessage;
@@ -126,6 +127,10 @@ public class MessageQueueIntegrationTest {
 
   @AfterEach
   public void tearDown() {
+    if (this.repeatingPublisher != null) {
+      this.repeatingPublisher.cancel();
+      this.repeatingPublisher = null;
+    }
     if(this.outgoingMessageQueue!=null){
       try {
         this.outgoingMessageQueue.shutdown(SHUTDOWN_TIMEOUT_MS, TimeUnit.MILLISECONDS);
@@ -139,13 +144,21 @@ public class MessageQueueIntegrationTest {
   }
 
   private void startRepeatingPublisher() {
-    this.executorService.execute(new CancellableLoop() {
+    this.repeatingPublisher = new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
         outgoingMessageQueue.add(expectedMessage);
         Thread.sleep(100);
       }
-    });
+    };
+    this.executorService.execute(this.repeatingPublisher);
+  }
+
+  private void stopRepeatingPublisher() {
+    if (this.repeatingPublisher != null) {
+      this.repeatingPublisher.cancel();
+      this.repeatingPublisher = null;
+    }
   }
 
   private final void removeHandShakeReceivedAddServerHandler(final ChannelPipeline channelPipeline){
@@ -237,9 +250,9 @@ public class MessageQueueIntegrationTest {
 
   @Test
   public void testSendAfterServerChannelClosed() throws InterruptedException {
-    startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
     connect(firstTcpClientManager, serverChannel);
+    stopRepeatingPublisher();
     assertTrue(serverChannel.close().await(1, TimeUnit.SECONDS));
     outgoingMessageQueue.add(expectedMessage);
   }
