@@ -36,12 +36,12 @@ import java.util.function.Consumer;
  */
 public final class ListenerGroup<T> {
 
-    private final static int DEFAULT_QUEUE_CAPACITY = 128;
+    private static final int DEFAULT_QUEUE_CAPACITY = 128;
 
     private final ExecutorService executorService;
-    private final List<EventDispatcher<T>> eventDispatchers = new CopyOnWriteArrayList();
+    private final List<EventDispatcher<T>> eventDispatchers = new CopyOnWriteArrayList<>();
 
-    public ListenerGroup(ExecutorService executorService) {
+    public ListenerGroup(final ExecutorService executorService) {
         this.executorService = executorService;
     }
 
@@ -67,7 +67,7 @@ public final class ListenerGroup<T> {
      * @return the {@link EventDispatcher} responsible for calling the specified
      * listener
      */
-    public final EventDispatcher<T> add(T listener) {
+    public final EventDispatcher<T> add(final T listener) {
         return add(listener, DEFAULT_QUEUE_CAPACITY);
     }
 
@@ -79,7 +79,7 @@ public final class ListenerGroup<T> {
      * @return a {@link Collection} of {@link EventDispatcher}s responsible for
      * calling the specified listeners
      */
-    public final void addAll(Collection<T> listeners, int limit) {
+    public final void addAll(final Collection<T> listeners, final int limit) {
         for (final T listener : listeners) {
             this.add(listener, limit);
         }
@@ -94,7 +94,7 @@ public final class ListenerGroup<T> {
      * @return a {@link Collection} of {@link EventDispatcher}s responsible for
      * calling the specified listeners
      */
-    public final void addAll(Collection<T> listeners) {
+    public final void addAll(final Collection<T> listeners) {
         this.addAll(listeners, DEFAULT_QUEUE_CAPACITY);
     }
 
@@ -115,14 +115,14 @@ public final class ListenerGroup<T> {
                 result = true;
             }
         }
-        return false;
+        return result;
     }
 
     /**
      * @return the number of listeners in the group
      */
     public final int size() {
-        return eventDispatchers.size();
+        return this.eventDispatchers.size();
     }
 
     /**
@@ -151,9 +151,9 @@ public final class ListenerGroup<T> {
      * limit, {@code false} otherwise
      * @throws InterruptedException
      */
-    public final boolean signal(final Consumer<T> signalConsumer, long timeout, TimeUnit unit)
+    public final boolean signal(final Consumer<T> signalConsumer, final long timeout, final TimeUnit unit)
             throws InterruptedException {
-        final List<EventDispatcher<T>> copy = Lists.newArrayList(eventDispatchers);
+        final List<EventDispatcher<T>> copy = Lists.newArrayList(this.eventDispatchers);
         final CountDownLatch latch = new CountDownLatch(copy.size());
         for (final EventDispatcher<T> eventDispatcher : copy) {
             eventDispatcher.signal(listener -> {
