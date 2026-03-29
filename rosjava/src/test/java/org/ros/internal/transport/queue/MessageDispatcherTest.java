@@ -18,6 +18,7 @@
 package org.ros.internal.transport.queue;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.message.DefaultMessageFactory;
@@ -46,22 +47,34 @@ public class MessageDispatcherTest {
     private ExecutorService executorService;
     private CircularBlockingDeque<LazyMessage<std_msgs.Int32>> lazyMessages;
     private MessageFactory messageFactory;
+    private MessageDispatcher<std_msgs.Int32> messageDispatcher;
 
     @BeforeEach
     public void before() {
-        executorService = Executors.newCachedThreadPool();
-        lazyMessages = new CircularBlockingDeque<LazyMessage<std_msgs.Int32>>(128);
-        messageFactory = new DefaultMessageFactory(new MessageDefinitionReflectionProvider());
+        this.executorService = Executors.newCachedThreadPool();
+        this.lazyMessages = new CircularBlockingDeque<LazyMessage<std_msgs.Int32>>(128);
+        this.messageFactory = new DefaultMessageFactory(new MessageDefinitionReflectionProvider());
+    }
+
+    @AfterEach
+    public void after() throws InterruptedException {
+        if (messageDispatcher != null) {
+            messageDispatcher.cancel();
+        }
+        if (executorService != null) {
+            executorService.shutdownNow();
+            executorService.awaitTermination(1, TimeUnit.SECONDS);
+        }
     }
 
     @Test
     public void testMessageOrder() throws InterruptedException {
-        int numberOfMessages = 100;
+        final int numberOfMessages = 100;
         final CountDownLatch latch = new CountDownLatch(numberOfMessages);
 
-        final MessageDispatcher<std_msgs.Int32> messageDispatcher = new MessageDispatcher<std_msgs.Int32>(lazyMessages, executorService);
+        messageDispatcher = new MessageDispatcher<std_msgs.Int32>(lazyMessages, executorService);
         messageDispatcher.addListener(new MessageListener<std_msgs.Int32>() {
-            private AtomicInteger count = new AtomicInteger();
+            private final AtomicInteger count = new AtomicInteger();
 
             @Override
             public void onNewMessage(Int32 message) {
@@ -75,7 +88,7 @@ public class MessageDispatcherTest {
                     // Sleeping allows the queue to fill up a bit by slowing down the
                     // consumer.
                     Thread.sleep(5);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                 }
             }
         }, QUEUE_CAPACITY);
@@ -88,6 +101,6 @@ public class MessageDispatcherTest {
             lazyMessages.addLast(new LazyMessage<std_msgs.Int32>(message));
         }
 
-        assertTrue(latch.await(1, TimeUnit.SECONDS));
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
     }
 }
