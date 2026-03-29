@@ -6,6 +6,11 @@ Changelog
 latest
 -----------------
 
+* Fixes:
+    - Fixed service response ordering (`SpyrosKou/rosjava_core#18 <https://github.com/SpyrosKou/rosjava_core/issues/18>`, `rosjava/rosjava_core#261 <https://github.com/rosjava/rosjava_core/issues/261>`)
+* Performance and concurrency:
+    - Reworked `ListenerGroup` dispatch to avoid idle thread-per-listener execution while preserving per-listener ordering and non-concurrent callback execution
+
 
 0.4.1.1 (2026-03-18)
 --------------------

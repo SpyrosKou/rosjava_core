@@ -23,9 +23,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -49,8 +51,8 @@ public class ListenerGroupTest {
 
   @BeforeEach
   public void before() {
-    executorService = Executors.newCachedThreadPool();
-    listenerGroup = new ListenerGroup<Runnable>(executorService);
+    this.executorService = Executors.newCachedThreadPool();
+    this.listenerGroup = new ListenerGroup<Runnable>(this.executorService);
   }
 
   @AfterEach
@@ -66,7 +68,7 @@ public class ListenerGroupTest {
 
   @Test
   public void testOneListenerMultipleSignals() throws InterruptedException {
-    int numberOfSignals = 10;
+    final int numberOfSignals = 10;
     final CountDownLatch latch = new CountDownLatch(numberOfSignals);
     listenerGroup.add(new Runnable() {
       @Override
@@ -82,7 +84,7 @@ public class ListenerGroupTest {
 
   @Test
   public void testMultipleListenersMultipleSignals() throws InterruptedException {
-    int numberOfSignals = 10;
+    final int numberOfSignals = 10;
     final CountDownLatch latch1 = new CountDownLatch(numberOfSignals);
     final CountDownLatch latch2 = new CountDownLatch(numberOfSignals);
     listenerGroup.add(new Runnable() {
@@ -104,19 +106,33 @@ public class ListenerGroupTest {
     assertTrue(latch2.await(1, TimeUnit.SECONDS));
   }
 
+  @Test
+  public void testRemoveReturnsTrueForRegisteredListener() {
+    final Runnable listener = new Runnable() {
+      @Override
+      public void run() {
+      }
+    };
+
+    listenerGroup.add(listener);
+
+    assertTrue(listenerGroup.remove(listener));
+    assertEquals(0, listenerGroup.size());
+  }
+
   private interface CountingListener {
     void run(int count);
   }
 
   @Test
   public void testSignalOrder() throws InterruptedException {
-    int numberOfSignals = 100;
+    final int numberOfSignals = 100;
     final CountDownLatch latch = new CountDownLatch(numberOfSignals);
 
-    ListenerGroup<CountingListener> listenerGroup =
+    final ListenerGroup<CountingListener> listenerGroup =
         new ListenerGroup<CountingListener>(executorService);
     listenerGroup.add(new CountingListener() {
-      private AtomicInteger count = new AtomicInteger();
+      private final AtomicInteger count = new AtomicInteger();
 
       @Override
       public void run(int count) {
@@ -127,7 +143,7 @@ public class ListenerGroupTest {
           // Sleeping allows the queue to fill up a bit by slowing down the
           // consumer.
           Thread.sleep(5);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
       }
     });
@@ -146,7 +162,7 @@ public class ListenerGroupTest {
     final CountDownLatch latch = new CountDownLatch(numberOfSignals);
     final List<Integer> actual = new ArrayList<Integer>();
 
-    ListenerGroup<CountingListener> orderedListenerGroup =
+    final ListenerGroup<CountingListener> orderedListenerGroup =
         new ListenerGroup<CountingListener>(executorService);
     orderedListenerGroup.add(new CountingListener() {
       @Override
@@ -180,7 +196,7 @@ public class ListenerGroupTest {
     final AtomicInteger maxConcurrentCallbacks = new AtomicInteger();
     final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
 
-    ListenerGroup<Runnable> runnableListenerGroup = new ListenerGroup<Runnable>(executorService);
+    final ListenerGroup<Runnable> runnableListenerGroup = new ListenerGroup<Runnable>(executorService);
     runnableListenerGroup.add(new Runnable() {
       @Override
       public void run() {
@@ -191,7 +207,7 @@ public class ListenerGroupTest {
             failure.compareAndSet(null, new AssertionError("Listener callback overlapped."));
           }
           Thread.sleep(10);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           Thread.currentThread().interrupt();
           failure.compareAndSet(null, e);
         } finally {
@@ -223,7 +239,7 @@ public class ListenerGroupTest {
         entered.countDown();
         try {
           release.await();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           Thread.currentThread().interrupt();
         }
       }
@@ -234,7 +250,7 @@ public class ListenerGroupTest {
         entered.countDown();
         try {
           release.await();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           Thread.currentThread().interrupt();
         }
       }
@@ -246,7 +262,7 @@ public class ListenerGroupTest {
       public void run() {
         try {
           completed.set(runnableListenerGroup.signal(listener -> listener.run(), 1, TimeUnit.SECONDS));
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           Thread.currentThread().interrupt();
           completed.set(Boolean.FALSE);
         }
@@ -357,7 +373,7 @@ public class ListenerGroupTest {
               firstCallbackEntered.countDown();
               try {
                 releaseFirstCallback.await();
-              } catch (InterruptedException e) {
+              } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
               } finally {
                 firstCallbackFinished.countDown();
@@ -395,7 +411,7 @@ public class ListenerGroupTest {
         slowEntered.countDown();
         try {
           releaseSlow.await();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
           Thread.currentThread().interrupt();
         }
       }
@@ -441,7 +457,72 @@ public class ListenerGroupTest {
     }
   }
 
-  private static boolean awaitThreadCount(String threadNamePrefix, int expectedCount, long timeoutMillis)
+  @Test
+  public void testRejectedDispatchDoesNotWedgeFutureSignals() throws InterruptedException {
+    final ExecutorService backingExecutor = Executors.newSingleThreadExecutor();
+    final RejectOnceExecutorService rejectOnceExecutor = new RejectOnceExecutorService(backingExecutor);
+    final ListenerGroup<Runnable> rejectingListenerGroup = new ListenerGroup<Runnable>(rejectOnceExecutor);
+    final CountDownLatch latch = new CountDownLatch(2);
+
+    try {
+      rejectingListenerGroup.add(new Runnable() {
+        @Override
+        public void run() {
+          latch.countDown();
+        }
+      });
+
+      boolean rejected = false;
+      try {
+        rejectingListenerGroup.signal(listener -> listener.run());
+      } catch (final RejectedExecutionException expected) {
+        rejected = true;
+      }
+
+      assertTrue(rejected);
+      rejectingListenerGroup.signal(listener -> listener.run());
+      assertTrue(latch.await(1, TimeUnit.SECONDS));
+    } finally {
+      rejectingListenerGroup.shutdown();
+      rejectOnceExecutor.shutdownNow();
+      rejectOnceExecutor.awaitTermination(1, TimeUnit.SECONDS);
+    }
+  }
+
+  @Test
+  public void testListenerExceptionDoesNotWedgeFutureSignals() {
+    final DirectExecutorService directExecutorService = new DirectExecutorService();
+    final ListenerGroup<Runnable> directListenerGroup = new ListenerGroup<Runnable>(directExecutorService);
+    final AtomicInteger invocations = new AtomicInteger();
+
+    try {
+      directListenerGroup.add(new Runnable() {
+        @Override
+        public void run() {
+          if (invocations.getAndIncrement() == 0) {
+            throw new IllegalStateException("First callback failure.");
+          }
+        }
+      });
+
+      boolean firstSignalFailed = false;
+      try {
+        directListenerGroup.signal(listener -> listener.run());
+      } catch (final IllegalStateException expected) {
+        firstSignalFailed = true;
+      }
+
+      assertTrue(firstSignalFailed);
+      directListenerGroup.signal(listener -> listener.run());
+      assertEquals(2, invocations.get());
+    } finally {
+      directListenerGroup.shutdown();
+      directExecutorService.shutdownNow();
+    }
+  }
+
+  private static boolean awaitThreadCount(final String threadNamePrefix, final int expectedCount,
+      final long timeoutMillis)
       throws InterruptedException {
     final long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
     while (System.nanoTime() < deadline) {
@@ -453,7 +534,7 @@ public class ListenerGroupTest {
     return countAliveThreads(threadNamePrefix) == expectedCount;
   }
 
-  private static int countAliveThreads(String threadNamePrefix) {
+  private static int countAliveThreads(final String threadNamePrefix) {
     int count = 0;
     for (Thread thread : Thread.getAllStackTraces().keySet()) {
       if (thread.isAlive() && thread.getName().startsWith(threadNamePrefix)) {
@@ -467,17 +548,97 @@ public class ListenerGroupTest {
     private final String threadNamePrefix;
     private final AtomicInteger threadCounter = new AtomicInteger();
 
-    private PrefixThreadFactory(String threadNamePrefix) {
+    private PrefixThreadFactory(final String threadNamePrefix) {
       this.threadNamePrefix = threadNamePrefix;
     }
 
     @Override
-    public Thread newThread(Runnable runnable) {
+    public Thread newThread(final Runnable runnable) {
       return new Thread(runnable, threadNamePrefix + "-" + threadCounter.incrementAndGet());
     }
   }
 
-  private static ExecutorService newTransientExecutor(String threadNamePrefix) {
+  private static final class RejectOnceExecutorService extends AbstractExecutorService {
+    private final ExecutorService delegate;
+    private final AtomicInteger executions = new AtomicInteger();
+
+    private RejectOnceExecutorService(final ExecutorService delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void shutdown() {
+      delegate.shutdown();
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+      return delegate.shutdownNow();
+    }
+
+    @Override
+    public boolean isShutdown() {
+      return delegate.isShutdown();
+    }
+
+    @Override
+    public boolean isTerminated() {
+      return delegate.isTerminated();
+    }
+
+    @Override
+    public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
+      return delegate.awaitTermination(timeout, unit);
+    }
+
+    @Override
+    public void execute(final Runnable command) {
+      if (executions.getAndIncrement() == 0) {
+        throw new RejectedExecutionException("Simulated rejection.");
+      }
+      delegate.execute(command);
+    }
+  }
+
+  private static final class DirectExecutorService extends AbstractExecutorService {
+    private volatile boolean shutdown;
+
+    @Override
+    public void shutdown() {
+      shutdown = true;
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+      shutdown = true;
+      return new ArrayList<Runnable>();
+    }
+
+    @Override
+    public boolean isShutdown() {
+      return shutdown;
+    }
+
+    @Override
+    public boolean isTerminated() {
+      return shutdown;
+    }
+
+    @Override
+    public boolean awaitTermination(final long timeout, final TimeUnit unit) {
+      return shutdown;
+    }
+
+    @Override
+    public void execute(final Runnable command) {
+      if (shutdown) {
+        throw new RejectedExecutionException("Executor already shut down.");
+      }
+      command.run();
+    }
+  }
+
+  private static ExecutorService newTransientExecutor(final String threadNamePrefix) {
     final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(0, 16,
         100, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(),
         new PrefixThreadFactory(threadNamePrefix));

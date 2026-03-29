@@ -19,6 +19,7 @@ package org.ros.concurrent;
 
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -46,6 +47,25 @@ public final class EventDispatcher<T> {
     this.executorService = executorService;
   }
 
+  private boolean startDispatchIfNeeded() {
+    if (this.cancelled || this.dispatching || this.events.peekFirst() == null) {
+      return false;
+    }
+    this.dispatching = true;
+    return true;
+  }
+
+  private void executeDispatch() {
+    try {
+      this.executorService.execute(this::dispatch);
+    } catch (final RejectedExecutionException e) {
+      synchronized (mutex) {
+        this.dispatching = false;
+      }
+      throw e;
+    }
+  }
+
   /**
    * Submits a task to be processed by the dispatcher if the dispatcher is not cancelled.
    * Tasks are executed asynchronously in the order they are submitted.
@@ -53,17 +73,17 @@ public final class EventDispatcher<T> {
    * @param signalConsumer a consumer that will process the event, which operates on the listener of type {@code T}
    */
   public final void signal(final Consumer<T> signalConsumer) {
+    final boolean shouldDispatch;
     synchronized (mutex) {
       if (this.cancelled) {
         return;
       }
       this.events.addLast(signalConsumer);
-      if (this.dispatching) {
-        return;
-      }
-      this.dispatching = true;
+      shouldDispatch = this.startDispatchIfNeeded();
     }
-    this.executorService.execute(this::dispatch);
+    if (shouldDispatch) {
+      this.executeDispatch();
+    }
   }
 
   /**
@@ -83,8 +103,11 @@ public final class EventDispatcher<T> {
    * Thread interruptions or unexpected errors will not prevent the final cleanup steps from executing.
    */
   private final void dispatch() {
+    final Thread currentThread = Thread.currentThread();
+    Throwable failure = null;
+    boolean shouldDispatch = false;
     synchronized (this.mutex) {
-      this.dispatchThread = Thread.currentThread();
+      this.dispatchThread = currentThread;
     }
     try {
       while (true) {
@@ -100,11 +123,36 @@ public final class EventDispatcher<T> {
             return;
           }
         }
-        consumer.accept(this.listener);
+        try {
+          consumer.accept(this.listener);
+        } catch (final Throwable throwable) {
+          failure = throwable;
+          synchronized (this.mutex) {
+            this.dispatching = false;
+            shouldDispatch = this.startDispatchIfNeeded();
+          }
+          return;
+        }
       }
     } finally {
       synchronized (this.mutex) {
-        this.dispatchThread = null;
+        if (this.dispatchThread == currentThread) {
+          this.dispatchThread = null;
+        }
+      }
+      if (shouldDispatch) {
+        try {
+          this.executeDispatch();
+        } catch (final Throwable scheduleFailure) {
+          if (failure != null) {
+            failure.addSuppressed(scheduleFailure);
+          } else {
+            throw scheduleFailure;
+          }
+        }
+      }
+      if (failure != null) {
+        EventDispatcher.<RuntimeException>throwUnchecked(failure);
       }
     }
   }
@@ -112,7 +160,9 @@ public final class EventDispatcher<T> {
   /**
    * Cancels the event dispatching process and ensures proper cleanup of resources.
    *
-   * This method marks the dispatcher as*/
+   * This method marks the dispatcher as cancelled, clears queued work, and
+   * interrupts the active dispatch thread, if one is running.
+   */
   public final void cancel() {
     final Thread activeDispatchThread;
     synchronized (mutex) {
@@ -126,8 +176,12 @@ public final class EventDispatcher<T> {
     }
   }
 
-  public final T getListener()
-  {
+  public final T getListener() {
     return this.listener;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <E extends Throwable> void throwUnchecked(final Throwable throwable) throws E {
+    throw (E) throwable;
   }
 }

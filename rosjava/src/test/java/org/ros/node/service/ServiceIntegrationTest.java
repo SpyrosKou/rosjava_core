@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2026 Spyros Koukas
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,11 +25,13 @@ import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.ServiceClientNode;
+import rosjava_test_msgs.AddTwoIntsRequest;
 import rosjava_test_msgs.AddTwoIntsResponse;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static junit.framework.Assert.*;
 
@@ -36,6 +39,7 @@ import static junit.framework.Assert.*;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 public class ServiceIntegrationTest extends RosTest {
 
@@ -55,7 +59,7 @@ public class ServiceIntegrationTest extends RosTest {
 
             @Override
             public void onStart(final ConnectedNode connectedNode) {
-                ServiceServer<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceServer =
+                final ServiceServer<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceServer =
                         connectedNode
                                 .newServiceServer(
                                         SERVICE_NAME,
@@ -65,7 +69,7 @@ public class ServiceIntegrationTest extends RosTest {
                     connectedNode.newServiceServer(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE, (a, b) -> {
                     });
                     fail();
-                } catch (DuplicateServiceException e) {
+                } catch (final DuplicateServiceException e) {
                     // Only one ServiceServer with a given name can be created.
                 }
                 serviceServer.addListener(countDownServiceServerListener);
@@ -83,7 +87,7 @@ public class ServiceIntegrationTest extends RosTest {
 
             @Override
             public void onStart(ConnectedNode connectedNode) {
-                ServiceClient<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceClient;
+                final ServiceClient<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceClient;
                 try {
                     serviceClient = connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
                     // Test that requesting another client for the same service returns
@@ -91,7 +95,7 @@ public class ServiceIntegrationTest extends RosTest {
                     ServiceClient<?, ?> duplicate =
                             connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
                     assertEquals(serviceClient, duplicate);
-                } catch (ServiceNotFoundException e) {
+                } catch (final ServiceNotFoundException e) {
                     throw new RosRuntimeException(e);
                 }
                 final rosjava_test_msgs.AddTwoIntsRequest request = serviceClient.newMessage();
@@ -107,7 +111,7 @@ public class ServiceIntegrationTest extends RosTest {
                         }
 
                         @Override
-                        public void onFailure(RemoteException e) {
+                        public void onFailure(final RemoteException e) {
                             throw new RuntimeException(e);
                         }
                     });
@@ -125,7 +129,7 @@ public class ServiceIntegrationTest extends RosTest {
                         }
 
                         @Override
-                        public void onFailure(RemoteException e) {
+                        public void onFailure(final RemoteException e) {
                             throw new RuntimeException(e);
                         }
                     });
@@ -134,6 +138,305 @@ public class ServiceIntegrationTest extends RosTest {
         }, nodeConfiguration);
 
         assertTrue(latch.await(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testPersistentServiceConnectionPreservesOrderingDeterministically() throws Exception {
+        final CountDownServiceServerListener<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> countDownServiceServerListener =
+                CountDownServiceServerListener.newDefault();
+        nodeMainExecutor.execute(new AbstractNodeMain() {
+            @Override
+            public GraphName getDefaultNodeName() {
+                return GraphName.of(SERVER_NAME + "_ordered");
+            }
+
+            @Override
+            public void onStart(final ConnectedNode connectedNode) {
+                final ServiceServer<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceServer =
+                        connectedNode.newServiceServer(
+                                SERVICE_NAME,
+                                rosjava_test_msgs.AddTwoInts._TYPE,
+                                (request, response) -> {
+                                    if (request.getA() == 1) {
+                                        try {
+                                            Thread.sleep(200);
+                                        } catch (final InterruptedException e) {
+                                            Thread.currentThread().interrupt();
+                                        }
+                                    }
+                                    response.setSum(request.getA() + request.getB());
+                                });
+                serviceServer.addListener(countDownServiceServerListener);
+            }
+        }, nodeConfiguration);
+
+        assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
+
+        final CountDownLatch latch = new CountDownLatch(2);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        nodeMainExecutor.execute(new AbstractNodeMain() {
+            @Override
+            public GraphName getDefaultNodeName() {
+                return GraphName.of(CLIENT + "_ordered");
+            }
+
+            @Override
+            public void onStart(ConnectedNode connectedNode) {
+                final ServiceClient<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceClient;
+                try {
+                    serviceClient = connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
+                } catch (final ServiceNotFoundException e) {
+                    failure.compareAndSet(null, e);
+                    while (latch.getCount() > 0) {
+                        latch.countDown();
+                    }
+                    return;
+                }
+
+                final AddTwoIntsRequest firstRequest = serviceClient.newMessage();
+                firstRequest.setA(1);
+                firstRequest.setB(1);
+                serviceClient.call(firstRequest, new ServiceResponseListener<>() {
+                    @Override
+                    public void onSuccess(AddTwoIntsResponse response) {
+                        if (response.getSum() != 2) {
+                            failure.compareAndSet(null,
+                                    new AssertionError("Expected first response sum 2 but was " + response.getSum()));
+                        }
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onFailure(final RemoteException e) {
+                        failure.compareAndSet(null, e);
+                        latch.countDown();
+                    }
+                });
+
+                final AddTwoIntsRequest secondRequest = serviceClient.newMessage();
+                secondRequest.setA(2);
+                secondRequest.setB(2);
+                serviceClient.call(secondRequest, new ServiceResponseListener<>() {
+                    @Override
+                    public void onSuccess(AddTwoIntsResponse response) {
+                        if (response.getSum() != 4) {
+                            failure.compareAndSet(null,
+                                    new AssertionError("Expected second response sum 4 but was " + response.getSum()));
+                        }
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onFailure(final RemoteException e) {
+                        failure.compareAndSet(null, e);
+                        latch.countDown();
+                    }
+                });
+            }
+        }, nodeConfiguration);
+
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        if (failure.get() != null) {
+            fail(failure.get().toString());
+        }
+    }
+
+    @Test
+    public void testSeparatePersistentServiceClientsRemainIndependent() throws Exception {
+        final CountDownServiceServerListener<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> countDownServiceServerListener =
+                CountDownServiceServerListener.newDefault();
+        final CountDownLatch slowRequestEntered = new CountDownLatch(1);
+        final CountDownLatch releaseSlowRequest = new CountDownLatch(1);
+
+        nodeMainExecutor.execute(new AbstractNodeMain() {
+            @Override
+            public GraphName getDefaultNodeName() {
+                return GraphName.of(SERVER_NAME + "_parallel");
+            }
+
+            @Override
+            public void onStart(final ConnectedNode connectedNode) {
+                ServiceServer<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceServer =
+                        connectedNode.newServiceServer(
+                                SERVICE_NAME,
+                                rosjava_test_msgs.AddTwoInts._TYPE,
+                                (request, response) -> {
+                                    if (request.getA() == 1) {
+                                        slowRequestEntered.countDown();
+                                        try {
+                                            releaseSlowRequest.await();
+                                        } catch (final InterruptedException e) {
+                                            Thread.currentThread().interrupt();
+                                        }
+                                    }
+                                    response.setSum(request.getA() + request.getB());
+                                });
+                serviceServer.addListener(countDownServiceServerListener);
+            }
+        }, nodeConfiguration);
+
+        assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
+
+        final ServiceClientNode<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> client1 =
+                new ServiceClientNode<>(SERVER_NAME + CLIENT + "_parallel_1", SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
+        final ServiceClientNode<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> client2 =
+                new ServiceClientNode<>(SERVER_NAME + CLIENT + "_parallel_2", SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
+
+        nodeMainExecutor.execute(client1, nodeConfiguration);
+        nodeMainExecutor.execute(client2, nodeConfiguration);
+        assertTrue(client1.awaitConnection(1, TimeUnit.SECONDS));
+        assertTrue(client2.awaitConnection(1, TimeUnit.SECONDS));
+
+        final CountDownLatch fastCompleted = new CountDownLatch(1);
+        final CountDownLatch slowCompleted = new CountDownLatch(1);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        final AddTwoIntsRequest slowRequest = client1.getServiceClient().newMessage();
+        slowRequest.setA(1);
+        slowRequest.setB(1);
+        client1.getServiceClient().call(slowRequest, new ServiceResponseListener<>() {
+            @Override
+            public void onSuccess(AddTwoIntsResponse response) {
+                if (response.getSum() != 2) {
+                    failure.compareAndSet(null,
+                            new AssertionError("Expected slow response sum 2 but was " + response.getSum()));
+                }
+                slowCompleted.countDown();
+            }
+
+            @Override
+            public void onFailure(RemoteException e) {
+                failure.compareAndSet(null, e);
+                slowCompleted.countDown();
+            }
+        });
+
+        assertTrue(slowRequestEntered.await(1, TimeUnit.SECONDS));
+
+        final AddTwoIntsRequest fastRequest = client2.getServiceClient().newMessage();
+        fastRequest.setA(2);
+        fastRequest.setB(2);
+        client2.getServiceClient().call(fastRequest, new ServiceResponseListener<>() {
+            @Override
+            public void onSuccess(AddTwoIntsResponse response) {
+                if (response.getSum() != 4) {
+                    failure.compareAndSet(null,
+                            new AssertionError("Expected fast response sum 4 but was " + response.getSum()));
+                }
+                fastCompleted.countDown();
+            }
+
+            @Override
+            public void onFailure(RemoteException e) {
+                failure.compareAndSet(null, e);
+                fastCompleted.countDown();
+            }
+        });
+
+        assertTrue(fastCompleted.await(1, TimeUnit.SECONDS));
+        releaseSlowRequest.countDown();
+        assertTrue(slowCompleted.await(1, TimeUnit.SECONDS));
+        if (failure.get() != null) {
+            fail(failure.get().toString());
+        }
+    }
+
+    @Test
+    public void testPersistentServiceConnectionRecoversFromUncheckedServerFailure() throws Exception {
+        final CountDownServiceServerListener<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> countDownServiceServerListener =
+                CountDownServiceServerListener.newDefault();
+        nodeMainExecutor.execute(new AbstractNodeMain() {
+            @Override
+            public GraphName getDefaultNodeName() {
+                return GraphName.of(SERVER_NAME + "_runtime_failure");
+            }
+
+            @Override
+            public void onStart(final ConnectedNode connectedNode) {
+                ServiceServer<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceServer =
+                        connectedNode.newServiceServer(
+                                SERVICE_NAME,
+                                rosjava_test_msgs.AddTwoInts._TYPE,
+                                (request, response) -> {
+                                    if (request.getA() == 1) {
+                                        throw new IllegalStateException("boom");
+                                    }
+                                    response.setSum(request.getA() + request.getB());
+                                });
+                serviceServer.addListener(countDownServiceServerListener);
+            }
+        }, nodeConfiguration);
+
+        assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
+
+        final CountDownLatch latch = new CountDownLatch(2);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        nodeMainExecutor.execute(new AbstractNodeMain() {
+            @Override
+            public GraphName getDefaultNodeName() {
+                return GraphName.of(CLIENT + "_runtime_failure");
+            }
+
+            @Override
+            public void onStart(ConnectedNode connectedNode) {
+                final ServiceClient<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceClient;
+                try {
+                    serviceClient = connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
+                } catch (final ServiceNotFoundException e) {
+                    failure.compareAndSet(null, e);
+                    while (latch.getCount() > 0) {
+                        latch.countDown();
+                    }
+                    return;
+                }
+
+                final AddTwoIntsRequest failingRequest = serviceClient.newMessage();
+                failingRequest.setA(1);
+                failingRequest.setB(1);
+                serviceClient.call(failingRequest, new ServiceResponseListener<>() {
+                    @Override
+                    public void onSuccess(AddTwoIntsResponse response) {
+                        failure.compareAndSet(null,
+                                new AssertionError("Expected unchecked server failure to produce onFailure."));
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onFailure(RemoteException e) {
+                        if (e.getMessage() == null || !e.getMessage().contains("boom")) {
+                            failure.compareAndSet(null,
+                                    new AssertionError("Expected failure message to contain boom but was: " + e.getMessage()));
+                        }
+                        latch.countDown();
+                    }
+                });
+
+                final AddTwoIntsRequest succeedingRequest = serviceClient.newMessage();
+                succeedingRequest.setA(2);
+                succeedingRequest.setB(2);
+                serviceClient.call(succeedingRequest, new ServiceResponseListener<>() {
+                    @Override
+                    public void onSuccess(AddTwoIntsResponse response) {
+                        if (response.getSum() != 4) {
+                            failure.compareAndSet(null,
+                                    new AssertionError("Expected second response sum 4 but was " + response.getSum()));
+                        }
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onFailure(RemoteException e) {
+                        failure.compareAndSet(null, e);
+                        latch.countDown();
+                    }
+                });
+            }
+        }, nodeConfiguration);
+
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        if (failure.get() != null) {
+            fail(failure.get().toString());
+        }
     }
 
     /**
@@ -165,7 +468,7 @@ public class ServiceIntegrationTest extends RosTest {
                                     rosjava_test_msgs.AddTwoInts._TYPE,
                                     (request, response) -> response.setSum(request.getA() + request.getB()));
                     serviceServer1.addListener(countDownServiceServerListener);
-                } catch (DuplicateServiceException e) {
+                } catch (final DuplicateServiceException e) {
                     // Only one ServiceServer with a given name can be created.
                     dualServiceDeclarationDetected.incrementAndGet();
                 }
@@ -176,7 +479,7 @@ public class ServiceIntegrationTest extends RosTest {
                                     rosjava_test_msgs.AddTwoInts._TYPE,
                                     (request, response) -> response.setSum(request.getA() + request.getB()));
                     serviceServer1.addListener(countDownServiceServerListener);
-                } catch (DuplicateServiceException e) {
+                } catch (final DuplicateServiceException e) {
                     // Only one ServiceServer with a given name can be created.
                     dualServiceDeclarationDetected.incrementAndGet();
                 }
@@ -224,7 +527,7 @@ public class ServiceIntegrationTest extends RosTest {
                                     rosjava_test_msgs.AddTwoInts._TYPE,
                                     (request, response) -> response.setSum(1));
                     serviceServer1.addListener(countDownServiceServerListener);
-                } catch (DuplicateServiceException e) {
+                } catch (final DuplicateServiceException e) {
                     // Only one ServiceServer with a given name can be created.
 
                 }
@@ -269,7 +572,7 @@ public class ServiceIntegrationTest extends RosTest {
                                     rosjava_test_msgs.AddTwoInts._TYPE,
                                     (request, response) -> response.setSum(2));
                     serviceServer1.addListener(countDownServiceServerListener);
-                } catch (DuplicateServiceException e) {
+                } catch (final DuplicateServiceException e) {
                     // Only one ServiceServer with a given name can be created.
 
                 }
@@ -364,7 +667,7 @@ public class ServiceIntegrationTest extends RosTest {
                 ServiceClient<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceClient;
                 try {
                     serviceClient = connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
-                } catch (ServiceNotFoundException e) {
+                } catch (final ServiceNotFoundException e) {
                     throw new RosRuntimeException(e);
                 }
                 rosjava_test_msgs.AddTwoIntsRequest request = serviceClient.newMessage();
