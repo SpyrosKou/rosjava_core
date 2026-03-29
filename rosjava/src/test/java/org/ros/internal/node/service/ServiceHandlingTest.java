@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2026 Spyros Koukas
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.ros.internal.node.service;
 
 
@@ -18,12 +34,17 @@ import rosjava_test_msgs.AddTwoIntsResponse;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.helpers.MessageFormatter;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 /**
  * Class for running a multi-threaded service request
+ *
+ * @author Spyros Koukas
  */
 public class ServiceHandlingTest extends RosTest {
 
@@ -33,12 +54,12 @@ public class ServiceHandlingTest extends RosTest {
     @Test public void testServiceResponeOrder() throws Exception {
         final NodeConfiguration secondConfig = NodeConfiguration.newPrivate(rosCore.getUri());
         final MessageFactory messageFactory = secondConfig.getMessageFactory();
-        final CountDownLatch countDownLatch = new CountDownLatch(100);
         final String SERVICE_NAME = "test_service";
         final int NUM_THREADS = 10;
+        final CountDownLatch countDownLatch = new CountDownLatch(NUM_THREADS);
 
         // Create the anonymous node to test the server
-        AbstractNodeMain serverNode = new AbstractNodeMain() {
+        final AbstractNodeMain serverNode = new AbstractNodeMain() {
             @Override public GraphName getDefaultNodeName() {
                 return GraphName.of("server_node");
             }
@@ -46,12 +67,12 @@ public class ServiceHandlingTest extends RosTest {
             @Override public void onStart(final ConnectedNode connectedNode) {
 
                 // Setup Server
-                ServiceServer<AddTwoIntsRequest, AddTwoIntsResponse> testServer =
+                final ServiceServer<AddTwoIntsRequest, AddTwoIntsResponse> testServer =
                         connectedNode.newServiceServer(SERVICE_NAME, AddTwoInts._TYPE,
                                 new ServiceResponseBuilder<AddTwoIntsRequest, AddTwoIntsResponse>() {
 
                                     @Override
-                                    public void build(AddTwoIntsRequest req, AddTwoIntsResponse res) {
+                                    public void build(final AddTwoIntsRequest req, final AddTwoIntsResponse res) {
                                         res.setSum(req.getA() + req.getB());
                                     }
                                 });
@@ -61,7 +82,7 @@ public class ServiceHandlingTest extends RosTest {
         final List<ClientThread> threads = new LinkedList<>();
 
         // Create the anonymous node to test the server
-        AbstractNodeMain clientNode = new AbstractNodeMain() {
+        final AbstractNodeMain clientNode = new AbstractNodeMain() {
 
             @Override public GraphName getDefaultNodeName() {
                 return GraphName.of("client_node");
@@ -71,23 +92,23 @@ public class ServiceHandlingTest extends RosTest {
 
                 // Assert that the service was created
 
-                ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient;
+                final ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient;
                 try {
                     serviceClient = connectedNode.newServiceClient(SERVICE_NAME, AddTwoInts._TYPE);
-                    for(int i = 0; i < NUM_THREADS; i++) {
-                        ClientThread newThread = new ClientThread( i , i, countDownLatch, messageFactory,
+                    for (int i = 0; i < NUM_THREADS; i++) {
+                        final ClientThread newThread = new ClientThread(i, i, countDownLatch, messageFactory,
                                 SERVICE_NAME, serviceClient, connectedNode.getLog());
                         newThread.start();
                         threads.add(newThread);
                     }
-                } catch (org.ros.exception.ServiceNotFoundException e) {
+                } catch (final org.ros.exception.ServiceNotFoundException e) {
                     fail("Couldn't find service " + SERVICE_NAME);
                 }
             }
 
             @Override
-            public void onShutdown(Node node) {
-                for (ClientThread thread: threads) {
+            public void onShutdown(final Node node) {
+                for (final ClientThread thread : threads) {
                     thread.interrupt();
                 }
             }
@@ -100,10 +121,9 @@ public class ServiceHandlingTest extends RosTest {
         // Start the anonymous node to test the server
         nodeMainExecutor.execute(clientNode, secondConfig);
 
-        Thread.sleep(1000);
-        //assertTrue(countDownLatch.await(20, TimeUnit.SECONDS)); // Check if service calls were successful
+        assertTrue(countDownLatch.await(5, TimeUnit.SECONDS));
 
-        for(ClientThread a : threads) {
+        for (final ClientThread a : threads) {
             assertTrue(a.correct[0]);
         }
         // // Shutdown nodes
@@ -128,8 +148,10 @@ public class ServiceHandlingTest extends RosTest {
         final RosLog log;
         final boolean[] correct = new boolean[1];
 
-        ClientThread(int reqA, int reqB, CountDownLatch countDownLatch, MessageFactory messageFactory,
-                     String service, ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient, RosLog log) {
+        ClientThread(final int reqA, final int reqB, final CountDownLatch countDownLatch,
+                     final MessageFactory messageFactory, final String service,
+                     final ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient,
+                     final RosLog log) {
             this.a = reqA;
             this.b = reqB;
             this.countDownLatch = countDownLatch;
@@ -142,7 +164,7 @@ public class ServiceHandlingTest extends RosTest {
         }
 
         @Override
-        public void run(){
+        public void run() {
             // Build ros messages
             if (done[0]) {
 
@@ -154,16 +176,17 @@ public class ServiceHandlingTest extends RosTest {
                 req.setB(b);
 
                 serviceClient.call(req, new ServiceResponseListener<AddTwoIntsResponse>() {
-                    @Override public void onSuccess(AddTwoIntsResponse response) {
-                        log.info("Request: " + req.getA() + "+" + req.getB() + " Result: " + response.getSum());
-                        correct[0] = response.getSum() == (req.getA()+req.getB());
+                    @Override public void onSuccess(final AddTwoIntsResponse response) {
+                        log.info(MessageFormatter.arrayFormat("Request: {}+{} Result: {}",
+                                new Object[] {req.getA(), req.getB(), response.getSum()}).getMessage());
+                        correct[0] = response.getSum() == (req.getA() + req.getB());
                         countDownLatch.countDown();
                         done[0] = true;
                     }
 
                     @Override
-                    public void onFailure(RemoteException e) {
-                        fail("Service request failed for request " + a +"+"+ b);
+                    public void onFailure(final RemoteException e) {
+                        fail("Service request failed for request " + a + "+" + b);
                     }
                 });
             }
