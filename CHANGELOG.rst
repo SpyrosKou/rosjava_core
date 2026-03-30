@@ -6,6 +6,17 @@ Changelog
 latest
 -----------------
 
+* Summary:
+    - Persistent service-client behavior was tightened: shared connections now preserve response ordering, and pending requests fail explicitly on shutdown, disconnect, write failure, or response-processing failure instead of hanging
+    - Service registration edge cases are now covered explicitly, including duplicate registration on the same node and the observable behavior when different nodes use the same service name
+    - Listener dispatch now preserves per-listener order, avoids overlapping callbacks for the same listener, and no longer keeps an idle thread per listener
+    - TCP transport lifecycle handling is more predictable: shared Netty client infrastructure is reused, transport and timer resources are released cleanly, subscriber activation waits for handshake completion, expected shutdown noise is reduced, and queue behavior under load is more predictable
+    - Embedded `RosCore` startup and shutdown are easier to coordinate through `awaitStart()` and `awaitShutdown(...)`
+    - The public Java API was narrowed and clarified through stricter ROS message generics, reduced visibility, more deliberate `final` usage, more specific collection return types, and simpler internal result conversion
+    - XML-RPC integration now relies on published `org.apache.xmlrpc` artifacts instead of a modified in-repo source copy
+    - The build and publishing baseline was modernized around Java 17-compatible artifacts, a Java 21 toolchain, Gradle 8.14.4, refreshed dependencies, and `maven-publish`
+    - Maintained documentation now lives in the root Markdown files and in the source Javadocs for the maintained public APIs
+    - The legacy Sphinx docs module, the obsolete `rosjava/test` ROS-package harness, and the broken benchmark Python helper were removed
 * Fixes:
     - Fixed response ordering on persistent service connections (`SpyrosKou/rosjava_core#18 <https://github.com/SpyrosKou/rosjava_core/issues/18>`, `rosjava/rosjava_core#261 <https://github.com/rosjava/rosjava_core/issues/261>`)
     - Fixed persistent service client shutdown and write-failure handling so pending requests fail explicitly instead of hanging (`SpyrosKou/rosjava_core#19 <https://github.com/SpyrosKou/rosjava_core/issues/19>`)
@@ -18,6 +29,10 @@ latest
 * Documentation:
     - Moved maintained repository documentation from the legacy Sphinx module into root Markdown files and the source Javadocs for the maintained public APIs
     - Added `USAGE.md` for practical usage notes and removed the obsolete `docs` module from the build
+* Tooling and cleanup:
+    - Removed the obsolete `rosjava/test` ROS-package integration harness
+    - Removed the broken `rosjava_benchmarks/scripts/pubsub_benchmark.py` helper
+    - Tightened the README opening summary for the current fork
 
 
 0.4.1.1 (2026-03-18)
