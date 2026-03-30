@@ -22,6 +22,7 @@ import org.ros.exception.DuplicateServiceException;
 import org.ros.internal.message.Message;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ChannelBufferServiceServer;
+import org.ros.node.service.ServiceCaller;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 
@@ -46,6 +47,12 @@ public final class ServiceManager {
      * A mapping from service name to a client for the service.
      */
     private final ConcurrentHashMap<GraphName, ServiceClient<? extends Message, ? extends Message>> serviceClients = new ConcurrentHashMap<>();
+
+    /**
+     * Non-persistent service callers that should be shut down when the node stops.
+     */
+    private final Set<ServiceCaller<? extends Message, ? extends Message>> nonPersistentServiceClients =
+            ConcurrentHashMap.newKeySet();
 
     // TODO(damonkohler): Change to ListenerGroup.
     private ServiceManagerListener listener;
@@ -111,12 +118,24 @@ public final class ServiceManager {
         return serviceClients.get(name);
     }
 
+    public void addNonPersistentClient(final ServiceCaller<? extends Message, ? extends Message> serviceClient) {
+        this.nonPersistentServiceClients.add(serviceClient);
+    }
+
+    public void removeNonPersistentClient(final ServiceCaller<? extends Message, ? extends Message> serviceClient) {
+        this.nonPersistentServiceClients.remove(serviceClient);
+    }
+
     public final List<ChannelBufferServiceServer<?, ?>> getServers() {
         return ImmutableList.copyOf(this.serviceServers.values());
     }
 
     public final List<ServiceClient<?, ?>> getClients() {
         return ImmutableList.copyOf(serviceClients.values());
+    }
+
+    public final List<ServiceCaller<?, ?>> getNonPersistentClients() {
+        return ImmutableList.copyOf(this.nonPersistentServiceClients);
     }
 
     public final Set<GraphName> getServerNames() {

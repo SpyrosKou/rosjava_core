@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2011 Google Inc.
- * 
+ * Copyright (C) 2026 Spyros Koukas
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,34 +17,41 @@
 package org.ros.node.service;
 
 import org.ros.internal.message.Message;
-
-import java.net.URI;
+import org.ros.namespace.GraphName;
 
 /**
- * Provides a connection to a ROS service.
- * 
- * @author damonkohler@google.com (Damon Kohler)
- * 
+ * Calls a ROS service.
+ *
  * @param <T>
  *          the {@link ServiceServer} responds to requests of this type
  * @param <S>
  *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceClient<T extends Message, S extends Message> extends ServiceCaller<T, S> {
+public interface ServiceCaller<T extends Message, S extends Message> {
 
   /**
-   * Connects to a {@link ServiceServer}.
-   * 
-   * @param uri
-   *          the {@link URI} of the {@link ServiceServer} to connect to
+   * Calls a method on the {@link ServiceServer}.
+   *
+   * @param request
+   *          the request message
+   * @param listener
+   *          the {@link ServiceResponseListener} that will handle the response
+   *          to this request
    */
-  void connect(URI uri);
+  void call(T request, ServiceResponseListener<S> listener);
 
   /**
-   * @return {@code true} if the {@link ServiceClient} is connected
+   * @return the name of the service this caller targets
    */
-  boolean isConnected();
+  GraphName getName();
 
-  public void connectIfUnconnected(final URI uri);
+  /**
+   * Stops the caller and any in-flight work.
+   */
+  void shutdown();
 
+  /**
+   * @return a new request message
+   */
+  T newMessage();
 }

@@ -22,6 +22,7 @@ import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterTree;
+import org.ros.node.service.ServiceCaller;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
@@ -155,17 +156,6 @@ public interface ConnectedNode extends Node {
 
   /**
    * Create a {@link ServiceClient}.
-   * <p>
-   * The returned client uses a persistent service connection. The current
-   * rosjava implementation does not expose a non-persistent service client
-   * variant. A persistent service connection keeps the underlying transport
-   * connection open across multiple requests instead of reconnecting for each
-   * call.
-   * <p>
-   * For the corresponding ROS 1 service-client APIs, see
-   * <a href="https://docs.ros.org/en/noetic/api/roscpp/html/classros_1_1NodeHandle.html">ros::NodeHandle</a>
-   * and
-   * <a href="https://docs.ros.org/en/noetic/api/roscpp/html/classros_1_1ServiceClient.html">ros::ServiceClient</a>.
    * 
    * @param serviceName
    *          the name of the service
@@ -183,6 +173,27 @@ public interface ConnectedNode extends Node {
    */
   <T extends Message, S extends Message> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
       throws ServiceNotFoundException;
+
+  /**
+   * Create a non-persistent service caller which establishes a fresh ROS
+   * service connection for each call.
+   *
+   * @param serviceName
+   *          the name of the service
+   * @param serviceType
+   *          the type of the service (e.g. "rosjava_test_msgs/AddTwoInts")
+   * @return a non-persistent {@link ServiceCaller}
+   * @throws ServiceNotFoundException
+   *           thrown if no matching service could be found
+   */
+  <T extends Message, S extends Message> ServiceCaller<T, S> newNonPersistentServiceClient(
+      GraphName serviceName, String serviceType) throws ServiceNotFoundException;
+
+  /**
+   * @see #newNonPersistentServiceClient(GraphName, String)
+   */
+  <T extends Message, S extends Message> ServiceCaller<T, S> newNonPersistentServiceClient(
+      String serviceName, String serviceType) throws ServiceNotFoundException;
 
   /**
    * Create a {@link ParameterTree} to query and set parameters on the ROS

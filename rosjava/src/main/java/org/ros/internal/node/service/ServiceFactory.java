@@ -26,12 +26,14 @@ import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
+import org.ros.node.service.ServiceCaller;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
+import java.net.URI;
 
 /**
  * A factory for {@link ServiceServer}s and {@link ServiceClient}s.
@@ -95,8 +97,8 @@ public final class ServiceFactory {
      */
     @SuppressWarnings("unchecked")
     public <T extends Message, S extends Message> ServiceClient<T, S> newClient(final ServiceDeclaration serviceDeclaration,
-                                                                                final MessageSerializer<T> serializer, final MessageDeserializer<S> deserializer,
-                                                                                final MessageFactory messageFactory) {
+                                                                                 final MessageSerializer<T> serializer, final MessageDeserializer<S> deserializer,
+                                                                                 final MessageFactory messageFactory) {
         Preconditions.checkNotNull(serviceDeclaration.getUri());
 
         final GraphName graphName = serviceDeclaration.getName();
@@ -108,6 +110,21 @@ public final class ServiceFactory {
 
         final ServiceClient<T, S> serviceClient = (ServiceClient<T, S>) this.serviceManager.getOrCreateClient(graphName, serviceClientSupplier);
         serviceClient.connectIfUnconnected(serviceDeclaration.getUri());
+        return serviceClient;
+    }
+
+    public <T extends Message, S extends Message> ServiceCaller<T, S> newNonPersistentClient(
+            final ServiceDeclaration serviceDeclaration,
+            final MessageSerializer<T> serializer,
+            final MessageDeserializer<S> deserializer,
+            final MessageFactory messageFactory,
+            final Supplier<URI> serviceUriProvider) {
+        Preconditions.checkNotNull(serviceDeclaration.getUri());
+
+        final ServiceCaller<T, S> serviceClient = NonPersistentServiceClient.newDefault(nodeName,
+                serviceDeclaration, serializer, deserializer, messageFactory, executorService, serviceUriProvider,
+                this.serviceManager::removeNonPersistentClient);
+        this.serviceManager.addNonPersistentClient(serviceClient);
         return serviceClient;
     }
 }

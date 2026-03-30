@@ -49,6 +49,7 @@ import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
 import org.ros.node.*;
 import org.ros.node.parameter.ParameterTree;
+import org.ros.node.service.ServiceCaller;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
@@ -390,6 +391,32 @@ final class DefaultNode implements ConnectedNode {
     }
 
     @Override
+    public <T extends Message, S extends Message> ServiceCaller<T, S> newNonPersistentServiceClient(
+            final GraphName serviceName, final String serviceType) throws ServiceNotFoundException {
+        final GraphName resolvedServiceName = resolveName(serviceName);
+        final URI uri = lookupServiceUri(resolvedServiceName);
+        if (uri == null) {
+            throw new ServiceNotFoundException("No such service " + resolvedServiceName + " of type "
+                    + serviceType);
+        }
+        final ServiceDescription serviceDescription =
+                this.nodeConfiguration.getServiceDescriptionFactory().newFromType(serviceType);
+        final ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
+        final ServiceDeclaration definition = new ServiceDeclaration(serviceIdentifier, serviceDescription);
+        final MessageSerializer<T> requestSerializer = newServiceRequestSerializer(serviceType);
+        final MessageDeserializer<S> responseDeserializer = newServiceResponseDeserializer(serviceType);
+        return this.serviceFactory.newNonPersistentClient(definition, requestSerializer, responseDeserializer,
+                nodeConfiguration.getServiceRequestMessageFactory(),
+                () -> lookupServiceUri(resolvedServiceName));
+    }
+
+    @Override
+    public <T extends Message, S extends Message> ServiceCaller<T, S> newNonPersistentServiceClient(
+            final String serviceName, final String serviceType) throws ServiceNotFoundException {
+        return newNonPersistentServiceClient(GraphName.of(serviceName), serviceType);
+    }
+
+    @Override
     public Time getCurrentTime() {
         return timeProvider.getCurrentTime();
     }
@@ -442,6 +469,16 @@ final class DefaultNode implements ConnectedNode {
             }
         }
         for (final ServiceClient<?, ?> serviceClient : this.serviceManager.getClients()) {
+            try {
+                serviceClient.shutdown();
+            } catch (final Exception e) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(ExceptionUtils.getStackTrace(e));
+                }
+                this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
+            }
+        }
+        for (final ServiceCaller<?, ?> serviceClient : this.serviceManager.getNonPersistentClients()) {
             try {
                 serviceClient.shutdown();
             } catch (final Exception e) {
