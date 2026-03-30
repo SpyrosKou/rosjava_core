@@ -7,12 +7,12 @@ latest
 -----------------
 
 * Fixes:
-    - Fixed service response ordering (`SpyrosKou/rosjava_core#18 <https://github.com/SpyrosKou/rosjava_core/issues/18>`, `rosjava/rosjava_core#261 <https://github.com/rosjava/rosjava_core/issues/261>`)
-    - Fixed persistent service-client shutdown and write-failure handling so pending calls fail explicitly instead of hanging (`SpyrosKou/rosjava_core#19 <https://github.com/SpyrosKou/rosjava_core/issues/19>`)
+    - Fixed response ordering on persistent service connections (`SpyrosKou/rosjava_core#18 <https://github.com/SpyrosKou/rosjava_core/issues/18>`, `rosjava/rosjava_core#261 <https://github.com/rosjava/rosjava_core/issues/261>`)
+    - Fixed persistent service client shutdown and write-failure handling so pending requests fail explicitly instead of hanging (`SpyrosKou/rosjava_core#19 <https://github.com/SpyrosKou/rosjava_core/issues/19>`)
 * Performance and concurrency:
     - Reworked `ListenerGroup` dispatch to avoid idle thread-per-listener execution while preserving per-listener ordering and non-concurrent callback execution
 * Tests:
-    - Added regression coverage for persistent service-client shutdown and pending-response cleanup
+    - Added regression coverage for persistent service client shutdown and pending-response cleanup
 * Build and dependencies:
     - Gradle wrapper updated to 8.14.4
 
@@ -27,7 +27,7 @@ latest
     - Use `org.apache.xmlrpc` dependencies instead of compiling a modified source copy
     - Publish `rosjava_geometry` and `rosjava_helpers`
 * API and internal structure:
-    - Added methods that allow code to wait for roscore shutdown
+    - Added methods that allow code to wait for roscore start and shutdown
     - Most classes are now final, excluding unwanted inheritance
     - `Collection<T>` return types have been replaced with `List<T>` or `Set<T>` where appropriate
     - Reduced visibility of internal classes and members

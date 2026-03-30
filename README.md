@@ -1,126 +1,111 @@
-# rosjava
-rosjava is the first pure Java implementation of ROS.
-## About [SpyrosKou/rosjava_core](https://github.com/SpyrosKou/rosjava_core) fork
-This fork has the following changes:
-1. **Targets the JRE**
-   This version targets the JRE in Windows, Unix/Linux and Mac. Android compatibility has not been tested and has not been actively pursued. 
+# rosjava_core
 
-2. **Reduced visibility of API elements** 
-   Access modifiers have been added to reduce the visibility of all API elements (e.g. interfaces, classes and methods). This reduction aims to minimize the number of classes/methods accessible outside the projects packages. This simplifies usage inside an IDE since developers are presented with less autocomplete options, reducing the breadth of API elements that developers/users needs to consider. 
+`rosjava_core` is a pure Java implementation of core ROS 1 client functionality.
 
-3. **More programmer friendly API**
-   The API is stricter, improving the developer experience and the ease of use. For instance Service Servers, Publishers and Service Clients parameter types now extend org.ros.internal.message.Message indicating what the type parameters should be and benefit from the compiler during compile time.
+This repository is the maintained fork at [SpyrosKou/rosjava_core](https://github.com/SpyrosKou/rosjava_core). The current fork targets desktop and server JRE usage, tracks newer Java and Gradle releases, and maintains a narrower public API for library use.
 
+## Scope
 
-4. **Reduce extensibility of classes & methods**  
-  This fork is assumes usage as a library and reduces inheritance to the minimum. The goal is to allow for inheritance only where intended, simplifying both the usage of the fork and its development. 
+- Targets the JRE on Windows, Linux, and macOS.
+- Aims for a modern stack. Published artifacts are Java 17-compatible, while the build uses a Java 21 toolchain and Gradle 8.14.4.
+- Keeps the core libraries and tutorial applications in one multi-project Gradle build.
 
+## Improvements of [this fork](https://github.com/SpyrosKou/rosjava_core)
 
-3. **Update dependencies**  
-   1. Update dependency versions
-   2. Replace [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/) with [SL4J](https://www.slf4j.org/)
-   
+The [`rosjava`](./rosjava) module is the main focus of this fork. The highlights below are grouped by the kind of impact they have in practice.
 
-4.  **Update Java and Gradle versions used**
+### Reliability
 
-From [ROS.org](http://www.ros.org/wiki/): ROS is an open-source, meta-operating
-system for your robot. It provides the services you would expect from an
-operating system, including hardware abstraction, low-level device control,
-implementation of commonly-used functionality, message-passing between
-processes, and package management.
+- Correct service response ordering on persistent service connections. The service request/response path was updated so concurrent requests on a shared service connection are matched and completed in request order. This resolves the behavior reported in [rosjava/rosjava_core#261](https://github.com/rosjava/rosjava_core/issues/261).
+- Explicitly covered service registration edge cases. Integration tests now capture the behavior discussed in [rosjava/rosjava_core#272](https://github.com/rosjava/rosjava_core/issues/272), including duplicate registration on the same node and the observable behavior when different nodes use the same service name.
+- Fail-fast behavior for persistent service clients. Client-side shutdown, disconnects, write failures, and response-processing failures now complete waiting callbacks with a concrete error instead of leaving them blocked. For example, if two requests are queued and the connection closes, both waiting callbacks are completed with failure instead of leaving one request hanging.
+- Ordered, non-overlapping listener callbacks. `ListenerGroup` was reworked so one listener sees callbacks in the order they were emitted and never handles two callbacks at once. For example, if events happen as `registered -> new subscriber -> shutdown`, that listener sees them in that order; if it receives messages `m1, m2, m3`, it processes `m1, m2, m3`, not `m2` before `m1`.
 
-Developed at Google in cooperation with Willow Garage, rosjava enables
-integration of Android and ROS compatible robots. This project is under active
-development and currently alpha quality software. Please report bugs and feature
-requests on the [issues
-list](https://github.com/rosjava/rosjava/issues?state=open).
+### Transport and Runtime Behavior
 
-To get started, visit the
-[rosjava_core](http://rosjava.github.com/rosjava_core/latest) and
-[android_core](http://rosjava.github.com/android_core/latest) pages for
-documentation concerning the core libraries and examples. Also visit the roswiki
-[rosjava](http://wiki.ros.org/rosjava) and
-[android](http://wiki.ros.org/android) pages for more general rosjava-android
-information.
+- Hardened TCP transport lifecycle and handshake flow. The TCP layer reuses shared Netty client infrastructure, releases transport and timer resources predictably on shutdown, registers subscribers only after the handshake reply has been written, and treats expected `ClosedChannelException` shutdown paths as normal close events. This avoids leftover transport threads, prevents premature subscriber activation, and keeps logs focused on real transport problems.
+- Lower-overhead listener dispatch. Listener dispatch no longer keeps an idle thread per listener, which reduces background execution overhead while preserving ordered delivery for each listener.
+- More predictable queue behavior under load. Queue handling was tightened by clearing overwritten `CircularBlockingDeque` entries and increasing the default `OutgoingMessageQueue` capacity, which reduces stale reference retention and handles short bursts more cleanly.
 
-Still have questions? Check out the ros-users [discussion
-list](https://discourse.ros.org/c/rosjava), post questions to [ROS
-Answers](http://answers.ros.org/questions/) with the tag "rosjava," or join #ROS
-on irc.oftc.net.
+### Developer Experience
 
-rosjava was announced publicly during the [Cloud Robotics tech talk at Google
-I/O 2011](http://www.youtube.com/watch?feature=player_embedded&v=FxXBUp-4800).
+- Coordinated embedded `RosCore` lifecycle. `RosCore` exposes `awaitStart()` and `awaitShutdown(...)`, making application startup, teardown, and integration tests easier to coordinate.
+- Current Java, Gradle, and logging baseline. Published artifacts target Java 17 compatibility, the build is exercised with JDK 21, the Gradle wrapper is 8.14.4, dependencies were refreshed, and logging uses SLF4J.
 
-Looking for a robot platform to experiment with ROS, Android, and cloud
-robotics? The [OSRF](http://www.osrfoundation.org/)
-[TurtleBot](http://wiki.ros.org/Robots/TurtleBot) is a great mobile perception
-platform for [getting started with robotics
-development](http://www.youtube.com/watch?feature=player_embedded&v=MOEjL8JDvd0).
+### API and Maintenance
 
-### Branches ###
+- Safer Java-facing API surface. Service, publisher, and subscriber generics are constrained around ROS message types, internal visibility is reduced, and unnecessary inheritance points are closed.
+- More explicit Java contracts. Return types were narrowed from generic `Collection` to `List` or `Set` where appropriate, internal result conversion was simplified around standard `Function<Object, T>`, and more classes were made deliberately `final`, making APIs and extension points easier to reason about.
+- Leaner XML-RPC integration. The modified source copy in the repository has been replaced with published `org.apache.xmlrpc` artifacts, which reduces forked third-party code and makes the dependency story more standard for consumers.
 
-The master branch reflects the latest version of rosjava. All development
-happens on the master branch in the form of pull requests from developers.
-Unless you are developing rosjava itself, you should _not_ use the master
-branch.
+## Usage Requirements
 
-Named branches are created whenever a new version of ROS is released. These
-branches are considered stable. No new features will be added to these branches,
-however, bug fixes may be cherry picked from master.
+- Java 17+ for consuming the published artifacts
+- JDK 21 available to Gradle for local builds
+- Access to `mavenCentral()`
+- Access to the ROS Java Maven repository at `https://github.com/SpyrosKou/rosjava_mvn_repo/raw/noetic`
 
-### Pull Requests ###
+## Use from another Gradle project
 
-You must sign a Contributor License Agreement (CLA) before we can accept any
-code. The CLA protects you and us.
+Published artifacts for this fork are available from the ROS Java Maven repository:
 
-* If you are an individual writing original source code and you're sure you own
-  the intellectual property, then you'll need to sign an [individual
-  CLA](https://developers.google.com/open-source/cla/individual).
-* If you work for a company that wants to allow you to contribute your work to
-  SL4A, then you'll need to sign a [corporate
-  CLA](https://developers.google.com/open-source/cla/corporate).
+```gradle
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://github.com/SpyrosKou/rosjava_mvn_repo/raw/noetic")
+    }
+}
 
-Follow either of the two links above to access the appropriate CLA and
-instructions for how to sign and return it. Damon will respond on either github
-or email to confirm.
-
-### Building with Bazel ###
-
-To build this project with Bazel, simply run:
-
-```
-bazel build //...
+dependencies {
+    implementation("org.ros.rosjava_core:rosjava:0.4.1.1")
+    implementation("org.ros.rosjava_core:rosjava_geometry:0.4.1.1")
+    implementation("org.ros.rosjava_core:rosjava_helpers:0.4.1.1")
+}
 ```
 
-To depend on `rosjava_core` from another project, you'll need to use
-[bazel-deps](https://github.com/johnynek/bazel-deps).
+Use the modules you actually need. `rosjava` is the core dependency; `rosjava_geometry` and `rosjava_helpers` are optional add-ons.
+For a complete end-to-end usage example, see [Plain-ROS-Java-System-Example](https://github.com/SpyrosKou/Plain-ROS-Java-System-Example).
+Maintainer publishing notes are in [PUBLISHING.md](./PUBLISHING.md).
 
-1. Start by copying (or merging) [dependencies.yaml][dependencies.yaml] in to
-   your project.
-1. Follow the instructions in that file to generate the BUILD files inside your
-   project.
-1. Add the following lines to your WORKSPACE file:
+## Tutorials
 
-```
-load("//3rdparty:workspace.bzl", "maven_dependencies")
+The tutorial modules remain useful as runnable examples. For example:
 
-maven_dependencies()
-
-git_repository(
-    name = "com_github_rosjava_rosjava_core",
-    commit = "{insert commit SHA for HEAD}",
-    remote = "https://github.com/rosjava/rosjava_core.git",
-)
-
-load("@com_github_rosjava_rosjava_core//bazel:repositories.bzl", "rosjava_repositories")
-
-rosjava_repositories()
+```powershell
+.\gradlew.bat :rosjava_tutorial_pubsub:installDist
 ```
 
-*You may want to use `http_archive` instead of `git_repository` for the reasons
-described in the [Bazel docs][git-repository-docs].*
+Each tutorial application uses `org.ros.RosRun` as its entry point.
 
-[git-repository-docs]: https://docs.bazel.build/versions/master/be/workspace.html#git_repository
+## Build
 
-You can now depend on rosjava targets (eg
-`@com_github_rosjava_rosjava_core//rosjava`) as required by your application.
+Run explicit Gradle tasks from the repository root.
+
+On Windows:
+
+```powershell
+.\gradlew.bat compileJava
+.\gradlew.bat test
+```
+
+On Linux or macOS:
+
+```bash
+./gradlew compileJava
+./gradlew test
+```
+
+Do not rely on invoking the wrapper with no task name. Several modules define `publish` and `installDist` as default tasks, so an unqualified `gradlew` run is not the safest entry point for normal development.
+
+## Modules
+
+See [MODULES.md](./MODULES.md).
+
+## License
+
+See [LICENSE](./LICENSE) and [LICENSING.md](./LICENSING.md).
+
+## Changelog
+
+See [CHANGELOG.rst](./CHANGELOG.rst).
