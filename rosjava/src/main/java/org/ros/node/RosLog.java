@@ -1,10 +1,23 @@
 package org.ros.node;
 
-import org.slf4j.Marker;
-
 /**
- * A subset of {@link org.slf4j.Logger} that allows logging in a {@link org.slf4j.Logger} and published in {@link org.ros.Topics#ROSOUT}
- * Created at 2022-06-15 on 12:43
+ * A rosjava logging facade used by {@link Node#getLog()}.
+ *
+ * <p>
+ * {@link RosLog} intentionally exposes a small, stable subset of
+ * {@link org.slf4j.Logger}. Implementations log through the project's
+ * SLF4J-backed logger and also publish to {@link org.ros.Topics#ROSOUT} where
+ * appropriate.
+ *
+ * <p>
+ * The {@code fatal(...)} methods are provided because ROS logging conventions
+ * commonly use that severity label even though SLF4J itself does not define a
+ * dedicated fatal level.
+ *
+ * <p>
+ * Typical application code should prefer this interface over binding directly
+ * to a logging backend from node logic.
+ *
  *
  * @author Spyros Koukas -
  */

@@ -36,6 +36,21 @@ import java.util.Set;
  * static, non-binary data such as configuration parameters. It is meant to be
  * globally viewable so that tools can easily inspect the configuration state of
  * the system and modify if necessary.
+ *
+ * <p>
+ * The {@link ParameterTree} API is intentionally typed. Callers are expected to
+ * know the type they are retrieving and should use the matching getter. If a
+ * parameter exists but does not match the expected type,
+ * {@link ParameterClassCastException} is thrown.
+ *
+ * <p>
+ * Collection- and subtree-oriented accessors such as {@link #getList(GraphName)}
+ * and {@link #getMap(GraphName)} return untyped container values. Callers are
+ * responsible for casting nested values to their expected application types.
+ *
+ * <p>
+ * Parameter listeners subscribe to a specific parameter key, not to an entire
+ * subtree.
  * 
  * @see <a href="http://www.ros.org/wiki/Parameter%20Server">Parameter server
  *      documentation</a>

@@ -23,7 +23,6 @@ import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NodeNameResolver;
-import org.slf4j.Logger;
 
 import java.net.URI;
 import java.util.concurrent.ScheduledExecutorService;
@@ -72,12 +71,23 @@ public interface Node {
   URI getMasterUri();
 
   /**
-   * @return Logger for this node, which will also perform logging to /rosout.
+   * @return the {@link RosLog} for this node
+   *
+   * <p>
+   * The returned logger mirrors messages to the node's underlying SLF4J-backed
+   * logging implementation and, where applicable, to the ROS {@code /rosout}
+   * topic.
    */
   RosLog getLog();
 
   /**
    * @return the {@link MessageSerializationFactory} used by this node
+   *
+   * <p>
+   * This is the entry point for lower-level message serialization and
+   * deserialization work. If you deserialize raw ROS wire-format message
+   * payloads manually, configure your {@code ByteBuffer} for little-endian byte
+   * order before passing it to the relevant deserializer.
    */
   MessageSerializationFactory getMessageSerializationFactory();
 
@@ -98,7 +108,11 @@ public interface Node {
 
   /**
    * Add a new {@link NodeListener} to the {@link Node}.
-   * 
+   *
+   * <p>
+   * Listener callbacks for a given listener instance are delivered in emission
+   * order and are not invoked concurrently with one another.
+   *
    * @param listener
    *          the {@link NodeListener} to add
    */
@@ -113,10 +127,13 @@ public interface Node {
    * Executes a {@link CancellableLoop} using the {@link Node}'s
    * {@link ScheduledExecutorService}. The {@link CancellableLoop} will be
    * canceled when the {@link Node} starts shutting down.
-   * 
+   *
    * <p>
    * Any blocking calls executed in the provided {@link CancellableLoop} can
    * potentially delay {@link Node} shutdown and should be avoided.
+   * This is the preferred way to express repeated node work instead of blocking
+   * indefinitely inside a lifecycle callback such as
+   * {@link NodeListener#onStart(ConnectedNode)}.
    * 
    * @param cancellableLoop
    *          the {@link CancellableLoop} to execute

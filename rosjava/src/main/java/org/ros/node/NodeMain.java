@@ -22,12 +22,26 @@ import org.ros.node.topic.Subscriber;
 
 /**
  * Encapsulates a {@link Node} with its associated program logic.
- * 
+ *
  * <p>
  * {@link NodeMain} is the one required {@link NodeListener} for {@link Node}
- * creation. {@link NodeListener#onStart(ConnectedNode)} should be used to set up your
- * program's {@link Publisher}s, {@link Subscriber}s, etc.
- * 
+ * creation. {@link NodeListener#onStart(ConnectedNode)} should be used to set
+ * up your program's {@link Publisher}s, {@link Subscriber}s, service servers,
+ * service clients, parameter access, and other ROS-facing state.
+ *
+ * <p>
+ * Multiple rosjava nodes can run inside one JVM, so implementations should
+ * avoid treating lifecycle callbacks as dedicated long-running threads.
+ * Repeating work is usually better expressed through
+ * {@link Node#executeCancellableLoop(org.ros.concurrent.CancellableLoop)} or by
+ * delegating to the node's executor infrastructure.
+ *
+ * <p>
+ * {@link NodeListener#onShutdown(Node)} is called when shutdown begins.
+ * {@link NodeListener#onShutdownComplete(Node)} is the preferred hook for final
+ * cleanup after publishers, subscribers, and other node-managed resources have
+ * been shut down.
+ *
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */

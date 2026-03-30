@@ -22,7 +22,11 @@ import org.ros.internal.node.topic.SubscriberIdentifier;
 
 /**
  * A lifecycle listener for {@link Publisher} instances.
- * 
+ *
+ * <p>
+ * Listener callbacks for the same listener instance are delivered in emission
+ * order and are not invoked concurrently with one another.
+ *
  * @author khughes@google.com (Keith M. Hughes)
  */
 public interface PublisherListener<T extends Message> extends RegistrantListener<Publisher<T>> {
