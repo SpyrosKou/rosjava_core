@@ -66,6 +66,7 @@ dependencies {
 
 Use the modules you actually need. `rosjava` is the core dependency; `rosjava_geometry` and `rosjava_helpers` are optional add-ons.
 For a complete end-to-end usage example, see [Plain-ROS-Java-System-Example](https://github.com/SpyrosKou/Plain-ROS-Java-System-Example).
+Practical usage notes for this repository are in [USAGE.md](./USAGE.md).
 Maintainer publishing notes are in [PUBLISHING.md](./PUBLISHING.md).
 
 ## Tutorials
