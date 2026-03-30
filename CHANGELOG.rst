@@ -15,6 +15,9 @@ latest
     - Added regression coverage for persistent service client shutdown and pending-response cleanup
 * Build and dependencies:
     - Gradle wrapper updated to 8.14.4
+* Documentation:
+    - Moved maintained repository documentation from the legacy Sphinx module into root Markdown files and the source Javadocs for the maintained public APIs
+    - Added `USAGE.md` for practical usage notes and removed the obsolete `docs` module from the build
 
 
 0.4.1.1 (2026-03-18)

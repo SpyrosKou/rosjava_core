@@ -10,4 +10,7 @@ Modules marked as actively worked on are where the fork has received substantive
 - [`rosjava_tutorial_services`](./rosjava_tutorial_services) (`example module`): runnable service example.
 - [`rosjava_tutorial_right_hand_rule`](./rosjava_tutorial_right_hand_rule) (`example module`): runnable right-hand-rule example.
 - [`rosjava_benchmarks`](./rosjava_benchmarks) (`benchmark module`): benchmark applications.
-- [`docs`](./docs) (`legacy module`): historical Sphinx/Javadoc build scripts and content; not the current source of truth for the fork.
+
+Current documentation for this fork is maintained in the root Markdown files,
+such as `README.md`, `USAGE.md`, `PUBLISHING.md`, and `LICENSING.md`, together
+with the source Javadocs on the maintained public APIs.
