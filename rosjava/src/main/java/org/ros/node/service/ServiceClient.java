@@ -23,7 +23,19 @@ import java.net.URI;
 
 /**
  * Provides a connection to a ROS service.
- * 
+ * <p>
+ * The current rosjava implementation uses persistent service connections only.
+ * A persistent service connection keeps the underlying transport connection
+ * open across multiple requests instead of opening a fresh connection for each
+ * call. ROS 1 supports both persistent and non-persistent service calls in
+ * general, but non-persistent {@link ServiceClient} connections are not
+ * currently provided here.
+ * <p>
+ * For the ROS 1 service-client model, see
+ * <a href="https://docs.ros.org/en/noetic/api/roscpp/html/namespaceros_1_1service.html">ros::service</a>
+ * and
+ * <a href="https://docs.ros.org/en/noetic/api/roscpp/html/classros_1_1ServiceClient.html">ros::ServiceClient</a>.
+ *
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <T>
@@ -35,6 +47,11 @@ public interface ServiceClient<T extends Message, S extends Message> {
 
   /**
    * Connects to a {@link ServiceServer}.
+   * <p>
+   * Implementations establish or reuse a persistent service connection.
+   * In practical terms, multiple {@link #call(Message, ServiceResponseListener)}
+   * invocations can be sent over the same underlying connection until it is
+   * shut down or fails.
    * 
    * @param uri
    *          the {@link URI} of the {@link ServiceServer} to connect to

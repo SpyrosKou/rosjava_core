@@ -155,6 +155,17 @@ public interface ConnectedNode extends Node {
 
   /**
    * Create a {@link ServiceClient}.
+   * <p>
+   * The returned client uses a persistent service connection. The current
+   * rosjava implementation does not expose a non-persistent service client
+   * variant. A persistent service connection keeps the underlying transport
+   * connection open across multiple requests instead of reconnecting for each
+   * call.
+   * <p>
+   * For the corresponding ROS 1 service-client APIs, see
+   * <a href="https://docs.ros.org/en/noetic/api/roscpp/html/classros_1_1NodeHandle.html">ros::NodeHandle</a>
+   * and
+   * <a href="https://docs.ros.org/en/noetic/api/roscpp/html/classros_1_1ServiceClient.html">ros::ServiceClient</a>.
    * 
    * @param serviceName
    *          the name of the service
