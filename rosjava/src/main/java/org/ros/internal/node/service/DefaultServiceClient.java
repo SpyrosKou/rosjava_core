@@ -18,9 +18,12 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.ChannelFuture;
 import org.ros.exception.RosRuntimeException;
+import org.ros.exception.RemoteException;
 import org.ros.internal.message.Message;
 import org.ros.internal.message.MessageBufferPool;
+import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.transport.ClientHandshakeListener;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -166,11 +169,35 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
 
     @Override
     synchronized public final void call(final T request, final ServiceResponseListener<S> listener) {
+        final PendingServiceResponseListener pendingListener = new PendingServiceResponseListener(listener);
         final ChannelBuffer buffer = this.messageBufferPool.acquire();
-        this.serializer.serialize(request, buffer);
-        this.responseListeners.add(listener);
-        this.tcpClient.write(buffer).awaitUninterruptibly();
-        this.messageBufferPool.release(buffer);
+        boolean queued = false;
+        try {
+            if (!this.isConnected()) {
+                failListener(listener, "Service client is not connected.");
+                return;
+            }
+
+            this.serializer.serialize(request, buffer);
+            this.responseListeners.add(pendingListener);
+            queued = true;
+            final ChannelFuture writeFuture = this.tcpClient.write(buffer).awaitUninterruptibly();
+            if (!writeFuture.isSuccess()) {
+                failQueuedListener(pendingListener,
+                        errorMessageFor(writeFuture.getCause(),
+                                "Service client connection closed before request could be sent."));
+            }
+        } catch (final RuntimeException e) {
+            final String errorMessage =
+                    errorMessageFor(e, "Service client connection closed before request could be sent.");
+            if (queued) {
+                failQueuedListener(pendingListener, errorMessage);
+            } else {
+                failListener(listener, errorMessage);
+            }
+        } finally {
+            this.messageBufferPool.release(buffer);
+        }
     }
 
     @Override
@@ -197,5 +224,45 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
         return Objects.nonNull(this.tcpClient)
                 && Objects.nonNull(this.tcpClient.getChannel())
                 && this.tcpClient.getChannel().isConnected();
+    }
+
+    private void failQueuedListener(final PendingServiceResponseListener listener, final String message) {
+        if (this.responseListeners.remove(listener)) {
+            listener.onFailure(new RemoteException(StatusCode.ERROR, message));
+        }
+    }
+
+    private static <S extends Message> void failListener(final ServiceResponseListener<S> listener,
+                                                         final String message) {
+        listener.onFailure(new RemoteException(StatusCode.ERROR, message));
+    }
+
+    private static String errorMessageFor(final Throwable throwable, final String fallbackMessage) {
+        if (throwable == null) {
+            return fallbackMessage;
+        }
+        final String message = throwable.getMessage();
+        if (message != null && !message.isEmpty()) {
+            return message;
+        }
+        return throwable.toString();
+    }
+
+    private final class PendingServiceResponseListener implements ServiceResponseListener<S> {
+        private final ServiceResponseListener<S> delegate;
+
+        private PendingServiceResponseListener(final ServiceResponseListener<S> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onSuccess(final S response) {
+            this.delegate.onSuccess(response);
+        }
+
+        @Override
+        public void onFailure(final RemoteException e) {
+            this.delegate.onFailure(e);
+        }
     }
 }
