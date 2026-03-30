@@ -27,12 +27,16 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  * @author Spyros Koukas
  */
 public final class TcpClientManager {
+
+  private static final int DEFAULT_SHUTDOWN_TIMEOUT_DURATION = 5;
+  private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNIT = TimeUnit.SECONDS;
 
   private final ChannelGroup channelGroup;
   private final List<TcpClient> tcpClients;
@@ -78,7 +82,8 @@ public final class TcpClientManager {
    * {@link Channel}s.
    */
   public final void shutdown() {
-    this.channelGroup.close().awaitUninterruptibly();
+    this.channelGroup.close().awaitUninterruptibly(DEFAULT_SHUTDOWN_TIMEOUT_DURATION,
+        DEFAULT_SHUTDOWN_TIMEOUT_UNIT);
     this.tcpClients.clear();
     this.channelFactory.shutdown();
   }
