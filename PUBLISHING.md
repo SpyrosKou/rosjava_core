@@ -26,6 +26,7 @@ On Linux or macOS:
 
 `ROS_MAVEN_DEPLOYMENT_REPOSITORY` is a Gradle project property.
 You can pass it per invocation with `-P`, put it in `gradle.properties` in the project root or `GRADLE_USER_HOME`, or expose it as the environment variable `ORG_GRADLE_PROJECT_ROS_MAVEN_DEPLOYMENT_REPOSITORY`.
+The command-line form below uses Gradle's standard project-property syntax: `-Pname=value`.
 See Gradle's [Build Environment Configuration](https://docs.gradle.org/current/userguide/build_environment.html#sec:project_properties).
 
 On Windows:

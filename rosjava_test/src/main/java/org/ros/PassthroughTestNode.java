@@ -24,7 +24,7 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 /**
- * This node is used in rostest end-to-end integration tests with other client
+ * Support node for end-to-end interoperability tests with other ROS client
  * libraries.
  * 
  * @author kwc@willowgarage.com (Ken Conley)

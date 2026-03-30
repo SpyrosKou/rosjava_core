@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This node is used in rostest end-to-end integration tests with other client
- * libraries.
+ * Support node for parameter-server interoperability tests with other ROS
+ * client libraries.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */

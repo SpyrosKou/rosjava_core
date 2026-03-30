@@ -26,7 +26,7 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 /**
- * This node is used to test the slave API externally using rostest.
+ * Support node for external slave-API and interoperability testing.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
