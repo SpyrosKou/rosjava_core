@@ -1,8 +1,6 @@
-# rosjava_core
-
-`rosjava_core` is a pure Java implementation of core ROS 1 client functionality.
-
-This repository is the maintained fork at [SpyrosKou/rosjava_core](https://github.com/SpyrosKou/rosjava_core). The current fork targets desktop and server JRE usage, tracks newer Java and Gradle releases, and maintains a narrower public API for library use.
+# [SpyrosKou/rosjava_core](https://github.com/SpyrosKou/rosjava_core)
+A pure Java implementation of core ROS 1 functionality.
+The current fork targets desktop and server JRE usage, newer Java and Gradle releases, maintains a public API for library use and provides some improvements in reliability, transport, developer experience and API.
 
 ## Scope
 
