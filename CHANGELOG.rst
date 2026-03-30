@@ -8,8 +8,13 @@ latest
 
 * Fixes:
     - Fixed service response ordering (`SpyrosKou/rosjava_core#18 <https://github.com/SpyrosKou/rosjava_core/issues/18>`, `rosjava/rosjava_core#261 <https://github.com/rosjava/rosjava_core/issues/261>`)
+    - Fixed persistent service-client shutdown and write-failure handling so pending calls fail explicitly instead of hanging (`SpyrosKou/rosjava_core#19 <https://github.com/SpyrosKou/rosjava_core/issues/19>`)
 * Performance and concurrency:
     - Reworked `ListenerGroup` dispatch to avoid idle thread-per-listener execution while preserving per-listener ordering and non-concurrent callback execution
+* Tests:
+    - Added regression coverage for persistent service-client shutdown and pending-response cleanup
+* Build and dependencies:
+    - Gradle wrapper updated to 8.14.4
 
 
 0.4.1.1 (2026-03-18)
