@@ -1,7 +1,7 @@
 # [SpyrosKou/rosjava_core](https://github.com/SpyrosKou/rosjava_core)
 
 A pure Java implementation of core ROS 1 client functionality that targets desktop and server JRE usage and newer Java and Gradle releases.
-Offers a library-oriented public API with focused reliability, transport, and developer-experience improvements.
+Provides a library-oriented public API and includes changes in reliability, transport behavior, and developer experience.
 
 
 
