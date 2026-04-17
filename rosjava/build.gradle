@@ -25,7 +25,7 @@ dependencies {
     implementation 'org.ros.rosjava_messages:rosgraph_msgs:1.11.3'
 
 
-    implementation 'com.google.guava:guava:33.0.0-jre'
+    implementation 'com.google.guava:guava:33.5.0-jre'
 //    implementation 'io.netty:netty-bom:4.1.107.Final'
     implementation 'io.netty:netty:3.10.6.Final'
     implementation 'org.apache.commons:commons-lang3:3.18.0'

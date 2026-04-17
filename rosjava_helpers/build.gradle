@@ -4,7 +4,7 @@ plugins{
 }
 dependencies {
     implementation project(':rosjava')
-    implementation 'com.google.guava:guava:33.0.0-jre'
+    implementation 'com.google.guava:guava:33.5.0-jre'
     implementation 'org.yaml:snakeyaml:2.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
