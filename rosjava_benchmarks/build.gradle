@@ -18,7 +18,9 @@ plugins{
   id 'application'
 }
 
-mainClassName = 'org.ros.RosRun'
+application {
+  mainClass = 'org.ros.RosRun'
+}
 
 dependencies {
   implementation project(':rosjava')
