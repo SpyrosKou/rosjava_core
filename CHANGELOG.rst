@@ -34,6 +34,9 @@ latest
     - Removed the broken `rosjava_benchmarks/scripts/pubsub_benchmark.py` helper
     - Tightened the README opening summary for the current fork
 
+0.4.1.2 ()2026.04.17)
+----------
+- Updated dependencies to improve security, reliability, and long-term maintainability
 
 0.4.1.1 (2026-03-18)
 --------------------
