@@ -9,9 +9,9 @@ name: Build Java
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "noetic" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "noetic" ]
   workflow_dispatch:
 
 jobs:
