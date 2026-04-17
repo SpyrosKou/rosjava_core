@@ -21,9 +21,9 @@ dependencies {
   compileOnly 'org.ros.rosjava_messages:geometry_msgs:1.13.0'
   implementation 'com.google.guava:guava:33.0.0-jre'
   implementation project(':rosjava')
-  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
   testImplementation 'org.ros.rosjava_messages:geometry_msgs:1.13.0'
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+  testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 
